@@ -9,8 +9,8 @@
 <script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/site.css?v=36">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
+<link rel="stylesheet" href="css/site.css?v=37">
 </head>
 <body data-meta="data/korea/meta.json">
 <header class="masthead solid"><div class="wrap">
@@ -24,14 +24,14 @@
   <button class="langbtn" type="button">KO</button>
 </div></header>
 <main class="wrap">
-  <section class="pagehead">
+  <section id="top" class="pagehead">
     <h1 lang="en">Does it work?</h1>
     <h1 lang="ko">효과가 있나?</h1>
     <p class="lede" lang="en">Measured on real data. Where a result is weak or untested, it says so.</p>
     <p class="lede" lang="ko">실제 자료로 측정했습니다. 약하거나 검증되지 않은 결과는 그렇게 적었습니다.</p>
   </section>
 
-  <section class="sec">
+  <section id="hindsight" class="sec">
     <div class="side"><b>01</b><span lang="en">Hindsight test</span><span lang="ko">사후 검증</span></div>
     <div>
       <h2 lang="en">Would the list have found the slopes that failed?</h2>
@@ -56,7 +56,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="detection" class="sec">
     <div class="side"><b>02</b><span lang="en">Detection test</span><span lang="ko">탐지 시험</span></div>
     <div>
       <h2 lang="en">How small a movement can we catch?</h2>
@@ -81,7 +81,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="did-not-work" class="sec">
     <div class="side"><b>03</b><span lang="en">What did not work</span><span lang="ko">안 된 것</span></div>
     <div>
       <h2 lang="en">Two things we tried and dropped</h2>
@@ -101,7 +101,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="checks" class="sec">
     <div class="side"><b>04</b><span lang="en">Checks</span><span lang="ko">점검 항목</span></div>
     <div>
       <h2 lang="en">Sanity checks, including the ones that are still open</h2>
@@ -110,7 +110,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="by-province" class="sec">
     <div class="side"><b>05</b><span lang="en">By province</span><span lang="ko">시·도별</span></div>
     <div>
       <h2 lang="en">Where the check-first slopes are</h2>
@@ -119,12 +119,38 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="limits" class="sec">
     <div class="side"><b>06</b><span lang="en">Limits</span><span lang="ko">한계</span></div>
     <div>
       <h2 lang="en">What this does not show</h2>
       <h2 lang="ko">이 결과가 보여주지 않는 것</h2>
       <ul class="plain" data-block="limits"></ul>
+    </div>
+  </section>
+
+  <section id="uncertainty" class="sec">
+    <div class="side"><b>07</b><span>Uncertainty</span></div>
+    <div>
+      <h2>How sure is the 25%?</h2>
+      <p>With only <span data-x="of">…</span> failed slopes, one slope moves the result by 5 points, so we report an exact (Clopper–Pearson) 90% interval and a binomial test against picking 5% of slopes at random.</p>
+      <div class="scroll"><table class="tbl">
+        <thead><tr><th>Method</th><th class="num">Failed slopes in top 5%</th><th class="num">90% interval</th><th class="num">p vs chance</th></tr></thead>
+        <tbody>
+          <tr><td><b>Our model</b></td><td class="num"><span data-x="found">…</span> / <span data-x="of">…</span></td><td class="num"><span data-x="ciLo">…</span>–<span data-x="ciHi">…</span>%</td><td class="num" data-x="pModel">…</td></tr>
+          <tr><td>Steep + burned rule</td><td class="num"><span data-x="ruleFound">…</span> / <span data-x="of">…</span></td><td class="num"><span data-x="ruleCiLo">…</span>–<span data-x="ruleCiHi">…</span>%</td><td class="num" data-x="pRule">…</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">The model beats chance clearly. It does not yet beat the simple rule by a margin this sample can prove: the intervals overlap. More labelled failures, checked by hand, are the fix. Script: <code>analysis/headline_stats.py</code>.</p>
+    </div>
+  </section>
+
+  <section id="radar-check" class="sec">
+    <div class="side"><b>08</b><span>Radar check</span></div>
+    <div>
+      <h2>An independent check on the labels, from NISAR</h2>
+      <p>The failure scars were found in Sentinel-2 optical images, and nobody has checked them by hand yet. NISAR was not used to find them, which makes it an independent witness. For each scar, each old forest clearing (already bare before the storm) and 5,000 random places, we compared radar coherence across the storm pair with the ring of ground 240 m around it.</p>
+      <div class="xbars" data-xblock="radarbars"></div>
+      <p class="note">Descending orbit, pair <span data-x="dPair">…</span>. Scars against old clearings p = <span data-x="dP">…</span>. On the two ascending orbits the scars still differ from random places (p ≤ <span data-x="otherP">…</span>) but not from old clearings. The earliest pair, <span data-x="ePair">…</span>, shows <span data-x="eScar">…</span>% against <span data-x="eRand">…</span>% at random places (p = <span data-x="eP">…</span>). Three orbits were tested. After a Bonferroni correction (×3), scars still differ from random places on the descending orbit, but scars against old clearings and the 21 July signal no longer pass 0.05. Read them as supporting evidence that the scars are real ground changes, not as a detector. Script: <code>analysis/radar_scar_check.py</code>.</p>
     </div>
   </section>
 </main>
@@ -145,6 +171,8 @@
     <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
   </nav>
 </div></footer>
-<script type="module" src="js/site.js?v=42"></script>
+<script type="module" src="js/site.js?v=43"></script>
+<script type="module" src="js/extra.js?v=1"></script>
+<script src="js/nav.js?v=3" defer></script>
 </body>
 </html>

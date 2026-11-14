@@ -8,8 +8,8 @@
   --line: rgba(255, 255, 255, .12);
   --red: #ff4d2e;
   --amber: #ffb020;
-  --sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
-  --mono: "IBM Plex Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sans: "Roboto", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Roboto Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   --ease: cubic-bezier(.2, .7, .2, 1);
   color-scheme: dark;
 }
@@ -447,3 +447,23 @@ html.js .bars.rv.in i { transform: none; }
   .hero h1, .hero .lede, .hero .actions, .hero .specs, .hero .readout { animation: none; }
   .hero .sky { transition: none; }
 }
+
+/* ---- added: uncertainty, radar check, workload, operations ---- */
+.xstats { font: 500 14px/1.6 var(--mono); color: var(--ink2); margin-top: 18px; }
+.xstats b { color: var(--ink); font-weight: 600; }
+.xbars { display: grid; gap: 14px; margin: 34px 0 10px; max-width: 760px; }
+.xbar { display: grid; grid-template-columns: minmax(150px, 280px) 1fr 56px; align-items: center; gap: 14px; font-size: 15px; color: var(--ink2); }
+.xbar i { display: block; height: 22px; width: var(--w); min-width: 4px; background: var(--mute); border-radius: 3px; }
+.xbar b { font: 600 18px/1 var(--mono); color: var(--ink); text-align: right; }
+.xbar.me { color: var(--ink); font-weight: 600; }
+.xbar.me i { background: var(--red); box-shadow: 0 0 28px rgba(255, 77, 46, .3); }
+.xnote { color: var(--ink2); max-width: 760px; font-size: 15px; }
+.xbig { display: flex; flex-wrap: wrap; gap: 28px 64px; margin: 30px 0; }
+.xbig > div > b { display: block; font: 800 clamp(56px, 8vw, 112px)/.9 var(--sans); letter-spacing: -.05em; color: var(--red); }
+.xbig > div > span { display: block; margin-top: 10px; max-width: 280px; color: var(--ink2); }
+.xloop { list-style: none; padding: 0; margin: 34px 0 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; counter-reset: s; }
+.xloop li { border: 1px solid var(--line); border-radius: 8px; padding: 18px 16px; counter-increment: s; position: relative; }
+.xloop li::before { content: "0" counter(s); display: block; font: 600 13px/1 var(--mono); color: var(--red); margin-bottom: 12px; }
+.xloop li b { display: block; font-size: 17px; margin-bottom: 6px; }
+.xloop li span { font-size: 14px; color: var(--ink2); }
+@media (max-width: 860px) { .xloop { grid-template-columns: 1fr 1fr; } .xbar { grid-template-columns: 1fr 56px; } .xbar span { grid-column: 1 / -1; } }

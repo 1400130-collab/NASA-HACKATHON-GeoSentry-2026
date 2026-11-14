@@ -316,6 +316,7 @@ let frameNow = () => {};                                 // set further down: ru
 
   addEventListener('wheel', (e) => {
     if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;  // pinch zoom, sideways scrolling
+    if (document.documentElement.classList.contains('snav-open')) return;   // the site menu is open: the wheel scrolls the menu, not the page
     if (e.target.closest?.('.scroll, textarea, select, input:not([type="range"])')) return;   // the before/after slider is a range input as big as its picture
     e.preventDefault();
     const px = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * innerHeight : e.deltaY;
@@ -335,6 +336,7 @@ let frameNow = () => {};                                 // set further down: ru
   window.__page = (i) => { if (slides[i]) { clearTimeout(idle); glide(slides[i].offsetTop, 3.6, true); } };
   if (deck) addEventListener('keydown', (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+    if (document.documentElement.classList.contains('snav-open')) return;
     if (e.key === ' ' && e.target.closest?.('a, button:not(.dots button)')) return;      // space presses the focused button
     const d = { ArrowDown: 1, PageDown: 1, ' ': e.shiftKey ? -1 : 1, ArrowUp: -1, PageUp: -1 }[e.key];
     if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); clearTimeout(idle); glide(e.key === 'Home' ? 0 : maxY(), 3.6, true); return; }

@@ -9,8 +9,8 @@
 <script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/site.css?v=36">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
+<link rel="stylesheet" href="css/site.css?v=37">
 </head>
 <body data-meta="data/korea/meta.json">
 <header class="masthead solid"><div class="wrap">
@@ -24,7 +24,7 @@
   <button class="langbtn" type="button">KO</button>
 </div></header>
 <main class="wrap">
-  <section class="pagehead">
+  <section id="top" class="pagehead">
     <p class="eyebrow"><span class="live"></span><span lang="en">NASA Space Apps Challenge 2026 · Seoul</span><span lang="ko">NASA Space Apps Challenge 2026 · 서울</span></p>
     <h1 lang="en">Measure the slope before the rain does.</h1>
     <h1 lang="ko">비가 오기 전에, 사면을 먼저 측정합니다.</h1>
@@ -38,7 +38,7 @@
     </dl>
   </section>
 
-  <section class="sec">
+  <section id="mission" class="sec">
     <div class="side"><b>01</b><span lang="en">Mission</span><span lang="ko">목표</span></div>
     <div>
       <h2 lang="en">The warning tells you when to run. We show which slopes to fix first.</h2>
@@ -53,7 +53,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="in-numbers" class="sec">
     <div class="side"><b>02</b><span lang="en">In numbers</span><span lang="ko">숫자로 보기</span></div>
     <div>
       <h2 lang="en">Every hillside, ranked one by one</h2><h2 lang="ko">전국의 사면을 하나씩</h2>
@@ -67,7 +67,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="why-here" class="sec">
     <div class="side"><b>03</b><span lang="en">Why here</span><span lang="ko">왜 이곳인가</span></div>
     <div>
       <h2 lang="en">Burned hills, then a storm</h2><h2 lang="ko">산불이 지나간 산, 그리고 폭우</h2>
@@ -83,7 +83,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="who-we-asked" class="sec">
     <div class="side"><b>04</b><span lang="en">Who we asked</span><span lang="ko">자문</span></div>
     <div>
       <h2 lang="en">A phone call that changed the project</h2><h2 lang="ko">프로젝트의 방향을 바꾼 전화 한 통</h2>
@@ -104,7 +104,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="principles" class="sec">
     <div class="side"><b>05</b><span lang="en">Principles</span><span lang="ko">원칙</span></div>
     <div>
       <h2 lang="en">What we hold ourselves to</h2><h2 lang="ko">저희가 지키는 원칙</h2>
@@ -119,7 +119,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="team" class="sec">
     <div class="side"><b>06</b><span lang="en">Team</span><span lang="ko">팀</span></div>
     <div>
       <h2 lang="en">Who made this</h2><h2 lang="ko">만든 사람들</h2>
@@ -132,7 +132,7 @@
     </div>
   </section>
 
-  <section class="sec" id="data">
+  <section id="data" class="sec">
     <div class="side"><b>07</b><span lang="en">Data</span><span lang="ko">자료</span></div>
     <div>
       <h2 lang="en">Sources</h2><h2 lang="ko">출처</h2>
@@ -155,7 +155,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="tools" class="sec">
     <div class="side"><b>08</b><span lang="en">How it was built</span><span lang="ko">만든 방법</span></div>
     <div>
       <h2 lang="en">Tools</h2><h2 lang="ko">도구</h2>
@@ -169,11 +169,12 @@
       </ul>
       <h3 style="margin-top:40px" lang="en">How we used AI</h3><h3 style="margin-top:40px" lang="ko">AI 사용 내역</h3>
       <p lang="en">We used AI coding assistants to help write the code and to draft the Korean text. The two models on the <a href="method.html">method page</a> are our own: small models trained only on satellite data of this region. No number on this site is written by hand or by an AI. Each one is read from the pipeline's output file when the page loads.</p>
+      <p>Specifically: the radar label check and uncertainty scripts in <code>analysis/</code>, sections 08–10 of the home page, sections 07–08 of the results page, the README and the demo script were drafted with Claude Code (Anthropic), then reviewed and run by the team.</p>
       <p lang="ko">코드 작성과 한국어 문안 초안에는 AI 코딩 도구의 도움을 받았습니다. <a href="method.html">방법</a> 페이지의 두 모델은 저희가 직접 만든 것으로, 이 지역의 위성 자료만으로 학습한 작은 모델입니다. 이 사이트의 숫자는 사람이나 AI가 직접 쓴 것이 아니라, 페이지를 열 때 파이프라인 결과 파일에서 읽어 옵니다.</p>
     </div>
   </section>
 
-  <section class="sec">
+  <section id="limits" class="sec">
     <div class="side"><b>09</b><span lang="en">Limits</span><span lang="ko">한계</span></div>
     <div>
       <h2 lang="en">What it cannot do</h2><h2 lang="ko">할 수 없는 것</h2>
@@ -181,7 +182,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="roadmap" class="sec">
     <div class="side"><b>10</b><span lang="en">Roadmap</span><span lang="ko">로드맵</span></div>
     <div>
       <h2 lang="en">Done, and still to do</h2><h2 lang="ko">한 일과 남은 일</h2>
@@ -200,7 +201,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="thanks" class="sec">
     <div class="side"><b>11</b><span lang="en">Thanks</span><span lang="ko">감사</span></div>
     <div>
       <h2 lang="en">Acknowledgements</h2><h2 lang="ko">감사의 말</h2>
@@ -212,7 +213,7 @@
   </section>
 </main>
 
-<section class="closer">
+<section id="open-map" class="closer">
   <a class="huge" href="map.html" data-lang-href="map.html"><div class="wrap"><span class="t"><span lang="en">Open the map</span><span lang="ko">지도 열기</span></span><span class="arr">→</span></div></a>
 </section>
 
@@ -232,6 +233,7 @@
     <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
   </nav>
 </div></footer>
-<script type="module" src="js/site.js?v=42"></script>
+<script type="module" src="js/site.js?v=43"></script>
+<script src="js/nav.js?v=3" defer></script>
 </body>
 </html>

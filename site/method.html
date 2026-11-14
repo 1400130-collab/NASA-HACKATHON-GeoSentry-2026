@@ -9,8 +9,8 @@
 <script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/site.css?v=36">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
+<link rel="stylesheet" href="css/site.css?v=37">
 </head>
 <body>
 <header class="masthead solid"><div class="wrap">
@@ -24,7 +24,7 @@
   <button class="langbtn" type="button">KO</button>
 </div></header>
 <main class="wrap">
-  <section class="pagehead">
+  <section id="top" class="pagehead">
     <h1 lang="en">How it works.</h1>
     <h1 lang="ko">작동 방식.</h1>
     <p class="lede" lang="en">Six steps, about four minutes on a laptop. Every number on this site comes out of it.</p>
@@ -41,7 +41,7 @@
     <p class="note" lang="ko">아래 단계와 수치는 레이더 자료가 있는 경북의 20 m 세밀 분석 기준입니다. 전국 지도는 1단계와 4–6단계를 더 성긴 격자로 모든 시·도에 적용하고, 레이더 결과는 여기서 가져옵니다.</p>
   </section>
 
-  <section class="sec">
+  <section id="measuring" class="sec">
     <div class="side"><b>01–02</b><span lang="en">Measuring</span><span lang="ko">측정</span></div>
     <div>
       <div class="step">
@@ -70,7 +70,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="models" class="sec">
     <div class="side"><b>03–04</b><span lang="en">Two models</span><span lang="ko">두 모델</span></div>
     <div>
       <div class="step">
@@ -99,7 +99,7 @@
     </div>
   </section>
 
-  <section class="sec">
+  <section id="the-list" class="sec">
     <div class="side"><b>05–06</b><span lang="en">The list</span><span lang="ko">목록</span></div>
     <div>
       <div class="step">
@@ -149,6 +149,7 @@
     <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
   </nav>
 </div></footer>
-<script type="module" src="js/site.js?v=42"></script>
+<script type="module" src="js/site.js?v=43"></script>
+<script src="js/nav.js?v=3" defer></script>
 </body>
 </html>

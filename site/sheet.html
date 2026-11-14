@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SLOPEWATCH 점검표</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <style>
   :root { --ink: #111; --mute: #666; --line: #d8d8d4; --check: #c7341f; --watch: #b97a00; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #e9e9e6; color: var(--ink); font: 12px/1.45 "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, sans-serif; }
+  body { margin: 0; background: #e9e9e6; color: var(--ink); font: 12px/1.45 "Roboto", "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, sans-serif; }
   .bar { position: sticky; top: 0; z-index: 2; background: #111; color: #fff; padding: 10px 16px; display: flex; gap: 10px; align-items: center; }
   .bar select, .bar button { font: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid #555; background: #222; color: #fff; cursor: pointer; }
   .bar .sp { flex: 1; }
@@ -122,5 +123,6 @@ document.getElementById('count').onchange = render;
 document.getElementById('lang').onclick = () => { lang = lang === 'ko' ? 'en' : 'ko'; render(); };
 render();
 </script>
+<script src="js/nav.js?v=3" defer></script>
 </body>
 </html>

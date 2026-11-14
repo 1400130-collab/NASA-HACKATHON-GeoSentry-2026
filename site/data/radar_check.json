@@ -1,0 +1,189 @@
+{
+ "method": "The scar labels come only from Sentinel-2 optical images (pipeline/p05_labels.py). This script asks whether NISAR saw the same places change: is radar coherence across the storm pair lower at the scars than (a) at old forest clearings, which were already bare before the storm, and (b) at random places?",
+ "threshold": -0.1,
+ "tracks": {
+  "125": {
+   "pair": [
+    "20260716",
+    "20260821"
+   ],
+   "direction": "ascending",
+   "n": {
+    "failure": 32,
+    "clearing": 135,
+    "random": 5000
+   },
+   "median_contrast": {
+    "failure": -0.067,
+    "clearing": -0.053,
+    "random": 0.002
+   },
+   "share_below_threshold": {
+    "failure": 0.344,
+    "clearing": 0.348,
+    "random": 0.177
+   },
+   "p_failure_lower_than_clearing": 0.297,
+   "p_failure_lower_than_random": 0.0012,
+   "strongest_scars": [
+    {
+     "id": 490,
+     "lat": 36.43896000832711,
+     "lon": 128.6476456018948,
+     "area_m2": 1600,
+     "contrast": -0.314
+    },
+    {
+     "id": 271,
+     "lat": 36.56195176075661,
+     "lon": 129.0647490955413,
+     "area_m2": 2000,
+     "contrast": -0.276
+    },
+    {
+     "id": 436,
+     "lat": 36.47080809556281,
+     "lon": 128.73222148666886,
+     "area_m2": 1200,
+     "contrast": -0.267
+    },
+    {
+     "id": 270,
+     "lat": 36.56184442299499,
+     "lon": 129.06317703052216,
+     "area_m2": 4800,
+     "contrast": -0.261
+    },
+    {
+     "id": 117,
+     "lat": 36.73166961572768,
+     "lon": 128.9106820439012,
+     "area_m2": 1600,
+     "contrast": -0.245
+    }
+   ]
+  },
+  "032": {
+   "pair": [
+    "20260710",
+    "20260815"
+   ],
+   "direction": "descending",
+   "n": {
+    "failure": 33,
+    "clearing": 136,
+    "random": 5000
+   },
+   "median_contrast": {
+    "failure": -0.141,
+    "clearing": -0.071,
+    "random": -0.002
+   },
+   "share_below_threshold": {
+    "failure": 0.545,
+    "clearing": 0.39,
+    "random": 0.198
+   },
+   "p_failure_lower_than_clearing": 0.0258,
+   "p_failure_lower_than_random": 0.0,
+   "strongest_scars": [
+    {
+     "id": 270,
+     "lat": 36.56184442299499,
+     "lon": 129.06317703052216,
+     "area_m2": 4800,
+     "contrast": -0.276
+    },
+    {
+     "id": 316,
+     "lat": 36.532751020680415,
+     "lon": 129.07138265771704,
+     "area_m2": 1200,
+     "contrast": -0.275
+    },
+    {
+     "id": 271,
+     "lat": 36.56195176075661,
+     "lon": 129.0647490955413,
+     "area_m2": 2000,
+     "contrast": -0.245
+    },
+    {
+     "id": 382,
+     "lat": 36.50588419607055,
+     "lon": 129.19245428829427,
+     "area_m2": 2000,
+     "contrast": -0.233
+    },
+    {
+     "id": 698,
+     "lat": 36.158062104690934,
+     "lon": 129.328302333464,
+     "area_m2": 1200,
+     "contrast": -0.233
+    }
+   ]
+  },
+  "024": {
+   "pair": [
+    "20260709",
+    "20260721"
+   ],
+   "direction": "ascending",
+   "n": {
+    "failure": 30,
+    "clearing": 105,
+    "random": 5000
+   },
+   "median_contrast": {
+    "failure": -0.039,
+    "clearing": -0.027,
+    "random": 0.002
+   },
+   "share_below_threshold": {
+    "failure": 0.333,
+    "clearing": 0.286,
+    "random": 0.19
+   },
+   "p_failure_lower_than_clearing": 0.4106,
+   "p_failure_lower_than_random": 0.042,
+   "strongest_scars": [
+    {
+     "id": 142,
+     "lat": 36.708615410639155,
+     "lon": 129.04803254807362,
+     "area_m2": 1200,
+     "contrast": -0.518
+    },
+    {
+     "id": 572,
+     "lat": 36.300537003837164,
+     "lon": 129.3678359048539,
+     "area_m2": 2000,
+     "contrast": -0.269
+    },
+    {
+     "id": 671,
+     "lat": 36.177983706854334,
+     "lon": 129.0236123564478,
+     "area_m2": 1200,
+     "contrast": -0.222
+    },
+    {
+     "id": 639,
+     "lat": 36.23256734217055,
+     "lon": 129.11308416783427,
+     "area_m2": 2000,
+     "contrast": -0.198
+    },
+    {
+     "id": 576,
+     "lat": 36.29910696991131,
+     "lon": 129.0664542654843,
+     "area_m2": 2400,
+     "contrast": -0.184
+    }
+   ]
+  }
+ }
+}

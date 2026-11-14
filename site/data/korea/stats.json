@@ -1,0 +1,52 @@
+{
+ "top_share": 0.05,
+ "n_failed": 20,
+ "labels_human_checked": false,
+ "rows": {
+  "model_national": {
+   "label": "Our model",
+   "found": 5,
+   "of": 20,
+   "share": 0.25,
+   "ci90": [
+    0.104,
+    0.456
+   ],
+   "p_vs_chance": 0.0026
+  },
+  "steep_and_burned": {
+   "label": "Steep + burned rule",
+   "found": 3,
+   "of": 20,
+   "share": 0.15,
+   "ci90": [
+    0.042,
+    0.344
+   ],
+   "p_vs_chance": 0.0755
+  },
+  "steepness_only": {
+   "label": "Steepness only",
+   "found": 2,
+   "of": 20,
+   "share": 0.1,
+   "ci90": [
+    0.018,
+    0.283
+   ],
+   "p_vs_chance": 0.2642
+  }
+ },
+ "workload": {
+  "slopes": 129948,
+  "check_first": 3291,
+  "check_first_share": 0.0253,
+  "counties_with_any": 139,
+  "per_county_median": 7.0,
+  "per_county_max": 252,
+  "region_units": 7207,
+  "region_top5_visits": 360,
+  "region_failures_reached": 5,
+  "random_failures_reached": 1.0
+ }
+}

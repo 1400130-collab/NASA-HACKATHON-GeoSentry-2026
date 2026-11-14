@@ -21,8 +21,8 @@
   --t024: #199e70;
   --grid: rgba(255, 255, 255, .08);
   --axis: rgba(255, 255, 255, .2);
-  --sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
-  --mono: "IBM Plex Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sans: "Roboto", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Roboto Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   --ease: cubic-bezier(.2, .7, .2, 1);
   --lw: 252px;                              /* left column */
   --rw: clamp(324px, 31vw, 384px);          /* right panel */

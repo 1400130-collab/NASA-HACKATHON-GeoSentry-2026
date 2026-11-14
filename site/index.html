@@ -9,8 +9,8 @@
 <script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/site.css?v=36">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
+<link rel="stylesheet" href="css/site.css?v=37">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
 </script>
@@ -28,11 +28,10 @@
 </div></header>
 <!--main-->
 <main>
-  <section class="hero" id="hero" data-slide="black">
+  <section id="hero" class="hero" data-slide="black">
     <div class="fallback"></div>
     <div class="sky"></div>
     <div class="stage"><canvas aria-hidden="true"></canvas></div>
-    <p class="readout mono" aria-hidden="true"></p>
     <div class="inner"><div class="wrap">
       <h1 lang="en">Check these slopes first.</h1>
       <h1 lang="ko">이 사면부터 점검하세요.</h1>
@@ -54,7 +53,7 @@
     </div></div>
   </section>
 
-  <section class="band" data-slide="red"><div class="wrap">
+  <section id="gap" class="band" data-slide="red"><div class="wrap">
     <p class="eyebrow rv"><b>01</b><span lang="en">The gap</span><span lang="ko">빈틈</span></p>
     <p class="statement rv" lang="en">Korea's landslide warnings watch the rain. <span class="dim">Nothing measures whether a slope is already moving.</span> <span class="hot">A radar satellite can.</span></p>
     <p class="statement rv" lang="ko">산사태 경보는 비를 봅니다. <span class="dim">사면이 이미 움직이고 있는지는 아무도 재지 않습니다.</span> <span class="hot">레이더 위성은 잴 수 있습니다.</span></p>
@@ -62,7 +61,7 @@
     <p class="after rv" lang="ko">경보 체계를 대신하지 않습니다. 그 체계에 없는 측정값 하나를 더합니다. <a href="about.html">자문 내용 보기</a></p>
   </div></section>
 
-  <section class="band" data-slide="pine"><div class="wrap">
+  <section id="measurement" class="band" data-slide="pine"><div class="wrap">
     <p class="eyebrow rv"><b>02</b><span lang="en">The measurement</span><span lang="ko">측정</span></p>
     <div class="duo">
       <div>
@@ -83,7 +82,7 @@
     </div>
   </div></section>
 
-  <section class="band" data-slide="black"><div class="wrap">
+  <section id="where-it-learned" class="band" data-slide="black"><div class="wrap">
     <p class="eyebrow rv"><b>03</b><span lang="en">Where it learned</span><span lang="ko">어디서 배웠나</span></p>
     <div class="fire">
       <div>
@@ -111,7 +110,7 @@
     </div>
   </div></section>
 
-  <section class="band" data-slide="navy"><div class="wrap">
+  <section id="machine-learning" class="band" data-slide="navy"><div class="wrap">
     <p class="eyebrow rv"><b>04</b><span lang="en">The machine learning</span><span lang="ko">머신러닝</span></p>
     <h2 class="big wide rv" lang="en">Two models. <span class="dim">One watches the ground move. One learned which slopes fail.</span></h2>
     <h2 class="big wide rv" lang="ko">모델은 둘. <span class="dim">하나는 지표의 움직임을 봅니다. 하나는 어떤 사면이 무너지는지 배웠습니다.</span></h2>
@@ -143,7 +142,7 @@
     <p class="dropped rv"><span lang="en">Tried and thrown out: an autoencoder (caught <span data-n="ae3">…</span>%, a plain z-score catches <span data-n="z3">…</span>%) and radar inputs in the ranker (the ranking got worse). <a href="results.html">What didn't work</a></span><span lang="ko">써 보고 버린 것: 오토인코더(탐지율 <span data-n="ae3">…</span>%, 단순 z값은 <span data-n="z3">…</span>%)와 순위 모델의 레이더 입력(순위가 나빠짐). <a href="results.html">안 된 것들</a></span></p>
   </div></section>
 
-  <section class="band" data-slide="amber"><div class="wrap">
+  <section id="rule" class="band" data-slide="amber"><div class="wrap">
     <p class="eyebrow rv"><b>05</b><span lang="en">The rule</span><span lang="ko">규칙</span></p>
     <h2 class="big rv" lang="en">Two questions. Both have to be yes.</h2>
     <h2 class="big rv" lang="ko">질문은 둘. 둘 다 "예"여야 합니다.</h2>
@@ -163,7 +162,7 @@
     <p class="verdict rv"><span class="pill"><span lang="en">CHECK FIRST</span><span lang="ko">우선 점검</span></span><span lang="en">Every slope on the list shows its reasons.</span><span lang="ko">목록의 모든 사면에 이유가 표시됩니다.</span> <a href="method.html"><span lang="en">Full method</span><span lang="ko">방법 전체</span></a></p>
   </div></section>
 
-  <section class="band" data-slide="black"><div class="wrap">
+  <section id="short-list" class="band" data-slide="black"><div class="wrap">
     <p class="eyebrow rv"><b>06</b><span lang="en">The short list</span><span lang="ko">짧은 목록</span></p>
     <div class="funnel">
       <div>
@@ -182,7 +181,7 @@
     </div>
   </div></section>
 
-  <section class="band" data-slide="ember"><div class="wrap">
+  <section id="does-it-work" class="band" data-slide="ember"><div class="wrap">
     <p class="eyebrow rv"><b>07</b><span lang="en">Does it work</span><span lang="ko">효과가 있나</span></p>
     <div class="proof">
       <b class="rv"><span data-n="cap5" data-count>…</span><small>%</small></b>
@@ -194,9 +193,43 @@
       </div>
     </div>
     <div class="vs rv" data-block="versus"></div>
+    <p class="xstats rv"><b><span data-x="found">…</span> of <span data-x="of">…</span></b> failed slopes · 90% interval <b><span data-x="ciLo">…</span>–<span data-x="ciHi">…</span>%</b> · p = <b data-x="pModel">…</b> against chance. The steep + burned rule finds <span data-x="ruleFound">…</span> of <span data-x="of">…</span> (p = <span data-x="pRule">…</span>). <a href="results.html#uncertainty">How these were computed</a></p>
   </div></section>
 
-  <section class="closer" data-slide="black" data-enter="early">
+  <section id="second-witness" class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>08</b><span>A second witness</span></p>
+    <h2 class="mid rv">The radar found the same scars without being told where they were.</h2>
+    <p class="after rv">Our failure labels come only from optical photos. So we asked NISAR separately: did the ground at those exact spots change during the storm? Coherence measures how alike two radar echoes are. Fresh bare soil and moved ground make it drop.</p>
+    <div class="xbars rv" data-xblock="radarbars"></div>
+    <p class="xnote rv">Share of spots where coherence across the storm pair (descending orbit, <span data-x="dPair">…</span>) dropped by more than 0.1 compared with the ground 240 m around it. <span data-x="dN">…</span> scars, <span data-x="dNc">…</span> clearings. Scars against old clearings: p = <span data-x="dP">…</span> (permutation test).</p>
+    <p class="xnote rv">The pair ending <b>21 July</b>, two days after the storm, already shows a weak signal: <span data-x="eScar">…</span>% of scars against <span data-x="eRand">…</span>% of random places (p = <span data-x="eP">…</span>). That was 16 days before the first clear optical image. We tested three orbits, so read these p-values as suggestive, not as proof. <a href="results.html#radar-check">Full radar check</a></p>
+  </div></section>
+
+  <section id="officer" class="band" data-slide="pine"><div class="wrap">
+    <p class="eyebrow rv"><b>09</b><span>What it asks of an officer</span></p>
+    <h2 class="mid rv">A list one county office can actually walk.</h2>
+    <div class="xbig rv">
+      <div><b data-x="perCounty">…</b><span>slopes to check first in the median county (the busiest has <span data-x="perCountyMax">…</span>)</span></div>
+      <div><b><span data-x="shareChecked">…</span>%</b><span>of all hillsides in Korea, spread over <span data-x="counties">…</span> cities and counties</span></div>
+      <div><b><span data-x="reached">…</span> vs <span data-x="randomReached">…</span></b><span>July failures reached by visiting the top <span data-x="regionVisits">…</span> of <span data-x="regionUnits">…</span> burn-area slopes, against random visits</span></div>
+    </div>
+    <p class="xnote rv">The same number of site visits, pointed at the right hillsides, would have reached five times as many of the slopes that failed in July 2026.</p>
+  </div></section>
+
+  <section id="keeps-running" class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>10</b><span>How it keeps running</span></p>
+    <h2 class="mid rv">Every 12 days, the list updates itself.</h2>
+    <ol class="xloop rv">
+      <li><b>NISAR passes</b><span>Every land area is imaged every 12 days, day or night, through cloud.</span></li>
+      <li><b>Fetch the pairs</b><span>Interferograms (GUNW) from NASA's ASF archive, read over HTTPS without downloading whole files.</span></li>
+      <li><b>Rerun the pipeline</b><span>Movement, detector, ranking and rule. About 4 minutes for the regional build on a laptop.</span></li>
+      <li><b>Update map and sheets</b><span>Static files only. No server to run, any web host works.</span></li>
+      <li><b>Officer prints a sheet</b><span>One page per county, in Korean, with the reasons for each slope.</span></li>
+    </ol>
+    <p class="xnote rv">Nothing in the pipeline is specific to Korea except the building and border files. NISAR covers nearly all land, so the same steps could run for any country with burned or landslide-prone hills.</p>
+  </div></section>
+
+  <section id="open-map" class="closer" data-slide="black" data-enter="early">
     <div class="bgimg"></div>
     <div class="stage"></div>
     <div class="inner"><div class="wrap">
@@ -223,6 +256,8 @@
     <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
   </nav>
 </div></footer>
-<script type="module" src="js/site.js?v=42"></script>
+<script type="module" src="js/site.js?v=43"></script>
+<script type="module" src="js/extra.js?v=1"></script>
+<script src="js/nav.js?v=3" defer></script>
 </body>
 </html>
