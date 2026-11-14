@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spectral Blink demo</title>
+<style>
+:root{--bg:#0b0e14;--panel:#141925;--line:#263044;--text:#e6e9f0;--mute:#8d97ab;--acc:#ffb454;--ok:#7fd962;--bad:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,sans-serif}
+header{padding:14px 16px 4px}
+h1{margin:0;font-size:19px;letter-spacing:.2px}
+.sub{color:var(--mute);font-size:12.5px;margin-top:2px}
+.wrap{display:flex;gap:14px;padding:10px 16px 16px;flex-wrap:wrap;align-items:flex-start}
+.sky{flex:1 1 520px;min-width:0;position:relative}
+canvas{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#000}
+#sky{cursor:crosshair}
+.hud{position:absolute;left:10px;top:8px;font:12px ui-monospace,Menlo,monospace;color:#fff;text-shadow:0 0 4px #000,0 0 2px #000;pointer-events:none}
+.side{flex:1 1 280px;max-width:380px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.card h2{margin:0 0 6px;font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.8px}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{flex:1;background:transparent;color:var(--mute);border:0;padding:7px 4px;font:inherit;font-size:12.5px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--acc);color:#1a1205;font-weight:600}
+.row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.row label{flex:0 0 84px;color:var(--mute);font-size:12.5px}
+.row input[type=range]{flex:1;min-width:0;accent-color:var(--acc)}
+.row output{flex:0 0 58px;text-align:right;font:12px ui-monospace,Menlo,monospace}
+button.play{background:#1e2636;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 12px;font:inherit;cursor:pointer}
+.stat{font-size:26px;font-weight:700;line-height:1.1}
+.stat small{font-size:13px;font-weight:400;color:var(--mute)}
+.statnote{font-size:12.5px;color:var(--mute);margin-top:3px}
+#selname{font-weight:600}
+#selcls{color:var(--mute);font-size:12.5px;margin-bottom:6px}
+.foot{color:var(--mute);font-size:11.5px;padding:0 16px 16px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Spectral Blink</h1>
+  <div class="sub">SPHEREx sees every patch of sky at a different wavelength each visit. Blink the raw images and everything flickers. Correct for wavelength and only the real changes are left.</div>
+</header>
+
+<div class="wrap">
+  <div class="sky">
+    <canvas id="sky" width="720" height="480"></canvas>
+    <div class="hud" id="hud"></div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2>View</h2>
+      <div class="seg" id="modes">
+        <button data-m="raw" class="on">Raw blink</button>
+        <button data-m="corr">Corrected blink</button>
+        <button data-m="diff">Difference</button>
+      </div>
+      <div class="row">
+        <button class="play" id="play">Pause</button>
+        <input type="range" id="speed" min="150" max="1200" step="50" value="600" aria-label="Blink interval">
+        <output id="speedo">600 ms</output>
+      </div>
+      <div class="row"><label for="epoch">Epoch</label><input type="range" id="epoch" min="0" max="3" step="1" value="0"><output id="epocho">1 / 4</output></div>
+      <div class="row"><label for="lam">Wavelength</label><input type="range" id="lam" min="0.75" max="5" step="0.05" value="1.6"><output id="lamo">1.60 µm</output></div>
+      <div class="row"><label for="det">Detections</label><input type="checkbox" id="det" checked></div>
+    </div>
+
+    <div class="card">
+      <h2>Sources that appear to change since the last epoch</h2>
+      <div class="stat" id="stat"></div>
+      <div class="statnote" id="statnote"></div>
+    </div>
+
+    <div class="card">
+      <h2>Selected source — 102-band spectrum</h2>
+      <div id="selname">Click any source</div>
+      <div id="selcls"></div>
+      <canvas id="spec" width="680" height="340"></canvas>
+    </div>
+  </div>
+</div>
+<div class="foot">Simulated data for demonstration — not real SPHEREx images. Detection labels and confidences are mocked.</div>
+
+<script>
+const W = 720, H = 480, NE = 4, LMIN = 0.75, LMAX = 5.0;
+const $ = id => document.getElementById(id);
+
+// --- deterministic random numbers ---
+function rng(seed){return () => {seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;};}
+const R = rng(42);
+const gauss = r => {let u = 0; for (let i = 0; i < 6; i++) u += r(); return (u - 3) * 1.414;};
+
+// --- spectra ---
+const planck = (l, T) => 1 / (l ** 3 * (Math.exp(14388 / (l * T)) - 1));
+const bump = (l, c, w) => Math.exp(-0.5 * ((l - c) / w) ** 2);
+const solar = l => planck(l, 5800) / planck(1.6, 5800);
+
+// Each epoch saw this patch through a different part of the filter.
+const EPOCH_L = [1.1, 2.4, 3.8, 1.7];
+const lamRaw = (e, y) => EPOCH_L[e] + 0.5 * (y / H - 0.5);
+
+// --- the sky ---
+const objs = [];
+for (let i = 0; i < 260; i++) {
+  const T = 2600 + R() ** 2 * 7500, x = R() * W, y = R() * H;
+  objs.push({
+    name: 'Star #' + (i + 1), cls: 'static star · T ≈ ' + Math.round(T / 100) * 100 + ' K',
+    f: 40 * Math.pow(10, R() * R() * 2.2),
+    pos: () => ({x, y}), spec: l => planck(l, T) / planck(1.6, T)
+  });
+}
+const dyn = [
+  {name: 'Main-belt asteroid', cls: 'asteroid', conf: 0.98, color: '#ffb454', f: 900,
+   pos: e => ({x: 90 + e * 170, y: 400 - e * 95}),
+   spec: l => solar(l) * (0.7 + 0.2 * l) + 0.4 * bump(l, 5.2, 0.8)},
+  {name: 'Variable star', cls: 'variable star', conf: 0.95, color: '#7fd962', f: 500,
+   pos: () => ({x: 610, y: 330}), vary: e => [1, 2.2, 0.5, 1.6][e],
+   spec: l => planck(l, 3400) / planck(1.6, 3400)},
+  {name: 'Brown dwarf', cls: 'high proper motion · brown dwarf', conf: 0.91, color: '#ff7ab6', f: 300,
+   pos: e => ({x: 520 - e * 8, y: 130 + e * 4}),
+   spec: l => 0.02 + 0.25 * bump(l, 1.27, 0.08) + 0.2 * bump(l, 1.6, 0.09) + 0.12 * bump(l, 2.1, 0.1) + bump(l, 4.6, 0.35)},
+  {name: 'Slow mover', cls: 'Planet X candidate · methane bands', conf: 0.62, color: '#6cc6ff', f: 110,
+   pos: e => ({x: 330 + 2 * e + (e % 2 ? 5 : -5), y: 250 - e}),
+   spec: l => solar(l) * (1 - 0.75 * bump(l, 1.7, 0.08)) * (1 - 0.85 * bump(l, 2.3, 0.12)) * (1 - 0.9 * bump(l, 3.3, 0.25))}
+];
+objs.push(...dyn);
+
+const noise = [];
+for (let e = 0; e < NE; e++) {
+  const r = rng(100 + e), n = new Float32Array(W * H);
+  for (let i = 0; i < n.length; i++) n[i] = gauss(r);
+  noise.push(n);
+}
+
+// --- rendering ---
+function stamp(img, x, y, a) {
+  const x0 = Math.round(x), y0 = Math.round(y);
+  for (let j = -6; j <= 6; j++) {
+    const yy = y0 + j; if (yy < 0 || yy >= H) continue;
+    for (let i = -6; i <= 6; i++) {
+      const xx = x0 + i; if (xx < 0 || xx >= W) continue;
+      img[yy * W + xx] += a * Math.exp(-((xx - x) ** 2 + (yy - y) ** 2) / 5.12);
+    }
+  }
+}
+const amp = (o, e, corr, lv) => o.f * o.spec(corr ? lv : lamRaw(e, o.pos(e).y)) * (o.vary ? o.vary(e) : 1);
+function render(e, corr, lv) {
+  const img = new Float32Array(noise[e]);
+  for (const o of objs) { const p = o.pos(e); stamp(img, p.x, p.y, amp(o, e, corr, lv)); }
+  return img;
+}
+
+const cv = $('sky'), ctx = cv.getContext('2d'), id = ctx.createImageData(W, H);
+let mode = 'raw', ep = 0, lam = 1.6, playing = true, sel = dyn[3], timer = null;
+const prev = () => (ep + NE - 1) % NE;
+
+function draw() {
+  const corr = mode !== 'raw', img = render(ep, corr, lam), d = id.data;
+  if (mode === 'diff') {
+    const ref = render(prev(), true, lam);
+    for (let i = 0; i < img.length; i++) {
+      const t = Math.max(-1, Math.min(1, Math.asinh((img[i] - ref[i]) / 4) / 5)), g = 128 + t * 127;
+      d[4 * i] = g; d[4 * i + 1] = g; d[4 * i + 2] = g; d[4 * i + 3] = 255;
+    }
+  } else {
+    for (let i = 0; i < img.length; i++) {
+      const t = Math.min(1, Math.max(0, Math.asinh(img[i] / 5) / 7));
+      d[4 * i] = 255 * t; d[4 * i + 1] = 235 * t; d[4 * i + 2] = 215 * t; d[4 * i + 3] = 255;
+    }
+  }
+  ctx.putImageData(id, 0, 0);
+
+  if ($('det').checked) {
+    ctx.font = '11px ui-monospace, Menlo, monospace'; ctx.lineWidth = 1.5;
+    for (const o of dyn) {
+      const p = o.pos(ep);
+      ctx.strokeStyle = o.color; ctx.fillStyle = o.color;
+      ctx.globalAlpha = 0.45;
+      for (let e = 0; e < NE; e++) { const q = o.pos(e); ctx.fillRect(q.x - 1.5, q.y - 1.5, 3, 3); }
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 13, 0, 6.2832); ctx.stroke();
+      ctx.fillText(o.cls.split(' · ')[0] + ' ' + o.conf.toFixed(2), Math.min(p.x + 17, W - 150), p.y - 9);
+    }
+  }
+  if (sel) {
+    const p = sel.pos(ep); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+    ctx.strokeRect(p.x - 18.5, p.y - 18.5, 37, 37);
+  }
+
+  $('hud').textContent = 'Epoch ' + (ep + 1) + ' · ' + (mode === 'raw'
+    ? 'as observed, ' + lamRaw(ep, 0).toFixed(2) + '–' + lamRaw(ep, H).toFixed(2) + ' µm'
+    : mode === 'corr' ? 're-rendered at ' + lam.toFixed(2) + ' µm'
+    : 'epoch ' + (ep + 1) + ' minus epoch ' + (prev() + 1) + ' at ' + lam.toFixed(2) + ' µm');
+
+  // how many sources look different from the previous epoch?
+  let n = 0; const b = prev();
+  for (const o of objs) {
+    const p = o.pos(ep), q = o.pos(b);
+    if (Math.hypot(p.x - q.x, p.y - q.y) > 1.5 || Math.abs(Math.log(amp(o, ep, corr, lam) / amp(o, b, corr, lam))) > 0.25) n++;
+  }
+  $('stat').innerHTML = n + ' <small>of ' + objs.length + '</small>';
+  $('stat').style.color = corr ? 'var(--ok)' : 'var(--bad)';
+  $('statnote').textContent = corr
+    ? 'Only the asteroid, the variable star and the two movers are left.'
+    : 'Almost all of these are wavelength mismatch, not real change.';
+
+  $('epoch').value = ep; $('epocho').textContent = (ep + 1) + ' / ' + NE;
+  drawSpec();
+}
+
+const sc = $('spec'), sx = sc.getContext('2d');
+function drawSpec() {
+  const w = sc.width, h = sc.height, L = 56, Rm = 14, T = 16, B = 44;
+  sx.clearRect(0, 0, w, h);
+  $('selname').textContent = sel ? sel.name : 'Click any source';
+  $('selcls').textContent = sel ? sel.cls : '';
+  if (!sel) return;
+  const X = l => L + (l - LMIN) / (LMAX - LMIN) * (w - L - Rm);
+  const ch = []; let mx = 0;
+  for (let i = 0; i < 102; i++) { const l = LMIN + (LMAX - LMIN) * i / 101, s = sel.spec(l); ch.push([l, s]); mx = Math.max(mx, s); }
+  const Y = s => h - B - s / mx * (h - T - B);
+  sx.strokeStyle = '#263044'; sx.lineWidth = 2; sx.strokeRect(L, T, w - L - Rm, h - T - B);
+  sx.fillStyle = '#8d97ab'; sx.font = '20px system-ui, sans-serif'; sx.textAlign = 'center';
+  for (let l = 1; l <= 5; l++) sx.fillText(l + ' µm', X(l), h - 14);
+  sx.save(); sx.translate(20, (h - B + T) / 2); sx.rotate(-Math.PI / 2); sx.fillText('flux', 0, 0); sx.restore();
+  // where each epoch actually sampled this source
+  for (let e = 0; e < NE; e++) {
+    const l = lamRaw(e, sel.pos(e).y), on = e === ep;
+    sx.strokeStyle = on ? '#ffb454' : '#4a5670'; sx.lineWidth = on ? 3 : 2;
+    sx.beginPath(); sx.moveTo(X(l), T); sx.lineTo(X(l), h - B); sx.stroke();
+    sx.fillStyle = on ? '#ffb454' : '#8d97ab'; sx.fillText('E' + (e + 1), X(l), T + 22);
+  }
+  if (mode !== 'raw') {
+    sx.setLineDash([6, 6]); sx.strokeStyle = '#7fd962'; sx.lineWidth = 2;
+    sx.beginPath(); sx.moveTo(X(lam), T); sx.lineTo(X(lam), h - B); sx.stroke(); sx.setLineDash([]);
+  }
+  sx.strokeStyle = '#e6e9f0'; sx.lineWidth = 2; sx.beginPath();
+  ch.forEach(([l, s], i) => i ? sx.lineTo(X(l), Y(s)) : sx.moveTo(X(l), Y(s))); sx.stroke();
+  sx.fillStyle = '#e6e9f0';
+  for (const [l, s] of ch) { sx.beginPath(); sx.arc(X(l), Y(s), 2.6, 0, 6.2832); sx.fill(); }
+}
+
+// --- controls ---
+function setTimer() {
+  clearInterval(timer);
+  if (playing) timer = setInterval(() => { ep = (ep + 1) % NE; draw(); }, +$('speed').value);
+  $('play').textContent = playing ? 'Pause' : 'Play';
+}
+$('modes').onclick = ev => {
+  const m = ev.target.dataset.m; if (!m) return;
+  mode = m;
+  for (const b of $('modes').children) b.classList.toggle('on', b.dataset.m === m);
+  $('lam').disabled = m === 'raw';
+  draw();
+};
+$('play').onclick = () => { playing = !playing; setTimer(); };
+$('speed').oninput = () => { $('speedo').textContent = $('speed').value + ' ms'; setTimer(); };
+$('epoch').oninput = () => { ep = +$('epoch').value; playing = false; setTimer(); draw(); };
+$('lam').oninput = () => { lam = +$('lam').value; $('lamo').textContent = lam.toFixed(2) + ' µm'; draw(); };
+$('det').onchange = draw;
+cv.onclick = ev => {
+  const r = cv.getBoundingClientRect(), x = (ev.clientX - r.left) * W / r.width, y = (ev.clientY - r.top) * H / r.height;
+  let best = null, bd = 16;
+  for (const o of objs) { const p = o.pos(ep), d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = o; } }
+  sel = best; draw();
+};
+$('lam').disabled = true;
+draw(); setTimer();
+</script>
+</body>
+</html>

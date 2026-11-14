@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOPEWATCH · results</title>
+<meta name="description" content="What was tested, what passed and what is still weak.">
+<meta name="theme-color" content="#0b0c0d">
+<script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/site.css?v=36">
+</head>
+<body data-meta="data/korea/meta.json">
+<header class="masthead solid"><div class="wrap">
+  <a class="wordmark" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a>
+  <nav>
+    <a href="method.html"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html" aria-current="page"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a class="go" href="map.html" data-lang-href="map.html"><span lang="en">Open map</span><span lang="ko">지도 열기</span></a>
+  </nav>
+  <button class="langbtn" type="button">KO</button>
+</div></header>
+<main class="wrap">
+  <section class="pagehead">
+    <h1 lang="en">Does it work?</h1>
+    <h1 lang="ko">효과가 있나?</h1>
+    <p class="lede" lang="en">Measured on real data. Where a result is weak or untested, it says so.</p>
+    <p class="lede" lang="ko">실제 자료로 측정했습니다. 약하거나 검증되지 않은 결과는 그렇게 적었습니다.</p>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>01</b><span lang="en">Hindsight test</span><span lang="ko">사후 검증</span></div>
+    <div>
+      <h2 lang="en">Would the list have found the slopes that failed?</h2>
+      <h2 lang="ko">이 목록으로 실제 무너진 사면을 찾을 수 있었을까?</h2>
+      <div class="bignum">
+        <b><span data-n="cap5">…</span>%</b>
+        <div>
+          <p lang="en">of the slopes that failed in the July 2026 storm were in our top 5%, using only data from before the storm. Top 5% is the cut the check-first list uses.</p>
+          <p lang="ko">2026년 7월 폭우 때 무너진 사면 가운데 이만큼이 폭우 이전 자료만으로 매긴 순위의 상위 5% 안에 있었습니다. 상위 5%는 우선 점검 목록이 쓰는 기준입니다.</p>
+          <p class="small" lang="en">This is the nationwide ranking, scored on the failures in North Gyeongsang, the only place they are mapped. Picking at random gets 5%. Steepness alone gets <span data-n="steep5">…</span>%. A simple steep + burned rule gets <span data-n="rule5">…</span>%. Further down the list the rule catches up: in the top 10% it finds <span data-n="rule10">…</span>%, the same as our model, so the model's edge is at the very top. There are only <span data-n="nfail">…</span> failed slopes to test on, so each one is worth <span data-n="slip">…</span> points.</p>
+          <p class="small" lang="ko">전국 순위를, 붕괴 사면이 조사된 유일한 지역인 경북에서 채점한 값입니다. 무작위로 고르면 5%, 경사만 보면 <span data-n="steep5">…</span>%, 단순한 '급경사 + 산불' 규칙은 <span data-n="rule5">…</span>%입니다. 목록 아래로 가면 규칙이 따라잡아, 상위 10%에서는 <span data-n="rule10">…</span>%로 우리 모델과 같습니다. 모델의 강점은 목록 맨 위에 있습니다. 검증에 쓸 붕괴 사면이 <span data-n="nfail">…</span>곳뿐이라 한 곳이 <span data-n="slip">…</span>%포인트에 해당합니다.</p>
+        </div>
+      </div>
+      <div class="chart">
+        <h3 lang="en">Failures found against slopes inspected</h3><h3 lang="ko">점검한 사면 비율에 따른 붕괴 사면 발견율</h3>
+        <p lang="en">Whole counties were held out, so the model never saw the county it was ranking.</p>
+        <p lang="ko">시·군 전체를 빼고 학습했으므로, 모델은 순위를 매기는 지역을 본 적이 없습니다.</p>
+        <div data-block="capture"></div>
+      </div>
+      <p class="note" lang="en">The failed slopes were found automatically in satellite images and nobody has checked them by hand. Many sit beside older forest clearings. These numbers will move once a person has gone through them.</p>
+      <p class="note" lang="ko">붕괴 사면은 위성 영상에서 자동으로 찾았고 사람이 직접 확인하지 않았습니다. 상당수는 예전 벌채지 옆에 있습니다. 사람이 검토하고 나면 이 수치는 달라질 것입니다.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>02</b><span lang="en">Detection test</span><span lang="ko">탐지 시험</span></div>
+    <div>
+      <h2 lang="en">How small a movement can we catch?</h2>
+      <h2 lang="ko">얼마나 작은 이동까지 잡아낼 수 있을까?</h2>
+      <div class="bignum">
+        <b><span data-n="det50">…</span> cm</b>
+        <div>
+          <p lang="en">of downslope movement is caught half the time. <span data-n="det80">…</span> cm is caught 80% of the time.</p>
+          <p lang="ko">사면 아래 방향으로 이만큼 움직이면 절반은 잡아냅니다. <span data-n="det80">…</span> cm이면 80%를 잡아냅니다.</p>
+          <p class="small" lang="en">At <span data-n="far">…</span>% false alarms, on the <span data-n="oriented">…</span>% of slopes the radar views at a useful angle.</p>
+          <p class="small" lang="ko">오탐률 <span data-n="far">…</span>% 기준이며, 레이더가 쓸 만한 각도로 보는 사면(전체의 <span data-n="oriented">…</span>%)에 대한 값입니다.</p>
+        </div>
+      </div>
+      <div class="chart">
+        <h3 lang="en">Share of injected movements caught</h3><h3 lang="ko">넣어 준 이동을 잡아낸 비율</h3>
+        <p lang="en">We added artificial movement to real noise on slopes the detector had not seen, then counted how often each method noticed.</p>
+        <p lang="ko">탐지 모델이 보지 못한 사면의 실제 잡음에 가상의 이동을 더한 뒤, 각 방법이 얼마나 자주 알아채는지 셌습니다.</p>
+        <div data-block="inject"></div>
+      </div>
+      <p lang="en">At 3 cm the trained detector catches <span data-n="det3">…</span>% and the best classical method, a matched filter, catches <span data-n="mf3">…</span>%.</p>
+      <p lang="ko">3 cm 이동에서 학습한 탐지 모델은 <span data-n="det3">…</span>%를, 가장 좋은 고전 방법인 정합 필터는 <span data-n="mf3">…</span>%를 잡아냅니다.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>03</b><span lang="en">What did not work</span><span lang="ko">안 된 것</span></div>
+    <div>
+      <h2 lang="en">Two things we tried and dropped</h2>
+      <h2 lang="ko">시도했다가 뺀 두 가지</h2>
+      <div class="cols">
+        <div>
+          <h3 lang="en">NISAR inputs in the ranking</h3><h3 lang="ko">순위 모델에 NISAR 입력 넣기</h3>
+          <p lang="en">In the 20 m North Gyeongsang model, adding NISAR's pre-storm readings took the top-10% figure from <span data-n="capReg">…</span>% down to <span data-n="capNisar">…</span>%. So the ranking does not use them. NISAR is used to watch for movement and to see the ground through cloud.</p>
+          <p lang="ko">경북 20 m 모델에 NISAR의 폭우 전 측정값을 넣자 상위 10% 발견율이 <span data-n="capReg">…</span>%에서 <span data-n="capNisar">…</span>%로 떨어졌습니다. 그래서 순위에는 쓰지 않습니다. NISAR는 이동 감시와 구름 아래 지표 관측에 씁니다.</p>
+        </div>
+        <div>
+          <h3 lang="en">An autoencoder</h3><h3 lang="ko">오토인코더</h3>
+          <p lang="en">We trained a sequence autoencoder to spot unusual movement without labels. It caught <span data-n="ae3">…</span>% of 3 cm movements. A plain z-score caught <span data-n="z3">…</span>%, so the autoencoder is not used.</p>
+          <p lang="ko">라벨 없이 이상 이동을 찾도록 시퀀스 오토인코더를 학습시켰습니다. 3 cm 이동의 <span data-n="ae3">…</span>%를 잡았습니다. 단순한 z값이 <span data-n="z3">…</span>%를 잡았으므로 오토인코더는 쓰지 않습니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>04</b><span lang="en">Checks</span><span lang="ko">점검 항목</span></div>
+    <div>
+      <h2 lang="en">Sanity checks, including the ones that are still open</h2>
+      <h2 lang="ko">기본 점검 항목 (아직 해결 안 된 것 포함)</h2>
+      <div class="scroll" data-block="checks"></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>05</b><span lang="en">By province</span><span lang="ko">시·도별</span></div>
+    <div>
+      <h2 lang="en">Where the check-first slopes are</h2>
+      <h2 lang="ko">우선 점검 사면이 있는 곳</h2>
+      <div class="bars" data-block="counties"></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>06</b><span lang="en">Limits</span><span lang="ko">한계</span></div>
+    <div>
+      <h2 lang="en">What this does not show</h2>
+      <h2 lang="ko">이 결과가 보여주지 않는 것</h2>
+      <ul class="plain" data-block="limits"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div>
+    <b>SLOPEWATCH</b>
+    <p lang="en">Prototype for NASA Space Apps Challenge 2026, Seoul. Not a warning system.</p>
+    <p lang="ko">NASA Space Apps Challenge 2026 서울 출품 시제품. 경보 시스템이 아닙니다.</p>
+    <p class="mono"><span lang="en">Figures from the run of</span><span lang="ko">수치 기준일</span> <span data-n="built">…</span></p>
+  </div>
+  <nav>
+    <a href="map.html" data-lang-href="map.html"><span lang="en">Map</span><span lang="ko">지도</span></a>
+    <a href="sheet.html" data-lang-href="sheet.html"><span lang="en">Inspection sheet</span><span lang="ko">점검표</span></a>
+    <a href="method.html"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
+  </nav>
+</div></footer>
+<script type="module" src="js/site.js?v=42"></script>
+</body>
+</html>

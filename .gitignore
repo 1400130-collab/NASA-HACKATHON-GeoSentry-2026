@@ -1,0 +1,12 @@
+# Private interview files (contain a third party's contact details)
+interview/private-contact.md
+interview/raw-whisper-output.srt
+*.m4a
+
+.DS_Store
+
+# Local data, environments and secrets
+/data/
+.venv/
+.env
+__pycache__/

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOPEWATCH · method</title>
+<meta name="description" content="How SLOPEWATCH turns NISAR radar passes into slope inspection levels.">
+<meta name="theme-color" content="#0b0c0d">
+<script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/site.css?v=36">
+</head>
+<body>
+<header class="masthead solid"><div class="wrap">
+  <a class="wordmark" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a>
+  <nav>
+    <a href="method.html" aria-current="page"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a class="go" href="map.html" data-lang-href="map.html"><span lang="en">Open map</span><span lang="ko">지도 열기</span></a>
+  </nav>
+  <button class="langbtn" type="button">KO</button>
+</div></header>
+<main class="wrap">
+  <section class="pagehead">
+    <h1 lang="en">How it works.</h1>
+    <h1 lang="ko">작동 방식.</h1>
+    <p class="lede" lang="en">Six steps, about four minutes on a laptop. Every number on this site comes out of it.</p>
+    <p class="lede" lang="ko">여섯 단계, 노트북에서 4분. 이 사이트의 모든 수치가 여기서 나옵니다.</p>
+    <ol class="flow">
+      <li><span lang="en">Split hills into slopes</span><span lang="ko">사면 나누기</span></li>
+      <li class="hot"><span lang="en">Measure with radar</span><span lang="ko">레이더 측정</span></li>
+      <li class="hot"><span lang="en">Decide what moved</span><span lang="ko">이동 판정</span></li>
+      <li><span lang="en">Rank every slope</span><span lang="ko">순위 매기기</span></li>
+      <li><span lang="en">Look downhill</span><span lang="ko">아래 확인</span></li>
+      <li class="hot"><span lang="en">Give a level</span><span lang="ko">등급 정하기</span></li>
+    </ol>
+    <p class="note" lang="en">The steps and figures below are the detailed 20 m build for North Gyeongsang, where the radar data is. The nationwide map runs steps 1 and 4–6 for every province on a coarser grid and reuses the radar results from here.</p>
+    <p class="note" lang="ko">아래 단계와 수치는 레이더 자료가 있는 경북의 20 m 세밀 분석 기준입니다. 전국 지도는 1단계와 4–6단계를 더 성긴 격자로 모든 시·도에 적용하고, 레이더 결과는 여기서 가져옵니다.</p>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>01–02</b><span lang="en">Measuring</span><span lang="ko">측정</span></div>
+    <div>
+      <div class="step">
+        <div class="n">1</div>
+        <div>
+          <h3 lang="en">Divide the hills into slopes</h3><h3 lang="ko">산을 사면 단위로 나누기</h3>
+          <p lang="en">The study area is <span data-n="wkm">…</span> × <span data-n="hkm">…</span> km and covers parts of <span data-n="counties">…</span> cities and counties. We lay a grid of hexagons over it, each about 0.1 km², and keep the ones whose average slope is steeper than 10°. That leaves <b data-n="units">…</b> hillsides. Everything after this is worked out per hexagon.</p>
+          <p lang="ko">분석 지역은 <span data-n="wkm">…</span> × <span data-n="hkm">…</span> km이고 <span data-n="counties">…</span>개 시·군에 걸쳐 있습니다. 이 지역을 약 0.1 km² 크기의 육각형으로 덮고, 평균 경사가 10°보다 가파른 것만 남겼습니다. 그렇게 남은 사면이 <b data-n="units">…</b>곳입니다. 이후 모든 계산은 육각형 하나를 단위로 합니다.</p>
+          <p class="tech">H3 resolution 9 · Copernicus DEM 30 m</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <div>
+          <h3 lang="en">Measure movement with radar</h3><h3 lang="ko">레이더로 이동량 재기</h3>
+          <p lang="en">NISAR passes over every 12 days. Comparing two passes gives the change in distance between the ground and the satellite, to a small fraction of the <span data-n="wave">…</span> cm radar wavelength. We used <span data-n="npairs">…</span> such pairs on <span data-n="ntracks">…</span> tracks between June and October 2026.</p>
+          <p lang="ko">NISAR는 12일마다 같은 곳을 지납니다. 두 번의 촬영을 비교하면 지표와 위성 사이 거리가 얼마나 변했는지를 레이더 파장(<span data-n="wave">…</span> cm)의 일부 수준까지 알 수 있습니다. 2026년 6월부터 10월까지 <span data-n="ntracks">…</span>개 궤도에서 이런 영상쌍 <span data-n="npairs">…</span>개를 사용했습니다.</p>
+          <p lang="en">For each pair we take out the effects of the ionosphere, the lower atmosphere and earth tides, drop pixels where the signal is unreliable, remove broad trends, and take the median over each hexagon. What is left has a noise of <span data-n="noiseLo">…</span> to <span data-n="noiseHi">…</span> cm per pair.</p>
+          <p lang="ko">영상쌍마다 전리층, 대류권, 지구 조석의 영향을 빼고, 신호가 불안정한 화소를 버리고, 넓은 범위의 경향을 제거한 뒤 육각형별 중앙값을 구합니다. 이렇게 남은 값의 잡음은 영상쌍당 <span data-n="noiseLo">…</span>–<span data-n="noiseHi">…</span> cm입니다.</p>
+          <div class="scroll" data-block="tracks"></div>
+          <p class="note" lang="en">On all three tracks we found a signal that depended on whether a slope faces the radar. It is not ground movement, so we remove it pair by pair. The direction of movement (toward or away from the satellite) rests on a sign convention we have assumed and not yet confirmed.</p>
+          <p class="note" lang="ko">세 궤도 모두에서 사면이 레이더를 향하는지에 따라 달라지는 신호가 나왔습니다. 지표 이동이 아니므로 영상쌍마다 제거합니다. 이동 방향(위성 쪽인지 반대쪽인지)은 부호 규약을 가정한 것이며 아직 확인하지 못했습니다.</p>
+          <p class="tech">NISAR L-band GUNW interferograms, provisional quality · cropped over HTTPS, no full downloads</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>03–04</b><span lang="en">Two models</span><span lang="ko">두 모델</span></div>
+    <div>
+      <div class="step">
+        <div class="n">3</div>
+        <div>
+          <h3 lang="en">Decide what counts as movement</h3><h3 lang="ko">무엇을 "이동"으로 볼지 정하기</h3>
+          <p lang="en">Most small readings are noise, so two things have to agree. First a plain statistical rule: the reading on one track is at least 3.5 times its noise, or at least 2.5 times on two tracks that agree with each other. <span data-n="flagged">…</span> slopes pass that. Then a small neural network reads the slope's whole history on all three tracks. We trained it by hiding artificial downslope movement in real noise until it could tell the two apart. <b data-n="moving">…</b> slopes pass both.</p>
+          <p lang="ko">작은 측정값은 대부분 잡음이라, 두 가지가 모두 맞아야 합니다. 먼저 단순한 통계 규칙입니다. 한 궤도에서 잡음의 3.5배 이상이거나, 서로 일치하는 두 궤도에서 2.5배 이상이어야 합니다. 여기서 <span data-n="flagged">…</span>곳이 통과합니다. 그다음 작은 신경망이 세 궤도의 이력 전체를 읽습니다. 실제 잡음 속에 가상의 사면 이동을 숨겨 넣고, 둘을 구분할 수 있을 때까지 학습시켰습니다. 둘 다 통과한 사면은 <b data-n="moving">…</b>곳입니다.</p>
+          <p class="tech">GRU classifier (PyTorch) · trained on real noise + injected movement · threshold at <span data-n="far">…</span>% false alarms</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">4</div>
+        <div>
+          <h3 lang="en">Rank every slope against the others</h3><h3 lang="ko">모든 사면의 순위 매기기</h3>
+          <p lang="en">A second model looks at what the slopes that failed in the July 2026 storm had in common, using only data from before the storm: the shape of the land, fire damage, vegetation, land cover and earlier rain. It then ranks every slope. These are the inputs it leaned on most:</p>
+          <p lang="ko">두 번째 모델은 2026년 7월 폭우 때 무너진 사면들의 공통점을 찾습니다. 폭우 이전 자료만 씁니다. 지형, 산불 피해, 식생, 토지 피복, 그전에 내린 비입니다. 그리고 모든 사면에 순위를 매깁니다. 모델이 가장 많이 참고한 입력은 다음과 같습니다.</p>
+          <div class="bars" data-block="importance"></div>
+          <p lang="en">The failed slopes are patches that lost their vegetation between 12 June and 6 August 2026, were still bare on 2 October, and are shaped like a landslide. That gave <span data-n="ncand">…</span> patches, <span data-n="nscar">…</span> of them landslide-shaped, on <span data-n="nfail">…</span> slopes. They were found automatically and have not been checked by hand.</p>
+          <p lang="ko">무너진 사면은 2026년 6월 12일과 8월 6일 사이에 식생이 사라지고, 10월 2일에도 맨땅으로 남아 있으며, 모양이 산사태와 비슷한 곳입니다. 후보지 <span data-n="ncand">…</span>곳 가운데 산사태 형태가 <span data-n="nscar">…</span>곳이었고, 사면으로는 <span data-n="nfail">…</span>곳입니다. 자동으로 찾은 것이며 사람이 직접 확인하지는 않았습니다.</p>
+          <p lang="en">We also tried giving this model NISAR's pre-storm readings. The ranking got worse, so it does not use them. <a href="results.html">Results</a> has the numbers.</p>
+          <p lang="ko">이 모델에 NISAR의 폭우 전 측정값도 넣어 봤습니다. 순위가 오히려 나빠져서 쓰지 않습니다. 수치는 <a href="results.html">검증</a> 페이지에 있습니다.</p>
+          <p class="tech">LightGBM · <span data-n="nfeat">…</span> inputs per slope · <span data-n="observed">…</span> slopes with a clear view before and after · whole counties held out, <span data-n="nfolds">…</span> folds</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="side"><b>05–06</b><span lang="en">The list</span><span lang="ko">목록</span></div>
+    <div>
+      <div class="step">
+        <div class="n">5</div>
+        <div>
+          <h3 lang="en">Look at what is below</h3><h3 lang="ko">사면 아래에 무엇이 있는지 보기</h3>
+          <p lang="en">For each slope we look about 300 m downhill for buildings and main roads on OpenStreetMap. <span data-n="unitsBld">…</span> slopes have a building below them and <span data-n="unitsRoad">…</span> have a main road. OpenStreetMap misses some rural houses, so this undercounts.</p>
+          <p lang="ko">사면마다 아래쪽 약 300 m 안에 건물이나 주요 도로가 있는지 OpenStreetMap에서 확인합니다. 아래에 건물이 있는 사면은 <span data-n="unitsBld">…</span>곳, 주요 도로가 있는 사면은 <span data-n="unitsRoad">…</span>곳입니다. OpenStreetMap에는 농촌 주택이 일부 빠져 있어 실제보다 적게 집계됩니다.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">6</div>
+        <div>
+          <h3 lang="en">Give each slope a level</h3><h3 lang="ko">사면마다 등급 정하기</h3>
+          <p lang="en">The last step is a fixed rule, written out below, and not a third model. A level is an inspection priority. It is not a probability.</p>
+          <p lang="ko">마지막 단계는 세 번째 모델이 아니라 아래에 적힌 고정 규칙입니다. 등급은 점검 우선순위이며 확률이 아닙니다.</p>
+          <div class="scroll"><table class="tbl">
+            <thead><tr><th><span lang="en">Level</span><span lang="ko">등급</span></th><th><span lang="en">Rule</span><span lang="ko">규칙</span></th><th class="num"><span lang="en">Slopes</span><span lang="ko">사면 수</span></th></tr></thead>
+            <tbody>
+              <tr><td><b class="lvl" style="color:var(--red)"><span lang="en">Check first</span><span lang="ko">우선 점검</span></b></td><td><span lang="en">Movement, or top 5% in the ranking, and a building or main road below</span><span lang="ko">이동 감지 또는 순위 상위 5%이고, 아래에 건물이나 주요 도로가 있음</span></td><td class="num mono" data-n="check">…</td></tr>
+              <tr><td><b class="lvl" style="color:var(--amber)"><span lang="en">Watch</span><span lang="ko">관찰</span></b></td><td><span lang="en">Movement, or top 20% in the ranking</span><span lang="ko">이동 감지 또는 순위 상위 20%</span></td><td class="num mono" data-n="watch">…</td></tr>
+              <tr><td><b class="lvl" style="color:var(--ink2)"><span lang="en">Nothing flagged</span><span lang="ko">특이 신호 없음</span></b></td><td><span lang="en">The radar can see it and nothing stands out</span><span lang="ko">레이더로 측정되며 특이 신호 없음</span></td><td class="num mono" data-n="nosig">…</td></tr>
+              <tr><td><b class="lvl" style="color:var(--mute)"><span lang="en">Radar cannot see it</span><span lang="ko">레이더로 안 보임</span></b></td><td><span lang="en">No usable reading on any track. Not the same as safe.</span><span lang="ko">어느 궤도에서도 쓸 수 있는 측정값이 없음. 안전하다는 뜻이 아닙니다.</span></td><td class="num mono" data-n="nomeas">…</td></tr>
+            </tbody>
+          </table></div>
+          <p lang="en">The <a href="sheet.html" data-lang-href="sheet.html">inspection sheet</a> lists one county's check-first slopes in order, slopes with measured movement first, and prints on a single page. Across the whole area <span data-n="checkMoving">…</span> check-first slopes are moving.</p>
+          <p lang="ko"><a href="sheet.html" data-lang-href="sheet.html">점검표</a>는 한 시·군의 우선 점검 사면을 순서대로 보여 주며, 이동이 감지된 사면이 맨 위에 옵니다. 한 장으로 인쇄됩니다. 전체 지역에서 이동이 감지된 우선 점검 사면은 <span data-n="checkMoving">…</span>곳입니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div>
+    <b>SLOPEWATCH</b>
+    <p lang="en">Prototype for NASA Space Apps Challenge 2026, Seoul. Not a warning system.</p>
+    <p lang="ko">NASA Space Apps Challenge 2026 서울 출품 시제품. 경보 시스템이 아닙니다.</p>
+    <p class="mono"><span lang="en">Figures from the run of</span><span lang="ko">수치 기준일</span> <span data-n="built">…</span></p>
+  </div>
+  <nav>
+    <a href="map.html" data-lang-href="map.html"><span lang="en">Map</span><span lang="ko">지도</span></a>
+    <a href="sheet.html" data-lang-href="sheet.html"><span lang="en">Inspection sheet</span><span lang="ko">점검표</span></a>
+    <a href="method.html"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
+  </nav>
+</div></footer>
+<script type="module" src="js/site.js?v=42"></script>
+</body>
+</html>

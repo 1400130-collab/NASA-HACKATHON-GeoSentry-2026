@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOPEWATCH · check these slopes first</title>
+<meta name="description" content="Which hillsides in South Korea to inspect first before the rainy season. Ranked by a model trained on the July 2026 slope failures, with NISAR radar movement. A NASA Space Apps Challenge 2026 prototype.">
+<meta name="theme-color" content="#0b0c0d">
+<script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/site.css?v=36">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
+</script>
+</head>
+<body data-meta="data/korea/meta.json">
+<header class="masthead"><div class="wrap">
+  <a class="wordmark" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a>
+  <nav>
+    <a href="method.html"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a class="go" href="map.html" data-lang-href="map.html"><span lang="en">Open map</span><span lang="ko">지도 열기</span></a>
+  </nav>
+  <button class="langbtn" type="button">KO</button>
+</div></header>
+<!--main-->
+<main>
+  <section class="hero" id="hero" data-slide="black">
+    <div class="fallback"></div>
+    <div class="sky"></div>
+    <div class="stage"><canvas aria-hidden="true"></canvas></div>
+    <p class="readout mono" aria-hidden="true"></p>
+    <div class="inner"><div class="wrap">
+      <h1 lang="en">Check these slopes first.</h1>
+      <h1 lang="ko">이 사면부터 점검하세요.</h1>
+      <div class="row">
+        <div>
+          <p class="lede" lang="en"><b><span data-n="check">…</span> hillsides</b> to inspect before the rainy season. Picked by two machine-learning models and a radar satellite that measures the ground moving, centimetre by centimetre.</p>
+          <p class="lede" lang="ko">장마 전에 점검할 <b>사면 <span data-n="check">…</span>곳</b>. 머신러닝 모델 두 개와, 지표의 움직임을 센티미터 단위로 재는 레이더 위성이 골랐습니다.</p>
+          <div class="actions">
+            <a class="btn" href="map.html" data-lang-href="map.html"><span lang="en">Open the map</span><span lang="ko">지도 열기</span><span class="arr">→</span></a>
+            <a class="btn line" href="method.html"><span lang="en">How it works</span><span lang="ko">작동 방식</span></a>
+          </div>
+        </div>
+        <dl class="specs">
+          <div><dt data-n="units" data-count>…</dt><dd><span lang="en">hillsides ranked, all 17 provinces</span><span lang="ko">전국 17개 시·도 사면에 순위</span></dd></div>
+          <div><dt><span data-n="det50" data-count>…</span> cm</dt><dd><span lang="en">of ground movement, detectable from orbit</span><span lang="ko">의 지표 이동을 궤도에서 탐지</span></dd></div>
+          <div><dt>2</dt><dd><span lang="en">models: a neural network and boosted trees</span><span lang="ko">개 모델: 신경망과 부스팅 트리</span></dd></div>
+        </dl>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="band" data-slide="red"><div class="wrap">
+    <p class="eyebrow rv"><b>01</b><span lang="en">The gap</span><span lang="ko">빈틈</span></p>
+    <p class="statement rv" lang="en">Korea's landslide warnings watch the rain. <span class="dim">Nothing measures whether a slope is already moving.</span> <span class="hot">A radar satellite can.</span></p>
+    <p class="statement rv" lang="ko">산사태 경보는 비를 봅니다. <span class="dim">사면이 이미 움직이고 있는지는 아무도 재지 않습니다.</span> <span class="hot">레이더 위성은 잴 수 있습니다.</span></p>
+    <p class="after rv" lang="en">We don't replace the warning system. We add the one measurement it doesn't have. <a href="about.html">Who told us this</a></p>
+    <p class="after rv" lang="ko">경보 체계를 대신하지 않습니다. 그 체계에 없는 측정값 하나를 더합니다. <a href="about.html">자문 내용 보기</a></p>
+  </div></section>
+
+  <section class="band" data-slide="pine"><div class="wrap">
+    <p class="eyebrow rv"><b>02</b><span lang="en">The measurement</span><span lang="ko">측정</span></p>
+    <div class="duo">
+      <div>
+        <h2 class="big rv" lang="en">A slope creeps <em><span data-n="det50">…</span> cm</em>. We can see that from orbit.</h2>
+        <h2 class="big rv" lang="ko">사면이 <em><span data-n="det50">…</span> cm</em> 움직입니다. 궤도에서 그걸 봅니다.</h2>
+        <p class="after rv" lang="en">NISAR bounces a radar wave off every slope each 12 days. Line up two echoes and the shift between them is how far the ground moved. It works through cloud, rain and darkness.</p>
+        <p class="after rv" lang="ko">NISAR는 12일마다 모든 사면에 레이더파를 쏩니다. 두 번의 반사파를 겹쳐 보면, 어긋난 만큼이 지표가 움직인 거리입니다. 구름, 비, 밤에도 됩니다.</p>
+        <ul class="kpis">
+          <li class="rv"><b><span data-n="noiseLo">…</span>–<span data-n="noiseHi">…</span> cm</b><span lang="en">noise per image pair, after removing ionosphere, atmosphere and tides</span><span lang="ko">영상쌍당 잡음. 전리층·대기·조석 영향 제거 후</span></li>
+          <li class="rv" style="--d:.08s"><b><span data-n="npairs">…</span></b><span lang="en">radar image pairs on <span data-n="ntracks">…</span> orbits, June–October 2026</span><span lang="ko">개 영상쌍, <span data-n="ntracks">…</span>개 궤도, 2026년 6–10월</span></li>
+          <li class="rv" style="--d:.16s"><b><span data-n="det80">…</span> cm</b><span lang="en">slips caught 4 times in 5, at <span data-n="far">…</span>% false alarms</span><span lang="ko">이동은 5번 중 4번 탐지. 오탐률 <span data-n="far">…</span>%</span></li>
+        </ul>
+      </div>
+      <figure class="wave rv" style="--d:.15s">
+        <div data-block="phase"></div>
+        <figcaption><span lang="en">Drawn to scale. Detection figures come from hiding artificial movement in real radar noise, on slopes the radar views at a useful angle.</span><span lang="ko">실제 비율로 그렸습니다. 탐지 수치는 실제 레이더 잡음에 가상의 이동을 숨겨 넣어 구했으며, 레이더가 보기 좋은 각도의 사면 기준입니다.</span></figcaption>
+      </figure>
+    </div>
+  </div></section>
+
+  <section class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>03</b><span lang="en">Where it learned</span><span lang="ko">어디서 배웠나</span></p>
+    <div class="fire">
+      <div>
+        <h2 class="big rv" lang="en">A fire in 2025. Then a storm on the scar.</h2>
+        <h2 class="big rv" lang="ko">2025년의 산불. 그리고 그 자리에 내린 폭우.</h2>
+        <ol class="when">
+          <li class="rv"><time><span lang="en">Mar 2025</span><span lang="ko">2025년 3월</span></time><p><span lang="en">Wildfire, from Uiseong to the east coast.</span><span lang="ko">의성에서 동해안까지 산불.</span></p></li>
+          <li class="rv" style="--d:.05s"><time><span lang="en">Jun 2026</span><span lang="ko">2026년 6월</span></time><p><span lang="en">NISAR starts passing over every 12 days.</span><span lang="ko">NISAR가 12일마다 촬영 시작.</span></p></li>
+          <li class="rv hot" style="--d:.1s"><time><span lang="en">18–19 Jul 2026</span><span lang="ko">2026년 7월 18–19일</span></time><p><span lang="en">Heavy rain on the burn scar. 217 people evacuated.</span><span lang="ko">산불 피해지에 폭우. 217명 대피.</span></p></li>
+          <li class="rv" style="--d:.15s"><time><span lang="en">21 Jul 2026</span><span lang="ko">2026년 7월 21일</span></time><p><span lang="en">Radar sees the ground through the cloud.</span><span lang="ko">레이더가 구름 아래 지표를 관측.</span></p></li>
+          <li class="rv" style="--d:.2s"><time><span lang="en">6 Aug 2026</span><span lang="ko">2026년 8월 6일</span></time><p><span lang="en">First clear optical image, 18 days late.</span><span lang="ko">18일 뒤에야 첫 맑은 광학 영상.</span></p></li>
+          <li class="rv hot" style="--d:.25s"><time><span lang="en">Nov 2026</span><span lang="ko">2026년 11월</span></time><p><span lang="en">What the storm taught the model, applied to every slope in the country.</span><span lang="ko">이 폭우에서 배운 것을 전국 모든 사면에 적용.</span></p></li>
+        </ol>
+      </div>
+      <figure class="rv" style="--d:.1s">
+        <div class="ba" id="ba">
+          <img src="img/fire_after.jpg" width="1400" height="1008" loading="lazy" alt="Sentinel-2 image from 8 April 2025 with the burn scar in dark red">
+          <img class="top" src="img/fire_before.jpg" width="1400" height="1008" loading="lazy" alt="Sentinel-2 image from 14 March 2025, before the fire">
+          <span class="l"><span lang="en">14 Mar 2025</span><span lang="ko">2025.3.14</span></span><span class="r"><span lang="en">8 Apr 2025</span><span lang="ko">2025.4.8</span></span>
+          <div class="bar"></div>
+          <input type="range" min="0" max="100" value="50" aria-label="Before and after the fire">
+        </div>
+        <figcaption class="cap"><span lang="en">Drag. Sentinel-2, false colour: green is vegetation, dark red is burned ground.</span><span lang="ko">좌우로 끌어 보세요. Sentinel-2 위색 영상: 녹색은 식생, 짙은 붉은색은 불탄 땅.</span></figcaption>
+      </figure>
+    </div>
+  </div></section>
+
+  <section class="band" data-slide="navy"><div class="wrap">
+    <p class="eyebrow rv"><b>04</b><span lang="en">The machine learning</span><span lang="ko">머신러닝</span></p>
+    <h2 class="big wide rv" lang="en">Two models. <span class="dim">One watches the ground move. One learned which slopes fail.</span></h2>
+    <h2 class="big wide rv" lang="ko">모델은 둘. <span class="dim">하나는 지표의 움직임을 봅니다. 하나는 어떤 사면이 무너지는지 배웠습니다.</span></h2>
+    <div class="models">
+      <article class="model rv">
+        <p class="kind"><b>01</b><span lang="en">Neural network · GRU</span><span lang="ko">신경망 · GRU</span></p>
+        <h3 lang="en">The detector</h3><h3 lang="ko">탐지 모델</h3>
+        <p lang="en">Reads each slope's full radar history on three orbits and answers one question: real movement, or noise? It needed no labelled landslides. We hid artificial slips in real noise until it could find them.</p>
+        <p lang="ko">세 궤도에서 얻은 사면별 레이더 이력 전체를 읽고 한 가지를 판단합니다. 실제 이동인가, 잡음인가. 산사태 정답 자료가 필요 없습니다. 실제 잡음 속에 가상의 이동을 숨기고, 찾아낼 때까지 학습시켰습니다.</p>
+        <div class="base">
+          <p class="lab"><span lang="en">3 cm slips caught, at <span data-n="far">…</span>% false alarms</span><span lang="ko">3 cm 이동 탐지율, 오탐률 <span data-n="far">…</span>%</span></p>
+          <div class="vs sm rv" data-block="detbars"></div>
+        </div>
+      </article>
+      <article class="model rv" style="--d:.1s">
+        <p class="kind"><b>02</b><span lang="en">Gradient-boosted trees</span><span lang="ko">그래디언트 부스팅 트리</span></p>
+        <h3 lang="en">The ranker</h3><h3 lang="ko">순위 모델</h3>
+        <p lang="en">Learns what the slopes that failed in July 2026 had in common: terrain, burn severity, vegetation, land cover. A finer 20 m model of <span data-n="teacher">…</span> slopes teaches it, then it ranks the whole country.</p>
+        <p lang="ko">2026년 7월에 무너진 사면들의 공통점을 배웁니다. 지형, 산불 피해 정도, 식생, 토지 피복. 사면 <span data-n="teacher">…</span>곳을 다룬 더 세밀한 20 m 모델이 이 모델을 가르치고, 그다음 전국에 순위를 매깁니다.</p>
+        <div class="base">
+          <ul class="figs">
+            <li><b data-n="nfeat">…</b><span lang="en">inputs per slope</span><span lang="ko">개 입력 (사면당)</span></li>
+            <li><b data-n="nfolds">…</b><span lang="en">groups of counties, each held out in turn</span><span lang="ko">개 시·군 묶음을 번갈아 빼고 검증</span></li>
+            <li><b data-n="auc">…</b><span lang="en">AUC on counties it never saw, up from <span data-n="aucBase">…</span> without the teacher</span><span lang="ko">처음 보는 시·군에서의 AUC. 교사 모델 없이는 <span data-n="aucBase">…</span></span></li>
+          </ul>
+        </div>
+      </article>
+    </div>
+    <p class="dropped rv"><span lang="en">Tried and thrown out: an autoencoder (caught <span data-n="ae3">…</span>%, a plain z-score catches <span data-n="z3">…</span>%) and radar inputs in the ranker (the ranking got worse). <a href="results.html">What didn't work</a></span><span lang="ko">써 보고 버린 것: 오토인코더(탐지율 <span data-n="ae3">…</span>%, 단순 z값은 <span data-n="z3">…</span>%)와 순위 모델의 레이더 입력(순위가 나빠짐). <a href="results.html">안 된 것들</a></span></p>
+  </div></section>
+
+  <section class="band" data-slide="amber"><div class="wrap">
+    <p class="eyebrow rv"><b>05</b><span lang="en">The rule</span><span lang="ko">규칙</span></p>
+    <h2 class="big rv" lang="en">Two questions. Both have to be yes.</h2>
+    <h2 class="big rv" lang="ko">질문은 둘. 둘 다 "예"여야 합니다.</h2>
+    <div class="two">
+      <div class="rv">
+        <h3 lang="en">Is the slope risky?</h3><h3 lang="ko">사면이 위험한가?</h3>
+        <p lang="en">The ranker puts it in the top 5%. Or the radar measured movement and the detector agrees it is real.</p>
+        <p lang="ko">순위 모델에서 상위 5%. 또는 레이더가 이동을 측정했고 탐지 모델도 실제 이동으로 판단.</p>
+      </div>
+      <div class="and rv" style="--d:.05s" aria-hidden="true">+</div>
+      <div class="rv" style="--d:.1s">
+        <h3 lang="en">Is anything below it?</h3><h3 lang="ko">아래에 무엇이 있는가?</h3>
+        <p lang="en">A building or main road within about 300 m downhill. We checked <span data-n="bld">…</span> mapped buildings.</p>
+        <p lang="ko">아래쪽 약 300 m 안에 건물 또는 주요 도로. 지도에 있는 건물 <span data-n="bld">…</span>동을 확인했습니다.</p>
+      </div>
+    </div>
+    <p class="verdict rv"><span class="pill"><span lang="en">CHECK FIRST</span><span lang="ko">우선 점검</span></span><span lang="en">Every slope on the list shows its reasons.</span><span lang="ko">목록의 모든 사면에 이유가 표시됩니다.</span> <a href="method.html"><span lang="en">Full method</span><span lang="ko">방법 전체</span></a></p>
+  </div></section>
+
+  <section class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>06</b><span lang="en">The short list</span><span lang="ko">짧은 목록</span></p>
+    <div class="funnel">
+      <div>
+        <h2 class="mid rv" lang="en">Every hillside in Korea, down to a short list.</h2>
+        <h2 class="mid rv" lang="ko">전국의 모든 사면에서, 짧은 목록으로.</h2>
+        <ol class="tiers">
+          <li class="all rv"><b data-n="units" data-count>…</b><span><em lang="en">hillsides ranked</em><em lang="ko">곳의 사면에 순위</em><small lang="en">Every patch of ground steeper than 10°, in all 17 provinces.</small><small lang="ko">17개 시·도에서 경사 10°보다 가파른 모든 땅.</small></span></li>
+          <li class="watch rv" style="--d:.1s"><b data-n="watch" data-count>…</b><span><em lang="en">to watch</em><em lang="ko">곳 관찰</em><small lang="en">In the riskiest 20%, or the radar saw the ground move.</small><small lang="ko">위험 순위 상위 20%이거나, 레이더가 지표 이동을 관측한 곳.</small></span></li>
+          <li class="check rv" style="--d:.2s"><b data-n="check" data-count>…</b><span><em lang="en">to check first</em><em lang="ko">곳 우선 점검</em><small lang="en">In the riskiest 5%, with a house or main road below it.</small><small lang="ko">위험 순위 상위 5%이고, 아래에 집이나 주요 도로가 있는 곳.</small></span></li>
+        </ol>
+      </div>
+      <figure class="waffle rv" style="--d:.15s">
+        <canvas data-block="waffle" aria-label="One dot per 100 hillsides"></canvas>
+        <figcaption><span lang="en">One dot is 100 hillsides.</span><span lang="ko">점 하나가 사면 100곳.</span></figcaption>
+      </figure>
+    </div>
+  </div></section>
+
+  <section class="band" data-slide="ember"><div class="wrap">
+    <p class="eyebrow rv"><b>07</b><span lang="en">Does it work</span><span lang="ko">효과가 있나</span></p>
+    <div class="proof">
+      <b class="rv"><span data-n="cap5" data-count>…</span><small>%</small></b>
+      <div class="rv" style="--d:.1s">
+        <p lang="en">of the slopes that failed in the July 2026 storm sat in our top 5%. That is <span data-n="capX5">…</span> times what guessing finds.</p>
+        <p lang="ko">2026년 7월 폭우 때 무너진 사면 가운데 이만큼이 우리 순위 상위 5% 안에 있었습니다. 무작위의 <span data-n="capX5">…</span>배입니다.</p>
+        <p class="dim" lang="en">Scored on counties the model never saw. It rests on <span data-n="nfail">…</span> failed slopes nobody has checked by hand yet. It is not a warning system and it does not say when a slope will fail. <a href="results.html">All results, including what didn't work</a></p>
+        <p class="dim" lang="ko">모델이 처음 보는 시·군에서 채점했습니다. 아직 사람이 직접 확인하지 않은 붕괴 사면 <span data-n="nfail">…</span>곳에 기댄 수치입니다. 경보 시스템이 아니며, 사면이 언제 무너질지 말해 주지 않습니다. <a href="results.html">안 된 것까지 포함한 전체 결과</a></p>
+      </div>
+    </div>
+    <div class="vs rv" data-block="versus"></div>
+  </div></section>
+
+  <section class="closer" data-slide="black" data-enter="early">
+    <div class="bgimg"></div>
+    <div class="stage"></div>
+    <div class="inner"><div class="wrap">
+      <p class="eyebrow rv"><i class="live"></i><span lang="en"><span data-n="check">…</span> slopes · <span data-n="provs">…</span> provinces · one printable sheet per county</span><span lang="ko">사면 <span data-n="check">…</span>곳 · <span data-n="provs">…</span>개 시·도 · 시·군별 인쇄용 점검표</span></p>
+      <a class="huge rv" href="map.html" data-lang-href="map.html"><span class="t"><span lang="en">Open the map</span><span lang="ko">지도 열기</span></span><span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 5.5 19.5 12 13 18.5"/></svg></span></a>
+      <p class="more"><a href="sheet.html" data-lang-href="sheet.html"><span lang="en">Print an inspection sheet</span><span lang="ko">점검표 인쇄</span></a><a href="method.html"><span lang="en">How it works</span><span lang="ko">작동 방식</span></a><a href="results.html"><span lang="en">What didn't work</span><span lang="ko">안 된 것들</span></a></p>
+    </div></div>
+  </section>
+</main>
+<!--/main-->
+<footer class="foot"><div class="wrap">
+  <div>
+    <b>SLOPEWATCH</b>
+    <p lang="en">Prototype for NASA Space Apps Challenge 2026, Seoul. Not a warning system.</p>
+    <p lang="ko">NASA Space Apps Challenge 2026 서울 출품 시제품. 경보 시스템이 아닙니다.</p>
+    <p class="mono"><span lang="en">Figures from the run of</span><span lang="ko">수치 기준일</span> <span data-n="built">…</span></p>
+  </div>
+  <nav>
+    <a href="map.html" data-lang-href="map.html"><span lang="en">Map</span><span lang="ko">지도</span></a>
+    <a href="sheet.html" data-lang-href="sheet.html"><span lang="en">Inspection sheet</span><span lang="ko">점검표</span></a>
+    <a href="method.html"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
+  </nav>
+</div></footer>
+<script type="module" src="js/site.js?v=42"></script>
+</body>
+</html>

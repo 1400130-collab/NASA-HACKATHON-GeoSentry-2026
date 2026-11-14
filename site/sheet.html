@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOPEWATCH 점검표</title>
+<style>
+  :root { --ink: #111; --mute: #666; --line: #d8d8d4; --check: #c7341f; --watch: #b97a00; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9e9e6; color: var(--ink); font: 12px/1.45 "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, sans-serif; }
+  .bar { position: sticky; top: 0; z-index: 2; background: #111; color: #fff; padding: 10px 16px; display: flex; gap: 10px; align-items: center; }
+  .bar select, .bar button { font: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid #555; background: #222; color: #fff; cursor: pointer; }
+  .bar .sp { flex: 1; }
+  .page { width: 210mm; min-height: 297mm; margin: 14px auto; background: #fff; padding: 13mm 13mm 10mm; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+  h1 small { display: block; font-size: 11px; font-weight: 500; color: var(--mute); letter-spacing: .1em; }
+  .meta { text-align: right; color: var(--mute); font-size: 10.5px; }
+  .draft { margin: 8px 0; padding: 6px 9px; border: 1px solid var(--check); color: var(--check); border-radius: 5px; font-size: 11px; }
+  .top { display: grid; grid-template-columns: 1fr 62mm; gap: 8mm; margin: 8px 0 10px; }
+  canvas { width: 100%; border: 1px solid var(--line); border-radius: 4px; display: block; }
+  .facts b { font-size: 20px; display: block; line-height: 1.1; }
+  .facts div { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .facts span { color: var(--mute); font-size: 10.5px; }
+  .key { display: flex; gap: 12px; margin-top: 8px; font-size: 10.5px; color: var(--mute); flex-wrap: wrap; }
+  .key i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  th { text-align: left; font-weight: 600; color: var(--mute); border-bottom: 1.5px solid var(--ink); padding: 4px 5px; font-size: 9.5px; }
+  td { padding: 5px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td .no { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--check); color: #fff; font-weight: 700; font-size: 9.5px; }
+  .mv { color: #1c5cab; font-weight: 600; }
+  .box { width: 12px; height: 12px; border: 1.2px solid var(--ink); display: inline-block; }
+  footer { margin-top: 8px; color: var(--mute); font-size: 9.5px; line-height: 1.4; }
+  @media print { body { background: #fff; } .bar { display: none; } .page { margin: 0; box-shadow: none; width: auto; min-height: 0; padding: 0; } @page { size: A4; margin: 12mm; } tr { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="bar"><b>SLOPEWATCH</b><select id="county"></select><select id="count"><option>15</option><option selected>25</option><option>40</option></select><span class="sp"></span><button id="lang">English</button><button onclick="print()">🖨 Print / PDF</button></div>
+<div class="page" id="page">Loading…</div>
+<script type="module">
+import { loadAll, BASE } from './js/data.js';
+import { addScores } from './js/score.js';
+import { reason, compass } from './js/i18n.js';
+const qs = new URLSearchParams(location.search);
+let lang = qs.get('lang') || 'ko';
+const T = {
+  ko: { title: '사면 점검 우선순위표', sub: 'SLOPEWATCH · NISAR 레이더 기반', draft: '초안 — 해커톤 시제품입니다. 경보가 아니며 붕괴 시점을 예측하지 않습니다. 현장 점검 순서를 정하는 참고 자료입니다.',
+    made: '작성', data: '자료 기간: 2026.6.21 – 10.20 (NISAR)', datakr: '위성: Sentinel-2 (Planetary Computer) · NISAR는 경북만', check: '우선 점검 사면', watch: '관찰 사면', moving: '이동 감지 사면', listed: '이 표의 사면 수',
+    h: ['번호', '좌표 (위도, 경도)', '경사·방향', '등급 사유', '레이더 이동 (cm)', '사면 아래', '점검'], lv3: '우선 점검', lv2: '관찰', none: '잡음 이내', notmeas: '측정 불가',
+    bld: (n) => `건물 ${n}동`, road: '주요 도로', top: (p) => `취약도 상위 ${p}%`, moved: '이동 감지', dz: (v) => `위험 지수 ${v}`,
+    foot: '등급 규칙: 이동이 감지되었거나 취약도 상위 5%이면서 아래쪽 약 300 m 이내에 건물 또는 주요 도로가 있으면 "우선 점검". 이동량은 레이더 시선 방향이며 ± 뒤는 잡음 수준입니다. 건물 자료는 OpenStreetMap으로, 농촌 주택이 빠져 있을 수 있습니다. 붕괴 라벨은 자동 탐지이며 사람이 아직 확인하지 않았습니다. 이동이 없는 사면이 안전하다는 뜻은 아닙니다.', key: ['우선 점검', '관찰', '표의 번호'] },
+  en: { title: 'Slope inspection priority sheet', sub: 'SLOPEWATCH · from NISAR radar', draft: 'Draft — a hackathon prototype. Not a warning and not a forecast of when a slope will fail. A guide to the order of field inspection.',
+    made: 'Made', data: 'Data period: 21 Jun – 20 Oct 2026 (NISAR)', datakr: 'Satellite: Sentinel-2 (Planetary Computer) · NISAR in North Gyeongsang only', check: 'Check-first slopes', watch: 'Watch slopes', moving: 'Slopes with movement', listed: 'Slopes on this sheet',
+    h: ['No.', 'Coordinates (lat, lon)', 'Slope, facing', 'Why it is listed', 'Radar movement (cm)', 'Below the slope', 'Done'], lv3: 'Check first', lv2: 'Watch', none: 'within noise', notmeas: 'not measurable',
+    bld: (n) => `${n} building(s)`, road: 'main road', top: (p) => `top ${p}% susceptibility`, moved: 'movement detected', dz: (v) => `danger ${v}`,
+    foot: 'Rule: "Check first" means movement was detected or the slope is in the top 5% for susceptibility, and a building or main road lies within about 300 m downslope. Movement is along the radar line of sight; the figure after ± is the noise level. Buildings come from OpenStreetMap and may miss rural houses. Failure labels are automatic and not yet checked by a person. No movement does not mean a slope is safe.', key: ['Check first', 'Watch', 'Number on the sheet'] },
+};
+const D = addScores(await loadAll(() => {}));
+const C = D.col, M = D.meta;
+const withList = M.counties.filter((c) => { for (let u = 0; u < D.n; u++) if (C.level[u] === 3 && C.county[u] === c.id) return true; return false; });
+const sel = document.getElementById('county');
+const nCheck = (id) => { let k = 0; for (let u = 0; u < D.n; u++) if (C.level[u] === 3 && C.county[u] === id) k++; return k; };
+let county = +qs.get('county') || withList.slice().sort((a, b) => (D.korea ? nCheck(b.id) - nCheck(a.id) : b.units - a.units))[0].id;
+if (D.korea) withList.sort((a, b) => a.prov - b.prov || a.ko.localeCompare(b.ko, 'ko'));
+const normal = await new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.src = BASE + 'normal.jpg'; });
+
+function render() {
+  const t = T[lang], c = M.counties.find((x) => x.id === county), N = +document.getElementById('count').value, prov = M.provinces ? M.provinces.find((p) => p.id === c.prov) : null;
+  document.documentElement.lang = lang; document.getElementById('lang').textContent = lang === 'ko' ? 'English' : '한국어';
+  sel.innerHTML = withList.map((x) => { const p = M.provinces ? M.provinces.find((q) => q.id === x.prov) : null; return `<option value="${x.id}" ${x.id === county ? 'selected' : ''}>${p ? (lang === 'ko' ? p.ko + ' ' : p.en + ' · ') : ''}${lang === 'ko' ? x.ko : x.en}</option>`; }).join('');
+  const us = []; let nWatch = 0, nMove = 0;
+  for (let u = 0; u < D.n; u++) if (C.county[u] === county) { if (C.level[u] === 3) us.push(u); if (C.level[u] === 2) nWatch++; if (C.moving[u]) nMove++; }
+  us.sort((a, b) => C.danger[b] - C.danger[a] || C.pct[b] - C.pct[a] || a - b);      // the same order as the map: danger index, highest first
+  const top = us.slice(0, N);
+  const rows = top.map((u, i) => {
+    let best = null;
+    D.tracks.forEach((tr) => { const v = C['cum_' + tr.id][u], s = C['sig_' + tr.id][u]; if (C['meas_' + tr.id][u] && Number.isFinite(v) && (!best || Math.abs(v / s) > Math.abs(best.v / best.s))) best = { v, s, id: tr.id }; });
+    const why = [`<b>${t.dz(Math.round(C.danger[u]))}</b>`];
+    if (C.moving[u]) why.push(`<span class="mv">${t.moved}</span>`);
+    if (C.pct[u] >= 0.8) why.push(t.top(Math.max(1, Math.round((1 - C.pct[u]) * 100))));
+    [[C.r1[u], C.v1[u]], [C.r2[u], C.v2[u]]].forEach(([r, v]) => { if (r >= 0) why.push(reason(M.features[r], v, lang)); });
+    const below = [C.bld[u] > 0 ? t.bld(C.bld[u]) : '', C.road[u] > 0 ? t.road : ''].filter(Boolean).join(', ');
+    const mv = best ? `${best.v > 0 ? '+' : ''}${best.v.toFixed(1)} ± ${best.s.toFixed(1)} <span style="color:#888">(${best.id})</span>${C.moving[u] ? '' : `<br><span style="color:#888">${t.none}</span>`}` : t.notmeas;
+    return `<tr><td><span class="no">${i + 1}</span></td><td class="n">${C.lat[u].toFixed(5)}, ${C.lon[u].toFixed(5)}</td><td class="n">${C.slope[u].toFixed(0)}° ${compass(C.aspect[u], lang)}</td><td>${why.join(' · ')}</td><td class="n ${C.moving[u] ? 'mv' : ''}">${mv}</td><td>${below}</td><td><span class="box"></span></td></tr>`;
+  }).join('');
+  document.getElementById('page').innerHTML = `
+    <header><h1><small>${t.sub}</small>${prov ? (lang === 'ko' ? prov.ko + ' ' : prov.en + ' · ') : ''}${lang === 'ko' ? c.ko : c.en} · ${t.title}</h1><div class="meta">${t.made} ${M.generated.slice(0, 10)}<br>${D.korea ? t.datakr : t.data}</div></header>
+    <div class="draft">${t.draft}</div>
+    <div class="top"><div><canvas id="map" width="1100" height="760"></canvas><div class="key"><span><i style="background:var(--check)"></i>${t.key[0]}</span><span><i style="background:#e9b44c"></i>${t.key[1]}</span><span><i style="background:#111;border-radius:50%"></i>${t.key[2]}</span></div></div>
+      <div class="facts"><div><b>${us.length.toLocaleString()}</b><span>${t.check}</span></div><div><b>${nWatch.toLocaleString()}</b><span>${t.watch}</span></div><div><b>${nMove}</b><span>${t.moving}</span></div><div><b>${top.length}</b><span>${t.listed}</span></div></div></div>
+    <table><thead><tr>${t.h.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+    <footer>${t.foot}</footer>`;
+  drawMap(top);
+}
+
+function drawMap(top) {
+  const cv = document.getElementById('map'), g = cv.getContext('2d');
+  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+  for (let u = 0; u < D.n; u++) if (C.county[u] === county) { x0 = Math.min(x0, C.x[u]); x1 = Math.max(x1, C.x[u]); z0 = Math.min(z0, C.z[u]); z1 = Math.max(z1, C.z[u]); }
+  const pad = D.korea ? 3 : 1.5; x0 -= pad; x1 += pad; z0 -= pad; z1 += pad;
+  const ar = cv.width / cv.height; let w = x1 - x0, h = z1 - z0;
+  if (w / h > ar) { const nh = w / ar; z0 -= (nh - h) / 2; h = nh; } else { const nw = h * ar; x0 -= (nw - w) / 2; w = nw; }
+  const sx = normal.width / D.Wkm, sy = normal.height / D.Hkm;
+  g.fillStyle = '#f4f4f1'; g.fillRect(0, 0, cv.width, cv.height);
+  g.drawImage(normal, x0 * sx, z0 * sy, w * sx, h * sy, 0, 0, cv.width, cv.height);
+  const im = g.getImageData(0, 0, cv.width, cv.height), d = im.data;
+  for (let i = 0; i < d.length; i += 4) {                      // normal map -> light hillshade
+    const nx = (d[i] / 255 - 0.5) * 2.4, ny = (d[i + 1] / 255 - 0.5) * 2.4, l = 1 / Math.hypot(nx * 2, ny * 2, 1);
+    const s = Math.max(0, (-0.55 * nx * 2 + 0.55 * ny * 2 + 0.63) * l), v = 150 + 105 * Math.min(1, s * 1.15);
+    d[i] = d[i + 1] = d[i + 2] = v;
+  }
+  g.putImageData(im, 0, 0);
+  const k = cv.width / w, px = (u) => [(C.x[u] - x0) * k, (C.z[u] - z0) * k], r = Math.max(1.6, (D.korea ? 0.45 : 0.14) * k);
+  for (const [lv, col] of [[2, 'rgba(233,180,76,.75)'], [3, 'rgba(199,52,31,.95)']]) { g.fillStyle = col; for (let u = 0; u < D.n; u++) if (C.level[u] === lv && C.county[u] === county) { const [x, y] = px(u); g.beginPath(); g.arc(x, y, r, 0, 6.3); g.fill(); } }
+  g.font = 'bold 17px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  top.forEach((u, i) => { const [x, y] = px(u); g.fillStyle = '#111'; g.beginPath(); g.arc(x, y, 13, 0, 6.3); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke(); g.fillStyle = '#fff'; g.fillText(i + 1, x, y + 1); });
+  g.fillStyle = '#111'; g.fillRect(24, cv.height - 30, 5 * k, 4); g.font = '15px system-ui'; g.textAlign = 'left'; g.fillText('5 km', 24, cv.height - 42);
+}
+sel.onchange = () => { county = +sel.value; render(); };
+document.getElementById('count').onchange = render;
+document.getElementById('lang').onclick = () => { lang = lang === 'ko' ? 'en' : 'ko'; render(); };
+render();
+</script>
+</body>
+</html>
