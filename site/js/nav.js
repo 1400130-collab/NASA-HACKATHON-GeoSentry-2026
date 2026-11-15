@@ -65,7 +65,7 @@ function build() {
   const scrim = document.createElement('div'); scrim.className = 'snav-scrim';
   const drawer = document.createElement('nav');
   drawer.className = 'snav-drawer'; drawer.id = 'snav'; drawer.setAttribute('aria-label', 'Site menu');
-  drawer.innerHTML = `<div class="snav-head"><b>SLOPEWATCH</b><button class="snav-close" type="button" aria-label="Close menu">×</button></div>
+  drawer.innerHTML = `<div class="snav-head"><b class="geosentry-lockup"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="46" height="32" alt=""><span>GeoSentry</span></b><button class="snav-close" type="button" aria-label="Close menu">×</button></div>
     <div class="snav-body">${MENU.map((g) => `<div class="snav-group${g.page === here ? ' here' : ''}">
       <a href="${g.page}">${g.title}</a>${g.items.length ? `<ul>${g.items.map(([a, t]) => `<li><a href="${href(g.page, a)}">${t}</a></li>`).join('')}</ul>` : ''}
     </div>`).join('')}</div>`;

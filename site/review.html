@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SLOPEWATCH — scar review</title>
+<title>GeoSentry — scar review</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <style>
   :root { color-scheme: dark; }
@@ -37,10 +37,12 @@
   .btns button.on { background: #ff4d2e; color: #0b0c0d; box-shadow: none; font-weight: 700; }
   kbd { font: 500 11px/1 "Roboto Mono", ui-monospace, monospace; background: rgba(255, 255, 255, .1); border-radius: 4px; padding: 2px 6px; color: #f3f1ec; }
 </style>
+<link rel="icon" type="image/svg+xml" href="img/geosentry-logo.svg?v=2">
+<link rel="stylesheet" href="css/brand.css?v=3">
 </head>
 <body>
 <header class="bar">
-  <a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a>
+  <a class="brand" href="index.html"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="46" height="32" alt="">GeoSentry</a>
   <h1>Scar review</h1><span class="sp"></span><span id="prog"></span><button id="export">Export review.json</button>
   <p>Each card is one patch that lost vegetation between 12 June and 6 August 2026 and was still bare on 2 October. Decide: a <b>failure</b> (fresh scar running downslope), <b>logging</b> or other clearing (blocky, beside roads or older cuts), or <b>unclear</b>. Keys <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>, arrows to move. Only "failure" becomes a label.</p>
 </header>
@@ -79,6 +81,6 @@ document.getElementById('export').onclick = () => {
 };
 paint();
 </script>
-<script src="js/nav.js?v=4" defer></script>
+<script src="js/nav.js?v=6" defer></script>
 </body>
 </html>

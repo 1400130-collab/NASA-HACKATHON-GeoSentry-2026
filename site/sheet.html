@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SLOPEWATCH 점검표</title>
+<title>GeoSentry 점검표</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <style>
@@ -72,9 +72,11 @@
   }
 </style>
 <style id="pg"></style>
+<link rel="icon" type="image/svg+xml" href="img/geosentry-logo.svg?v=2">
+<link rel="stylesheet" href="css/brand.css?v=3">
 </head>
 <body>
-<div class="bar"><a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a><select id="prov"></select><select id="county"></select><select id="count"></select><span class="sp"></span><a id="map"></a><a id="forms"></a><button id="lang"></button><button class="go" id="print" onclick="print()"></button></div>
+<div class="bar"><a class="brand" href="index.html"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="46" height="32" alt="">GeoSentry</a><select id="prov"></select><select id="county"></select><select id="count"></select><span class="sp"></span><a id="map"></a><a id="forms"></a><button id="lang"></button><button class="go" id="print" onclick="print()"></button></div>
 <div class="doc" id="doc">Loading…</div>
 <script type="module">
 // The district priority sheet: one district's check-first slopes in inspection order, on paper.
@@ -155,14 +157,14 @@ function render() {
   const place = ranked.findIndex((x) => x.id === county) + 1, title = L('사면 점검 우선순위표', 'Slope inspection priority sheet');
 
   // toolbar
-  document.documentElement.lang = lang; document.title = `SLOPEWATCH · ${L(c.ko, c.en)} ${L('점검표', 'inspection sheet')}`;
+  document.documentElement.lang = lang; document.title = `GeoSentry · ${L(c.ko, c.en)} ${L('점검표', 'inspection sheet')}`;
   if (provs) $('#prov').innerHTML = provs.map((p) => `<option value="${p.id}" ${p.id === c.prov ? 'selected' : ''}>${L(p.ko, p.en)}</option>`).join(''); else $('#prov').hidden = true;
   $('#county').innerHTML = counties.filter((x) => !provs || x.prov === c.prov).map((x) => `<option value="${x.id}" ${x.id === county ? 'selected' : ''}>${L(x.ko, x.en)} (${byCounty.get(x.id).length})</option>`).join('');
   $('#count').innerHTML = [15, 25, 50, 100].map((n) => `<option value="${n}" ${n === count ? 'selected' : ''}>${L(`상위 ${n}곳`, `Top ${n}`)}</option>`).join('');
   $('#lang').textContent = lang === 'ko' ? 'English' : '한국어'; $('#print').textContent = L('인쇄 / PDF', 'Print / PDF');
   $('#map').textContent = L('지도', 'Map'); $('#map').href = `map.html?lang=${lang}${REG}`;
   $('#forms').textContent = L('사면별 현장 점검서 ▸', 'Field form per slope ▸'); $('#forms').href = `form.html?county=${county}&n=5&lang=${lang}${REG}`;
-  $('#pg').textContent = `@page { size: A4; margin: 11mm 12mm 13mm; @bottom-left { content: "SLOPEWATCH · ${name.replace(/"/g, '')} · ${title}"; font: 7pt system-ui, sans-serif; color: #5c5c5c; } @bottom-right { content: counter(page) " / " counter(pages); font: 7pt system-ui, sans-serif; color: #5c5c5c; } }`;
+  $('#pg').textContent = `@page { size: A4; margin: 11mm 12mm 13mm; @bottom-left { content: "GeoSentry · ${name.replace(/"/g, '')} · ${title}"; font: 7pt system-ui, sans-serif; color: #5c5c5c; } @bottom-right { content: counter(page) " / " counter(pages); font: 7pt system-ui, sans-serif; color: #5c5c5c; } }`;
 
   const rows = top.map((u, i) => {
     const b = best(u), sl = C.vd && Number.isFinite(C.vd[u]) && C.vds[u] > 0 ? { v: C.vd[u], s: C.vds[u] } : null, why = [];
@@ -184,7 +186,7 @@ function render() {
   const H = [L('순위', 'No.'), L('서식 번호 · 좌표 (위도, 경도)', 'Form no. · lat, lon'), L('위험 지수', 'Danger'), L('경사·방향', 'Slope, facing'), L('선정 사유', 'Why it is listed'), C.vd ? L('레이더 이동', 'Radar') : L('레이더 이동 cm', 'Radar cm'), L('사면 아래', 'Below'), L('점검일 · 판정', 'Date · result')];
   const Wd = [8, 34, 12, 14, 0, 23, 17, 21];
   $('#doc').innerHTML = `
-    <header class="h1"><h1><small>SLOPEWATCH · ${L('NISAR 레이더 + AI 취약도 기반', 'FROM NISAR RADAR + AI SUSCEPTIBILITY')}</small>${name}<br>${title}</h1>
+    <header class="h1"><h1><small>GeoSentry · ${L('NISAR 레이더 + AI 취약도 기반', 'FROM NISAR RADAR + AI SUSCEPTIBILITY')}</small>${name}<br>${title}</h1>
       <div class="fno"><div><span>${L('문서 번호', 'Sheet no.')}</span><b>SWL-${K ? 'K' : 'R'}-${String(county).padStart(3, '0')}</b></div><div><span>${L('자료 생성', 'Data built')}</span><b>${built}</b></div><div><span>${L('수록 사면', 'Slopes listed')}</span><b>${top.length} / ${all.length.toLocaleString()}</b></div></div></header>
     <div class="note">${L('초안 — 해커톤 시제품이며 정부 공식 서식이 아닙니다. 경보가 아니고 붕괴 시점을 예측하지 않습니다. 현장 점검 순서를 정하는 참고 자료입니다.', 'Draft — a hackathon prototype, not an official government form. Not a warning and not a forecast of when a slope will fail. A guide to the order of field inspection.')}</div>
     <div class="sum">
@@ -217,6 +219,6 @@ $('#count').onchange = (e) => { count = +e.target.value; render(); };
 $('#lang').onclick = () => { lang = lang === 'ko' ? 'en' : 'ko'; render(); };
 render();
 </script>
-<script src="js/nav.js?v=4" defer></script>
+<script src="js/nav.js?v=6" defer></script>
 </body>
 </html>
