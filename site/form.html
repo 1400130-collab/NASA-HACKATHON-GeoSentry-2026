@@ -92,9 +92,11 @@
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
+<link rel="icon" type="image/svg+xml" href="img/geosentry-logo.svg?v=2">
+<link rel="stylesheet" href="css/brand.css?v=4">
 </head>
 <body>
-<div class="bar"><a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>GeoSentry</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
+<div class="bar"><a class="brand" href="index.html"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="56" height="38" alt="">GeoSentry</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
 <div id="out"><div class="page">Loading…</div></div>
 <script type="module">
 // One printable field inspection form per slope: six A4 pages.

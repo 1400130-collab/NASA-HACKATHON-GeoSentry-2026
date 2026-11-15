@@ -33,7 +33,7 @@ const css = `
 .snav-btn:focus-visible { outline: 2px solid var(--red, #ff4d2e); outline-offset: 2px; }
 .snav-btn svg { width: 22px; height: 22px; }
 .snav-scrim { position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, .55); opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s linear .3s; }
-.snav-drawer { position: fixed; inset: 0 auto 0 0; z-index: 1001; width: min(360px, 86vw); display: flex; flex-direction: column; background: #111314; color: #f1efe9; border-right: 1px solid rgba(255, 255, 255, .1); box-shadow: 24px 0 60px rgba(0, 0, 0, .45); transform: translateX(-100%); visibility: hidden; transition: transform .35s cubic-bezier(.2, .7, .1, 1), visibility 0s linear .35s; font-family: var(--sans, Roboto, system-ui, sans-serif); }
+.snav-drawer { position: fixed; inset: 0 auto 0 0; z-index: 1001; width: min(360px, 86vw); display: flex; flex-direction: column; align-items: stretch; gap: 0; margin: 0; font-size: 15px; background: #111314; color: #f1efe9; border-right: 1px solid rgba(255, 255, 255, .1); box-shadow: 24px 0 60px rgba(0, 0, 0, .45); transform: translateX(-100%); visibility: hidden; transition: transform .35s cubic-bezier(.2, .7, .1, 1), visibility 0s linear .35s; font-family: var(--sans, Roboto, system-ui, sans-serif); }
 .snav-open .snav-scrim { opacity: 1; visibility: visible; transition: opacity .3s; }
 .snav-open .snav-drawer { transform: none; visibility: visible; transition: transform .35s cubic-bezier(.2, .7, .1, 1); }
 .snav-head { display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 12px 0 22px; border-bottom: 1px solid rgba(255, 255, 255, .1); flex: none; }
@@ -65,7 +65,7 @@ function build() {
   const scrim = document.createElement('div'); scrim.className = 'snav-scrim';
   const drawer = document.createElement('nav');
   drawer.className = 'snav-drawer'; drawer.id = 'snav'; drawer.setAttribute('aria-label', 'Site menu');
-  drawer.innerHTML = `<div class="snav-head"><b>GeoSentry</b><button class="snav-close" type="button" aria-label="Close menu">×</button></div>
+  drawer.innerHTML = `<div class="snav-head"><b class="geosentry-lockup"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="56" height="38" alt=""><span>GeoSentry</span></b><button class="snav-close" type="button" aria-label="Close menu">×</button></div>
     <div class="snav-body">${MENU.map((g) => `<div class="snav-group${g.page === here ? ' here' : ''}">
       <a href="${g.page}">${g.title}</a>${g.items.length ? `<ul>${g.items.map(([a, t]) => `<li><a href="${href(g.page, a)}">${t}</a></li>`).join('')}</ul>` : ''}
     </div>`).join('')}</div>`;
