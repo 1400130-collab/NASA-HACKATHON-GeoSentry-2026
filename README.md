@@ -21,6 +21,7 @@ It is a prevention tool. It does not predict when a slope will fail, and it is n
 | **Coverage** | 129,948 slope units in all 17 provinces. NISAR movement at 20 m over the North Gyeongsang burn area (85,690 units). |
 | **Output** | 3,291 slopes to *check first* and 22,768 to *watch*. Each one shows its reasons. |
 | **Interactive map** | 3D terrain of all of Korea with layers for priority, AI risk score, ground movement, fire damage and satellite photos, plus a storm replay. |
+| **Real-world detail** | Zoom in and the terrain carries the real place: 3.65 million buildings in 3D, trees as tall as NASA GEDI measured them, land cover, fields, rivers, reservoirs, every road and railway. All of it lies on the same relief as the slope layers. |
 | **Inspection sheet** | One printable page per county, in Korean, for field use. |
 
 ### How it works
@@ -71,6 +72,7 @@ The model beats chance clearly. With 20 failures it cannot yet prove it beats th
 - The sign convention of the radar phase (toward or away from the satellite) is assumed, not yet confirmed on a known moving slope.
 - The ranking is validated only in North Gyeongsang, the one place failures are mapped.
 - It does not say when a slope will fail and must not be used to decide evacuations.
+- The 3D buildings are the footprints that are openly mapped (OpenStreetMap and footprints traced from satellite images), about 3.65 million. Some buildings are missing, and most heights are an average for the 100 m around the building, not a survey. NASA publishes no building data, so these come from open sources; the trees and forest come from NASA GEDI. The risk levels do not use this layer.
 
 ## NASA data and other sources
 
@@ -83,6 +85,9 @@ The model beats chance clearly. With 20 failures it cannot yet prove it beats th
 | ESA WorldCover 2021 | ESA | Land cover |
 | ERA5 rainfall | ECMWF, via Open-Meteo | Rain before and during the storm |
 | OpenStreetMap | OSM contributors (ODbL) | Buildings and main roads below each slope |
+| **GLAD GLCLUC 2020 forest height** (30 m) | UMD GLAD, from **NASA GEDI** lidar and Landsat | Height of the 3D trees |
+| Overture Maps 2026-10-21 | OpenStreetMap (ODbL) + East Asian building footprints, Shi et al. 2024 (CC BY 4.0) | 3D buildings, local roads, railways, water, land use on the map |
+| GHSL GHS-BUILT-H 2018 (100 m) | EC JRC | Building height where a footprint has none |
 | KOSTAT 2018 boundaries | Statistics Korea, via southkorea-maps | City, county and province borders |
 
 ## Tools
@@ -106,11 +111,13 @@ python3 -m http.server 5173 --directory site     # then open http://localhost:51
 - `site/index.html`: home page. `site/map.html`: 3D map of Korea (`map.html?area=region` for the 20 m North Gyeongsang build with NISAR). `site/sheet.html`: inspection sheets. `site/review.html`: manual label review.
 - Rebuild the regional results: `sh pipeline/run_all.sh` (about 4 minutes; needs the data in `data/`, see [scripts/](scripts/), and a free NASA Earthdata token for NISAR).
 - Rebuild the nationwide results: `sh pipeline/korea/run_all.sh`.
+- Rebuild the real-world layers (buildings, trees, ground): `sh pipeline/world/run_all.sh` (about 15 minutes, 1.6 GB of downloads, no login).
 - Recompute the new statistics: `python3 analysis/headline_stats.py` and `python3 analysis/radar_scar_check.py`.
 
 ## Repository
 
 - `pipeline/`: regional pipeline (terrain, slope units, NISAR, labels, models, levels, export). `pipeline/korea/`: nationwide build.
+- `pipeline/world/`: the real-world layers of the map. `site/data/world/`: their output, 7,415 tiles of 4 km (120 MB) that the map streams around the camera.
 - `analysis/`: uncertainty and independent radar checks.
 - `site/`: the static website. Every number is read from `site/data/**/meta.json`, `stats.json` or `radar_check.json`.
 - `docs/`: [build plan](docs/build-plan.md), [concept](docs/concept.md), [expert consultation](docs/expert-consultation.md), [past winners research](docs/research.md), [label review list](docs/label-review.md), [demo video script](docs/demo-video.md).

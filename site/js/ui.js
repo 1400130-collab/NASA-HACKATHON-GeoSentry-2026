@@ -1,4 +1,4 @@
-import { STR, reason, compass, featName } from './i18n.js?v=7';
+import { STR, reason, compass, featName } from './i18n.js?v=8';
 import { addScores, checkOrder } from './score.js';
 import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js';
 import { DAY0, DAYS, dayOf, AREA } from './data.js';
@@ -54,7 +54,7 @@ export class UI {
     }
     const ex = $('#exag'); ex.max = this.D.view.exagMax; ex.value = this.D.view.exag; $('#exagOut').textContent = '×' + (+ex.value).toFixed(1);
     $('#areaSel').innerHTML = `<a class="${AREA === 'korea' ? 'on' : ''}" href="map.html" data-i18n="area_kr_s" data-tip="area_kr"></a><a class="${AREA === 'region' ? 'on' : ''}" href="map.html?area=region" data-i18n="area_rg_s" data-tip="area_rg"></a>`;
-    const togs = [['borders', 1], ['roads', 1], ['labels', 1], ['edges', 1], ['scars', 0]];
+    const togs = [['env', 1], ['trees', 1], ['borders', 1], ['roads', 1], ['labels', 1], ['edges', 1], ['scars', 0]];      // env, trees: the real-world layers (js/world.js)
     $('#toggles').innerHTML = togs.map(([k, on]) => `<label class="tog"><input type="checkbox" data-k="${k}" ${on ? 'checked' : ''}><span data-i18n="t_${k}"></span></label>`).join('');
     $('#toggles').onchange = $('#bldSwitch').onchange = (e) => a.setToggle(e.target.dataset.k, e.target.checked);
     $('#exag').oninput = (e) => { a.setExag(+e.target.value); $('#exagOut').textContent = '×' + (+e.target.value).toFixed(1); };
