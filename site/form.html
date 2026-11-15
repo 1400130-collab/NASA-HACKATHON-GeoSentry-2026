@@ -6,72 +6,108 @@
 <title>GeoSentry 사면 현장 점검서</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
+<link rel="stylesheet" href="css/paper.css?v=1">
 <style>
-  :root { --ink: #111; --mute: #5c5c5c; --line: #111; --soft: #b9b9b4; --fill: #ecece8; --red: #c7341f; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: #0b0c0d; color: var(--ink); font: 8.6pt/1.4 "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; }
-  /* top bar: the site header's type, wordmark and buttons */
-  .bar { position: sticky; top: 0; z-index: 5; background: #0b0c0d; color: #f3f1ec; min-height: 68px; padding: 12px clamp(16px, 4vw, 48px); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font: 500 14px/1 "Roboto", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", system-ui, sans-serif; }
-  .bar .brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; letter-spacing: -.01em; margin-right: 14px; color: #f3f1ec; text-decoration: none; border: 0; background: none; padding: 0; box-shadow: none; max-width: none; }
-  .bar .brand svg { color: #ff4d2e; }
-  .bar select, .bar button:not(.snav-btn), .bar a:not(.brand) { font: inherit; padding: 10px 13px; border-radius: 6px; border: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); background: none; color: #f3f1ec; cursor: pointer; text-decoration: none; max-width: 230px; transition: box-shadow .15s, background .15s, color .15s; }
-  .bar select { background: #121416; color-scheme: dark; }
-  .bar select:hover, .bar button:not(.snav-btn):hover, .bar a:not(.brand):hover { box-shadow: inset 0 0 0 1px #b4b1a9; }
-  .bar .go:not(.snav-btn), .bar .go:not(.snav-btn):hover { background: #f3f1ec; color: #0b0c0d; box-shadow: none; font-weight: 600; }
-  .bar .go:not(.snav-btn):hover { background: #ff4d2e; }
-  .bar .sp { flex: 1; }
-  .page { position: relative; width: 210mm; height: 297mm; margin: 14px auto; background: #fff; padding: 11mm 13mm 15mm; overflow: hidden; }
-  .pf { position: absolute; left: 13mm; right: 13mm; bottom: 7mm; display: flex; justify-content: space-between; border-top: .5pt solid var(--line); padding-top: 1.2mm; font-size: 7pt; color: var(--mute); }
-  .rh { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.6pt solid var(--line); padding-bottom: 1.2mm; margin-bottom: 3mm; font-size: 8pt; }
-  .rh b { font-size: 10pt; }
-  header.h1 { display: grid; grid-template-columns: 1fr auto; gap: 6mm; align-items: end; border-bottom: 2.2pt solid var(--line); padding-bottom: 2mm; }
-  header.h1 h1 { margin: 0; font-size: 21pt; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
-  header.h1 small { display: block; font-size: 7.5pt; letter-spacing: .14em; color: var(--mute); font-weight: 600; margin-bottom: 1mm; }
-  .fno { border: 1pt solid var(--line); font-size: 7.5pt; }
-  .fno div { display: grid; grid-template-columns: 19mm 33mm; }
+  .page { position: relative; width: 210mm; height: 297mm; margin: 18px auto; background: #fff; padding: 11mm 13mm 15mm; overflow: hidden; box-shadow: 0 30px 80px rgba(0, 0, 0, .55); }
+  .page > .band { margin: -11mm -13mm 0; padding: 3.2mm 13mm; }
+  .pf { position: absolute; left: 13mm; right: 13mm; bottom: 7mm; display: flex; justify-content: space-between; border-top: .5pt solid var(--line); padding-top: 1.2mm; font-size: 6.8pt; color: var(--mute); }
+  .pf b { font-family: var(--mono); color: var(--ink); }
+  .rh { display: flex; justify-content: space-between; align-items: center; gap: 3mm; border-bottom: 1.6pt solid var(--line); padding-bottom: 1.4mm; margin-bottom: 2.6mm; font-size: 7.6pt; }
+  .rh b { font: 700 8pt/1 var(--mono); background: #0b0c0d; color: #fff; padding: 1.1mm 1.8mm; margin-right: 1.6mm; }
+  .rh .part { font: 600 6.8pt/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+  .title { display: grid; grid-template-columns: 1fr auto; gap: 6mm; align-items: end; padding: 3mm 0 2.2mm; border-bottom: 2.4pt solid var(--line); }
+  .title h1 { margin: .8mm 0 0; font-size: 21pt; font-weight: 900; letter-spacing: -.035em; line-height: 1.04; }
+  .title h1 em { display: block; font-style: normal; font: 600 8.6pt/1.3 var(--mono); letter-spacing: 0; margin-top: 1.2mm; color: var(--mute); }
+  .fno { border: 1pt solid var(--line); font-size: 7.4pt; }
+  .fno div { display: grid; grid-template-columns: 19mm 31mm; }
   .fno div + div { border-top: .5pt solid var(--line); }
   .fno span { background: var(--fill); padding: .8mm 1.5mm; border-right: .5pt solid var(--line); }
-  .fno b { padding: .8mm 1.5mm; font-variant-numeric: tabular-nums; }
-  .note { margin: 2.2mm 0; padding: 1.4mm 2mm; border: .8pt solid var(--red); color: var(--red); font-size: 7.8pt; }
-  h2 { margin: 3.2mm 0 1.2mm; font-size: 10pt; font-weight: 800; display: flex; align-items: baseline; gap: 2mm; }
-  h2 i { font-style: normal; background: var(--ink); color: #fff; padding: .2mm 1.6mm; font-size: 8.5pt; }
-  h2 em { font-style: normal; font-weight: 500; font-size: 7.5pt; color: var(--mute); margin-left: auto; }
-  .part { margin: 0 0 1mm; padding: 1.2mm 2mm; background: var(--ink); color: #fff; font-weight: 800; font-size: 10pt; display: flex; justify-content: space-between; }
-  .part span { font-weight: 500; font-size: 7.8pt; opacity: .85; }
+  .fno b { padding: .8mm 1.5mm; font: 700 7.6pt/1.35 var(--mono); }
+  h2 { margin: 3mm 0 1.2mm; font-size: 10pt; font-weight: 900; display: flex; align-items: baseline; gap: 2mm; letter-spacing: -.01em; }
+  h2 i { font-style: normal; background: var(--ink); color: #fff; padding: .3mm 1.6mm; font: 700 8pt/1.3 var(--mono); }
+  h2 em { font-style: normal; font: 600 6.6pt/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); margin-left: auto; text-align: right; }
+  .part { margin: 2.6mm 0 1mm; padding: 1.4mm 2.2mm; background: var(--ink); color: #fff; font-weight: 800; font-size: 10pt; display: flex; justify-content: space-between; align-items: center; }
+  .part span { font: 600 6.6pt/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
   table { width: 100%; border-collapse: collapse; }
-  table.f th, table.f td { border: .5pt solid var(--line); padding: 1.15mm 1.6mm; vertical-align: middle; text-align: left; }
+  table.f th, table.f td { border: .5pt solid var(--line); padding: 1.1mm 1.6mm; vertical-align: middle; text-align: left; }
   table.f th { background: var(--fill); font-weight: 600; white-space: nowrap; }
-  table.f thead th { text-align: center; font-size: 7.6pt; }
+  table.f thead th { text-align: center; font-size: 7.4pt; }
   table.f td.c { text-align: center; }
   table.f td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  table.f td small, .hint { color: var(--mute); font-size: 7.2pt; }
+  table.f td small, .hint { color: var(--mute); font-size: 7.1pt; }
   table.f td.w { height: 7.4mm; }
   table.f tr.tall td { height: 9.2mm; }
   table.kv th { width: 27mm; }
   .big { font-size: 13pt; font-weight: 800; }
   .lv { display: inline-block; border: 1.2pt solid var(--ink); padding: 0 1.6mm; font-weight: 800; }
-  .lv.l3 { background: var(--ink); color: #fff; }
+  .lv.l3 { background: var(--red); border-color: var(--red); color: #fff; }
   .cb { display: inline-flex; align-items: center; gap: 1mm; margin-right: 3mm; white-space: nowrap; }
   .cb i { width: 3mm; height: 3mm; border: .8pt solid var(--ink); display: inline-block; flex: none; }
   td.c .cb { margin: 0; }
   .ln { display: inline-block; border-bottom: .5pt solid var(--ink); height: 3.4mm; vertical-align: bottom; margin: 0 .6mm; }
-  .maps { display: grid; grid-template-columns: 340px 340px; justify-content: space-between; margin-top: 1mm; }
-  .map { position: relative; width: 340px; height: 262px; overflow: hidden; border: .5pt solid var(--line); background: #eee; }
+  /* danger index and the models, page 1 */
+  .top { display: grid; grid-template-columns: 50mm 1fr; gap: 2.4mm; margin-top: 2.4mm; }
+  .dial { background: #0b0c0d; color: #f3f1ec; padding: 2.2mm 2.6mm 2.4mm; display: flex; flex-direction: column; }
+  .dial .k { font: 600 6.4pt/1.2 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: #bdbab2; }
+  .dial > b { font: 900 34pt/.95 var(--sans); letter-spacing: -.05em; margin-top: 1.2mm; font-variant-numeric: tabular-nums; }
+  .dial > b small { font-size: 10pt; letter-spacing: 0; color: #bdbab2; margin-left: .6mm; }
+  .dial .scale { position: relative; display: grid; grid-template-columns: 50fr 30fr 20fr; gap: .5mm; height: 2mm; margin: 2mm 0 .8mm; }
+  .dial .scale i:nth-child(1) { background: #4a4a46; } .dial .scale i:nth-child(2) { background: var(--amber); } .dial .scale i:nth-child(3) { background: var(--red); }
+  .dial .scale u { position: absolute; top: -1.1mm; width: 1mm; height: 4.2mm; background: #fff; margin-left: -.5mm; outline: .6pt solid #0b0c0d; }
+  .dial .ticks { position: relative; height: 2.4mm; font: 500 5.6pt/1 var(--mono); color: #8d8a83; }
+  .dial .ticks span { position: absolute; top: 0; transform: translateX(-50%); } .dial .ticks span:first-child { transform: none; } .dial .ticks span:last-child { transform: translateX(-100%); }
+  .dial .parts { margin-top: auto; padding-top: 1.6mm; display: grid; gap: .8mm; }
+  .dial .parts div { display: grid; grid-template-columns: 15mm 1fr 7mm; gap: 1.2mm; align-items: center; font: 500 6.2pt/1.1 var(--mono); color: #d6d3cb; }
+  .dial .parts div b { text-align: right; color: #fff; }
+  .dial .parts .mbar { width: 100%; background: #33332f; }
+  .dial .rk { margin-top: 1.4mm; font-size: 6.8pt; color: #d6d3cb; line-height: 1.3; }
+  .dial .rk b { color: #fff; }
+  .stack b { font-size: 13pt; }
+  .stack p { font-size: 6.3pt; }
+  /* maps */
+  .maps { display: grid; grid-template-columns: 255px 1fr; gap: 3mm; margin-top: 1mm; }
+  .map { position: relative; height: 318px; overflow: hidden; border: .8pt solid var(--line); background: #eee; }
   .map canvas, .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   .map img { position: absolute; max-width: none; }
-  .map .tag { position: absolute; left: 0; top: 0; background: #fff; border-right: .5pt solid var(--line); border-bottom: .5pt solid var(--line); padding: .4mm 1.6mm; font-weight: 700; font-size: 7.5pt; }
+  .map .tag { position: absolute; left: 0; top: 0; background: #0b0c0d; color: #fff; padding: .6mm 1.8mm; font: 700 6.6pt/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
   .map .att { position: absolute; right: 0; bottom: 0; background: rgba(255,255,255,.85); padding: 0 1mm; font-size: 6pt; color: #333; }
-  .find { display: grid; grid-template-columns: 1fr 24mm; gap: 4mm; align-items: center; margin-top: 1.6mm; border: .5pt solid var(--line); padding: 1.6mm 2mm; }
-  .find .qr svg { width: 24mm; height: 24mm; display: block; }
-  .find .url { font-family: ui-monospace, Menlo, monospace; font-size: 7.4pt; word-break: break-all; }
+  .vmap { position: relative; border: .8pt solid var(--line); }
+  .vmap canvas { display: block; width: 100%; }
+  .vmap .tag { position: absolute; left: 0; top: 0; background: #0b0c0d; color: #fff; padding: .6mm 1.8mm; font: 700 6.6pt/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+  .vmap .att { position: absolute; right: 0; bottom: 0; background: rgba(255,255,255,.88); padding: .2mm 1.2mm; font-size: 5.8pt; color: #333; }
+  .key { display: flex; gap: 4mm; margin: 1.1mm 0 0; font-size: 6.8pt; color: var(--mute); flex-wrap: wrap; align-items: center; }
+  .find { display: grid; grid-template-columns: 1fr 23mm; gap: 4mm; align-items: center; margin-top: 2mm; border: .8pt solid var(--line); padding: 1.6mm 2.2mm; }
+  .find .qr svg { width: 23mm; height: 23mm; display: block; }
+  .find .url { font: 400 6.8pt/1.3 var(--mono); word-break: break-all; color: var(--mute); }
   ul.why { margin: 0; padding: 0; list-style: none; border: .5pt solid var(--line); }
   ul.why li { padding: 1.1mm 2mm 1.1mm 7mm; position: relative; }
   ul.why li + li { border-top: .5pt solid var(--soft); }
   ul.why li::before { content: attr(data-n); position: absolute; left: 2mm; font-weight: 800; }
+  ul.why li.hot::before { color: var(--red); }
+  /* the debris flow */
+  .fstats { display: grid; grid-template-columns: repeat(6, 1fr); border: .8pt solid var(--line); border-top: 0; }
+  .fstats div { padding: 1.4mm 1.8mm 1.6mm; }
+  .fstats div + div { border-left: .5pt solid var(--line); }
+  .fstats b { display: block; font: 900 13pt/1.05 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .fstats b small { font-size: 7pt; font-weight: 700; letter-spacing: 0; }
+  .fstats span { display: block; font-size: 6.4pt; color: var(--mute); line-height: 1.25; margin-top: .4mm; }
+  .fstats .hot { background: var(--red); color: #fff; } .fstats .hot span { color: #fde3dd; }
+  .phys { font-size: 6.9pt; color: var(--mute); margin-top: 1.2mm; line-height: 1.4; }
+  .phys b { color: var(--ink); }
+  .trig { display: grid; grid-template-columns: auto 1fr; gap: 3mm; align-items: center; margin-top: 2.4mm; background: #0b0c0d; color: #f3f1ec; padding: 2mm 2.6mm; }
+  .trig b { font: 900 20pt/1 var(--sans); letter-spacing: -.03em; } .trig b small { font-size: 8pt; color: #bdbab2; letter-spacing: 0; }
+  .trig p { margin: 0; font-size: 7.3pt; line-height: 1.4; } .trig p em { font-style: normal; font: 600 6.4pt/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #ff8a70; display: block; margin-bottom: .6mm; }
+  /* radar */
+  .solve { display: grid; grid-template-columns: 44mm 1fr; border: .8pt solid var(--line); }
+  .solve .hd { padding: 2mm 2.4mm; border-right: .5pt solid var(--line); display: flex; flex-direction: column; }
+  .solve .hd b { font: 900 17pt/1 var(--sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .solve .hd .tagx { display: inline-block; margin-top: 1.4mm; font: 700 6.2pt/1.3 var(--mono); letter-spacing: .08em; padding: .6mm 1.2mm; background: var(--blue); color: #fff; align-self: flex-start; }
+  .solve .hd .tagx.mv { background: var(--red); }
+  .solve .hd p { margin: 1.4mm 0 0; font-size: 6.6pt; color: var(--mute); line-height: 1.35; }
+  .solve .ch { padding: 1mm 1.4mm .6mm; } .solve .ch > svg { width: 100%; height: auto; display: block; }
   .chart { border: .5pt solid var(--line); padding: 1mm 1.5mm 0; }
   .chart svg { width: 100%; height: auto; display: block; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
-  .safe { margin-top: 3mm; border: 1.6pt solid var(--ink); padding: 1.8mm 2.4mm; }
+  .safe { margin-top: 2.6mm; border: 1.6pt solid var(--ink); padding: 1.8mm 2.4mm; }
   .safe b { font-size: 9.5pt; }
   .verdict { display: grid; grid-template-columns: repeat(4, 1fr); border: .8pt solid var(--line); }
   .verdict div { padding: 1.6mm 2mm 2mm; min-height: 17mm; }
@@ -83,29 +119,32 @@
   .grid > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   .grid .north { position: absolute; right: 3mm; top: 2mm; font-weight: 800; text-align: center; line-height: 1; font-size: 9pt; }
   .grid .lg { position: absolute; left: 2mm; bottom: 1.5mm; right: 2mm; font-size: 7.2pt; color: var(--mute); background: #fff; padding: .6mm 1.2mm; border: .4pt solid var(--soft); }
-  .foot { margin-top: 2.4mm; font-size: 7.2pt; color: var(--mute); line-height: 1.45; }
+  .foot { margin-top: 2.2mm; font-size: 6.9pt; color: var(--mute); line-height: 1.45; }
   .sig td { height: 12mm; }
   @media print {
-    body { background: #fff; } .bar { display: none; }
-    .page { margin: 0; break-after: page; }
+    .page { margin: 0; break-after: page; box-shadow: none; }
     @page { size: A4; margin: 0; }
-    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 <link rel="icon" type="image/svg+xml" href="img/geosentry-logo.svg?v=2">
 <link rel="stylesheet" href="css/brand.css?v=4">
 </head>
 <body>
-<div class="bar"><a class="brand" href="index.html"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="56" height="38" alt="">GeoSentry</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
+<div class="bar"><a class="brand" href="index.html"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="56" height="38" alt="">GeoSentry</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="st" id="status"></span><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
 <div id="out"><div class="page">Loading…</div></div>
 <script type="module">
-// One printable field inspection form per slope: six A4 pages.
-//   Part A (pages 1-2) is filled in from the data; Part B (pages 3-6) is filled in by hand on the slope.
+// One printable field inspection form per slope: seven A4 pages.
+//   Part A (pages 1-3) is filled in from the data; Part B (pages 4-7) is filled in by hand on the slope.
+//   1  where it is: danger index, what each model said, a locator and a road map with the debris path
+//   2  why it is listed, what to look at first, and what happens if it lets go: the GPU debris flow (regional runs) or
+//      ML 3's reach, on our own map of the real world (js/paper.js), plus the rain it has already stood through
+//   3  the radar: the time-series solver's fit, every track, the AI's inputs, ground cover and rain
 //   form.html?u=123            one slope            form.html?county=214&n=5   the county's top five
 //   &area=region for the 20 m North Gyeongsang map, &lang=en for English
 import { loadAll, BASE, AREA } from './js/data.js';
 import { addScores, checkOrder } from './js/score.js';
 import { reason, compass } from './js/i18n.js';
+import { paperGeo, vectorMap, frameFor, osmMap, flowsOnOSM, solverData, solverSVG, solverLegend, qrSVG, bar, RED, BLUE } from './js/paper.js';
 
 const qs = new URLSearchParams(location.search);
 let lang = qs.get('lang') || 'ko';
@@ -129,11 +168,13 @@ let count = Math.min(10, Math.max(1, +qs.get('n') || 1));
 
 const normal = await new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = BASE + 'normal.jpg'; });
 await new Promise((res) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js'; s.onload = s.onerror = res; document.head.append(s); });
+const G = await paperGeo(D, normal);
 
 // ---- small pieces ---------------------------------------------------------------
 const cb = (...o) => o.map((s) => `<span class="cb"><i></i>${s}</span>`).join('');
 const ln = (mm = 16, unit = '') => `<span class="ln" style="width:${mm}mm"></span>${unit}`;
-const sg = (v, d = 1) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+const sg = (v, d = 1) => { const a = Math.abs(v).toFixed(d); return (+a === 0 ? '' : v > 0 ? '+' : '−') + a; };
+const r10 = (v) => (Math.round(v / 10) * 10).toLocaleString();
 const dms = (v, pos, neg) => { const a = Math.abs(v), d = Math.floor(a), m = Math.floor((a - d) * 60), s = ((a - d) * 60 - m) * 60; return `${d}°${String(m).padStart(2, '0')}′${s.toFixed(1).padStart(4, '0')}″${v >= 0 ? pos : neg}`; };
 const fno = (u) => `SW-${K ? 'K' : 'R'}-${String(u).padStart(6, '0')}`;
 const LV = () => [L('측정 불가', 'Not measurable'), L('신호 없음', 'No signal'), L('관찰', 'Watch'), L('우선 점검', 'Check first')];
@@ -142,52 +183,22 @@ const day = (s) => `${+s.slice(4, 6)}.${+s.slice(6, 8)}`;
 const best = (u) => { let b = null; D.tracks.forEach((tr) => { const v = C['cum_' + tr.id][u], s = C['sig_' + tr.id][u]; if (C['meas_' + tr.id][u] && Number.isFinite(v) && s > 0 && (!b || Math.abs(v / s) > Math.abs(b.v / b.s))) b = { v, s, id: tr.id }; }); return b; };
 const slide = (u) => (C.vd && Number.isFinite(C.vd[u]) && C.vds[u] > 0 ? { v: C.vd[u], s: C.vds[u], ub: Math.ceil(Math.abs(C.vd[u]) + 2 * C.vds[u]) } : null);   // merged downslope rate, mm a month
 const hasRadar = (u) => !K || C.rcov[u] > 0;
-
-// ---- maps: OpenStreetMap tiles over a hillshade made from our own terrain (the hillshade shows if tiles can't load) ----
-function map(u, z, half, label, scaleM) {
-  const W = 340, H = 262, lat = C.lat[u], lon = C.lon[u], s = half ? 128 : 256, zz = half ? z + 1 : z, n = 2 ** zz;
-  const fx = (lon + 180) / 360 * n, fy = (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n, x0 = fx - W / 2 / s, y0 = fy - H / 2 / s;
-  const mpp = 156543.03392 * Math.cos(lat * Math.PI / 180) / 2 ** z;
-  let t = '';
-  for (let ty = Math.floor(y0); ty < y0 + H / s; ty++) for (let tx = Math.floor(x0); tx < x0 + W / s; tx++)
-    t += `<img alt="" src="https://tile.openstreetmap.org/${zz}/${tx}/${ty}.png" style="left:${((tx - x0) * s).toFixed(1)}px;top:${((ty - y0) * s).toFixed(1)}px;width:${s}px;height:${s}px" onerror="this.remove()">`;
-  const r = CELL.r / mpp, bar = scaleM / mpp, cx = W / 2, cy = H / 2;
-  const mark = r > 12
-    ? `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="rgba(199,52,31,.08)" stroke="#c7341f" stroke-width="2.2" stroke-dasharray="7 4"/><path d="M${cx - 7} ${cy}h14M${cx} ${cy - 7}v14" stroke="#c7341f" stroke-width="2.2"/>`
-    : `<circle cx="${cx}" cy="${cy}" r="11" fill="none" stroke="#c7341f" stroke-width="2.6"/><circle cx="${cx}" cy="${cy}" r="3" fill="#c7341f"/>`;
-  return `<div class="map"><canvas class="hs" width="${W}" height="${H}" data-u="${u}" data-mpp="${mpp}"></canvas>${t}
-    <svg viewBox="0 0 ${W} ${H}">${mark}
-      <g transform="translate(${W - 20} 22)"><path d="M0 -14L6 6L0 2L-6 6Z" fill="#111" stroke="#fff" stroke-width="1"/><text y="19" text-anchor="middle" font-size="10" font-weight="800" stroke="#fff" stroke-width="2.5" paint-order="stroke">N</text></g>
-      <g transform="translate(10 ${H - 12})"><rect x="-4" y="-15" width="${(bar + 8).toFixed(1)}" height="22" fill="rgba(255,255,255,.85)"/><path d="M0 0h${bar.toFixed(1)}M0 -4v8M${bar.toFixed(1)} -4v8" stroke="#111" stroke-width="1.6" fill="none"/><text x="2" y="-5" font-size="9.5" font-weight="700">${scaleM >= 1000 ? scaleM / 1000 + ' km' : scaleM + ' m'}</text></g>
-    </svg><span class="tag">${label}</span><span class="att">© OpenStreetMap</span></div>`;
-}
-function hillshades() {
-  if (!normal) return;
-  document.querySelectorAll('canvas.hs').forEach((cv) => {
-    const u = +cv.dataset.u, km = +cv.dataset.mpp / 1000, w = cv.width * km, h = cv.height * km, g = cv.getContext('2d', { willReadFrequently: true });
-    const sx = normal.width / D.Wkm, sy = normal.height / D.Hkm;
-    g.fillStyle = '#eee'; g.fillRect(0, 0, cv.width, cv.height);
-    g.imageSmoothingQuality = 'high'; g.drawImage(normal, (C.x[u] - w / 2) * sx, (C.z[u] - h / 2) * sy, w * sx, h * sy, 0, 0, cv.width, cv.height);
-    const im = g.getImageData(0, 0, cv.width, cv.height), d = im.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const nx = (d[i] / 255 - 0.5) * 2.4, ny = (d[i + 1] / 255 - 0.5) * 2.4, l = 1 / Math.hypot(nx * 2, ny * 2, 1);
-      d[i] = d[i + 1] = d[i + 2] = 150 + 105 * Math.min(1, Math.max(0, (-0.55 * nx * 2 + 0.55 * ny * 2 + 0.63) * l) * 1.15);
-    }
-    g.putImageData(im, 0, 0);
-  });
-}
+const isSim = (u) => !!(C.sim && C.sim[u] > 0);
+const fmtDate = (ms) => new Date(ms).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const susc = M.suscept, ship = susc.shipped_uses_nisar ? susc.results.model_full : susc.results.model_without_nisar, AN = M.anomaly.results;
+const xf = (v) => (Math.abs(v - Math.round(v)) < 0.15 ? Math.round(v) : v.toFixed(1));
 
 // ---- radar history, drawn for paper: black lines told apart by dash pattern ----
 const DASH = ['', '5 3', '1.5 3'];
 function chart(u) {
-  const W = 660, H = 150, l = 34, r = 8, t = 8, b = 20, X0 = 15, X1 = 147;
+  const W = 660, H = 128, l = 34, r = 8, t = 8, b = 20, X0 = 15, X1 = 147;
   const S = D.tracks.map((tr, i) => ({ i, tr, pts: C['meas_' + tr.id][u] ? tr.days.map((d, k) => [d, D.cum(u, i, k)]).filter((p) => Number.isFinite(p[1])) : [] })).filter((s) => s.pts.length > 1);
   if (!S.length) return '';
   let ym = 2; S.forEach((s) => s.pts.forEach((p) => { ym = Math.max(ym, Math.abs(p[1]) * 1.2); })); ym = Math.ceil(ym);
   const x = (d) => l + (d - X0) / (X1 - X0) * (W - l - r), y = (v) => t + (ym - v) / (2 * ym) * (H - t - b);
   const np = D.tracks[0].noise_pair, s0 = np.reduce((a, c) => a + c, 0) / np.length, band = Array.from({ length: 12 }, (_, k) => [21 + k * 11, 2 * s0 * Math.sqrt(k)]);
   const step = ym <= 3 ? 1 : ym <= 8 ? 2 : 5, yt = []; for (let v = -Math.floor(ym / step) * step; v <= ym; v += step) yt.push(v);
-  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" font-size="9.5">
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" font-size="9.5" font-family="Roboto Mono, monospace">
     <rect x="${x(47)}" y="${t}" width="${x(49) - x(47)}" height="${H - t - b}" fill="#bbb"/>
     <path d="M${band.map(([d, v]) => `${x(d).toFixed(1)} ${y(Math.min(v, ym)).toFixed(1)}`).join('L')}L${band.slice().reverse().map(([d, v]) => `${x(d).toFixed(1)} ${y(-Math.min(v, ym)).toFixed(1)}`).join('L')}Z" fill="#e6e6e2"/>
     ${yt.map((v) => `<path d="M${l} ${y(v).toFixed(1)}H${W - r}" stroke="${v ? '#ccc' : '#111'}" stroke-width="${v ? .5 : 1}"/><text x="${l - 5}" y="${(y(v) + 3).toFixed(1)}" text-anchor="end">${sg(v, 0)}</text>`).join('')}
@@ -201,7 +212,7 @@ function chart(u) {
 
 // ---- what the data says about one slope ----------------------------------------
 function facts(u) {
-  const lv = C.level[u], b = best(u), sl = slide(u), pct = C.pct[u], radar = hasRadar(u);
+  const lv = C.level[u], b = best(u), sl = slide(u), pct = C.pct[u], radar = hasRadar(u), sim = isSim(u);
   const rs = [[C.r1[u], C.v1[u]], [C.r2[u], C.v2[u]], [C.r3[u], C.v3[u]]].filter((r) => r[0] >= 0).map((r) => ({ f: M.features[r[0]], v: r[1], s: reason(M.features[r[0]], r[1], lang) }));
   const mv = !radar ? L('NISAR 레이더 미처리 지역 (경북 산불 지역만 처리). 안정하다는 뜻이 아님.', 'No NISAR radar here yet (processed for the North Gyeongsang burn area only). Not the same as stable.')
     : !b ? L('어느 궤도에서도 레이더로 측정할 수 없음. 안정하다는 뜻이 아님.', 'Radar cannot measure this slope on any track. Not the same as stable.')
@@ -210,11 +221,13 @@ function facts(u) {
       : sl ? L(`사면 방향으로 감지되는 이동 없음: 월 ${sg(sl.v, 0)} ± ${sl.s.toFixed(0)} mm. 월 ${sl.ub} mm보다 빠른 이동은 배제됨.`, `No detectable movement along the slope: ${sg(sl.v, 0)} ± ${sl.s.toFixed(0)} mm a month. Anything faster than ${sl.ub} mm a month is ruled out.`)
       : C.moving[u] ? L(`잡음 수준을 넘는 이동 감지: 궤도 ${b.id}에서 ${sg(b.v)} cm (잡음 ±${b.s.toFixed(1)} cm)`, `Movement above the noise floor: ${sg(b.v)} cm on track ${b.id} (noise ±${b.s.toFixed(1)} cm)`)
         : L(`잡음 수준을 넘는 이동 없음 (최대: 궤도 ${b.id}에서 ${sg(b.v)} cm, 잡음 ±${b.s.toFixed(1)} cm)`, `No movement above the noise floor (largest: ${sg(b.v)} cm on track ${b.id}, noise ±${b.s.toFixed(1)} cm)`);
-  const rank = pct >= 0.8 ? L(`AI 취약도 순위: 전체 사면 중 상위 ${Math.max(1, Math.round((1 - pct) * 100))}%`, `AI susceptibility rank: top ${Math.max(1, Math.round((1 - pct) * 100))}% of all slopes`) : L(`AI 취약도 순위: 전체 사면의 ${Math.round(pct * 100)}%보다 높음`, `AI susceptibility rank: above ${Math.round(pct * 100)}% of all slopes`);
+  const rank = pct >= 0.8 ? L(`AI 위험 순위: 전체 사면 중 상위 ${Math.max(1, Math.round((1 - pct) * 100))}%`, `AI risk rank: top ${Math.max(1, Math.round((1 - pct) * 100))}% of all slopes`) : L(`AI 위험 순위: 전체 사면의 ${Math.round(pct * 100)}%보다 높음`, `AI risk rank: above ${Math.round(pct * 100)}% of all slopes`);
   const below = [C.bld[u] > 0 ? L(`건물 ${C.bld[u]}동`, `${C.bld[u]} building(s)`) : '', C.road[u] > 0 ? L('주요 도로', 'a main road') : ''].filter(Boolean).join(', ') || L('지도에 표시된 건물·주요 도로 없음', 'no mapped building or main road');
   // what to look at first on this slope, from the reasons above
   const look = [], has = (re) => rs.some((r) => re.test(r.f));
   if (C.moving[u]) look.push(L(`사면 상부(${compass(C.aspect[u], lang)}향 사면의 능선 쪽)에서 새 인장균열·단차를 먼저 찾을 것. 레이더는 약 ${CELL.r} m 범위의 평균 이동을 본 것이므로 범위 전체를 훑을 것.`, `Start at the crest of the ${compass(C.aspect[u], lang)}-facing slope and look for fresh tension cracks or steps. The radar saw the average movement over about ${CELL.r} m, so walk the whole circle.`));
+  if (sim) look.push(L(`모의 토석류 경로(2쪽 지도)를 따라 ${compass(C.rf_dir[u], lang)} 방향으로 약 ${r10(C.rf_len[u])} m 걸어 내려갈 것. 실제 계곡·물길이 있는지, 출구에 집이 있는지 확인 (B7, B8).`, `Walk the simulated debris path (map on page 2) about ${r10(C.rf_len[u])} m ${compass(C.rf_dir[u], lang)}. Check for a real gully or channel along it and for houses at its mouth (B7, B8).`));
+  else if (C.reach) look.push(L(`${compass(C.aspect[u], lang)} 방향 아래로 약 ${r10(C.reach[u])} m(ML 3 도달 거리)까지 내려가 계곡 출구의 집과 도로를 확인 (B7).`, `Walk down about ${r10(C.reach[u])} m toward the ${compass(C.aspect[u], lang)} (ML 3's reach) and check houses and roads at gully mouths (B7).`));
   if (C.label[u]) look.push(L('2026년 7월 붕괴 후보지(자동 탐지)가 이 격자 안에 있음. 실제 붕괴인지 벌채·개간인지 확인하고 B8에 기록.', 'A July 2026 scar candidate (automatic) lies inside this cell. Check whether it is a real failure or a clearing and record it in B8.'));
   if (rs.some((r) => r.f === 'curv' && r.v > 0) || has(/^twi$|dstream/)) look.push(L('물이 모이는 지형. 오목한 곳과 계곡 머리에서 용수·세굴·지반 포화 확인 (B4).', 'Water gathers here. Check hollows and gully heads for seepage, scouring and saturated ground (B4).'));
   if (C.burn[u] > 0.2 || C.dnbr[u] > 0.27 || has(/burn|dnbr|loss2025/)) look.push(L('산불 피해지. 고사목 뿌리 부패, 지표 침식, 식생 회복 정도 확인 (B5).', 'Burned ground. Check dead-tree roots, surface erosion and how far vegetation has recovered (B5).'));
@@ -222,80 +235,134 @@ function facts(u) {
   if (C.bld[u] > 0) look.push(L(`아래쪽 약 300 m 이내 건물 ${C.bld[u]}동(OpenStreetMap). 건물 뒤 사면 하부, 옹벽 균열, 실제 거주 여부 확인 (B6, B7).`, `${C.bld[u]} building(s) within about 300 m downslope (OpenStreetMap). Check the slope foot behind them, retaining-wall cracks and whether people live there (B6, B7).`));
   if (C.road[u] > 0) look.push(L('주요 도로 인접. 절토면, 도로 배수구, 낙석 흔적 확인.', 'A main road is close. Check the cut slope, road drains and signs of rockfall.'));
   if (!look.length) look.push(L('특정 징후 없음. B3–B6 항목을 순서대로 점검.', 'No specific pointer. Work through B3–B6 in order.'));
-  return { lv, b, pct, radar, rs, mv, rank, below, look };
+  return { lv, b, pct, radar, rs, mv, rank, below, look, sim };
 }
 
-// ---- one form (six pages) --------------------------------------------------------
+// what each model said about this slope, as tiles (the map's "model outputs" block, on paper)
+function modelTiles(u, F) {
+  const t = (cls, k, nm, v, p, g) => `<div class="${cls}"><i>${k}</i><span>${nm}</span><b>${v}</b>${g !== undefined ? `<span class="gauge"><u style="width:${Math.min(100, Math.max(2, g * 100)).toFixed(0)}%"></u></span>` : ''}<p>${p}</p></div>`;
+  const top = Math.max(0.1, (1 - F.pct) * 100), sl = slide(u), dt = C.det ? C.det[u] : NaN, out = [];
+  out.push(t('', 'ML 1', L('위험 순위', 'Risk ranker'), `${L('상위', 'top')} ${top < 1 ? top.toFixed(1) : Math.round(top)}<small>%</small>`, L(`LightGBM · 전국 ${D.n.toLocaleString()}개 사면 중`, `LightGBM · among ${D.n.toLocaleString()} slopes`), F.pct));
+  out.push(F.radar && Number.isFinite(dt) ? t(C.moving[u] ? '' : '', 'ML 2', L('이동 탐지', 'Movement detector'), `${dt.toFixed(2)}`, L('GRU 신경망 점수 · 이동 판정은 상위 5% + 역산 4σ', 'GRU score · "moving" needs its top 5% and the solver at 4σ'), dt)
+    : t('na', 'ML 2', L('이동 탐지', 'Movement detector'), '—', L('레이더 자료 없음', 'no radar data here')));
+  if (F.sim) out.push(t('ph', 'PHYSICS', L('토석류 모의', 'Debris-flow sim'), `${r10(C.rf_len[u])}<small> m</small>`, L(`GPU 천수 흐름 · 최고 ${Math.round(C.rf_vmax[u])} m/s`, `GPU shallow-water run · top ${Math.round(C.rf_vmax[u])} m/s`), C.rf_len[u] / 450));
+  else if (C.reach) out.push(t(C.reach_src[u] === 2 ? 'ph' : '', C.reach_src[u] === 2 ? 'PHYSICS' : 'ML 3', L('토석류 도달 거리', 'Debris reach'), `${r10(C.reach[u])}<small> m</small>`, C.reach_src[u] === 2 ? L('이 격자에서 GPU로 직접 모의', 'simulated on the GPU in this cell') : L(`GPU 모의 ${M.reach.simulated_slopes.toLocaleString()}건으로 학습한 LightGBM`, `LightGBM taught by ${M.reach.simulated_slopes.toLocaleString()} GPU runs`), C.reach[u] / 450));
+  if (sl) out.push(t(C.moving[u] ? '' : 'ph', 'SOLVER', L('레이더 속도 역산', 'Radar speed solver'), `${sg(sl.v, 0)}<small> ± ${sl.s.toFixed(0)} ${L('mm/월', 'mm/mo')}</small>`, C.moving[u] ? L('사면 아래로 이동 중', 'moving downhill') : L(`감지되는 이동 없음 · 월 ${sl.ub} mm 초과 배제`, `nothing detectable · over ${sl.ub} mm/mo ruled out`), Math.abs(sl.v / sl.s) / (M.velocity?.z_detect || 4)));
+  else if (C.vd) out.push(t('na', 'SOLVER', L('레이더 속도 역산', 'Radar speed solver'), '—', F.radar ? L('한 방향에서만 관측되어 풀 수 없음', 'seen from one side only: not solvable') : L('레이더 자료 없음', 'no radar data here')));
+  return out.join('');
+}
+
+// ---- one form (seven pages) --------------------------------------------------------
+const P = 7;
 function form(u) {
   const F = facts(u), no = fno(u), where = cname(C.county[u]), lvn = LV()[F.lv], rk = byCounty.get(C.county[u])?.indexOf(u) ?? -1;
   const coord = `${C.lat[u].toFixed(5)}°N, ${C.lon[u].toFixed(5)}°E`, kakao = `https://map.kakao.com/link/map/${no},${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}`;
   const GRID = '<svg><defs><pattern id="g5" width="18.898" height="18.898" patternUnits="userSpaceOnUse"><path d="M18.898 0H0V18.898" fill="none" stroke="#b4b4ae" stroke-width=".7"/></pattern></defs><rect width="100%" height="100%" fill="url(#g5)"/></svg>';
-  const P = 6, pf = (p) => `<div class="pf"><span>GeoSentry · ${L('사면 현장 점검서', 'Slope field inspection form')} · ${no}</span><span>${L('자료 생성', 'data built')} ${M.generated.slice(0, 10)} · ${L('시제품 · 공식 서식 아님', 'prototype · not an official form')}</span><span>${p} / ${P}</span></div>`;
-  const rh = (part) => `<div class="rh"><span><b>${no}</b> &nbsp; ${where} &nbsp;·&nbsp; ${coord}</span><span>${part}</span></div>`;
+  const pf = (p) => `<div class="pf"><span><b>${no}</b> · GeoSentry · ${L('사면 현장 점검서', 'Slope field inspection form')}</span><span>${L('자료 생성', 'data built')} ${M.generated.slice(0, 10)} · ${L('시제품 · 공식 서식 아님', 'prototype · not an official form')}</span><span>${p} / ${P}</span></div>`;
+  const rh = (part) => `<div class="rh"><span><b>${no}</b>${where} &nbsp;·&nbsp; ${coord}</span><span class="part">${part}</span></div>`;
   const partA = L('A. 위성 사전 조사', 'A. Satellite pre-survey'), partB = L('B. 현장 점검', 'B. Field inspection');
   const h2 = (n, t, e = '') => `<h2><i>${n}</i>${t}${e ? `<em>${e}</em>` : ''}</h2>`;
   const NSC = [L('없음', 'None'), L('경미', 'Slight'), L('뚜렷', 'Clear')];
   const signs = (rows, tall) => `<table class="f"><thead><tr><th style="width:7mm">${L('번호', 'No.')}</th><th>${L('점검 항목', 'What to check')}</th>${NSC.map((s) => `<th style="width:11mm">${s}</th>`).join('')}<th style="width:62mm">${L('위치 · 크기 · 비고', 'Where · size · notes')}</th></tr></thead>
     ${rows.map(([t, h], i) => `<tr${tall ? ' class="tall"' : ''}><td class="c">${i + 1}</td><td>${t}</td><td class="c">${cb('')}</td><td class="c">${cb('')}</td><td class="c">${cb('')}</td><td class="w"><small>${h || ''}</small></td></tr>`).join('')}</table>`;
+  const dz = Math.round(C.danger[u]);
 
-  // ---------- page 1: where it is and why it is listed ----------
+  // ---------- page 1: where it is, the danger index and what each model said ----------
   const p1 = `<section class="page">
-    <header class="h1"><h1><small>GeoSentry · ${L('NISAR 레이더 + AI 취약도 기반', 'FROM NISAR RADAR + AI SUSCEPTIBILITY')}</small>${L('사면 현장 점검서', 'Slope field inspection form')}</h1>
-      <div class="fno"><div><span>${L('서식 번호', 'Form no.')}</span><b>${no}</b></div><div><span>${L('점검 등급', 'Level')}</span><b>${lvn}</b></div><div><span>${L('위험 지수', 'Danger index')}</span><b>${Math.round(C.danger[u])} / 100</b></div></div></header>
+    <div class="band"><img src="img/geosentry-logo.svg?v=2" alt=""><span class="wm">GeoSentry</span><span class="kind">${L('사면 현장 점검서', 'Slope field inspection form')}<br>${L('A 위성 사전 조사 · B 현장 점검', 'A satellite pre-survey · B field inspection')}</span>${F.lv === 3 ? `<span class="lvb">${lvn}</span>` : ''}<span class="id">${no}</span></div>
+    <div class="title"><div><div class="kick">${L('사면 현장 점검서', 'Slope field inspection form')} · <b>${lvn}</b>${rk >= 0 ? ` · ${L('시·군 내', 'in district')} ${rk + 1} / ${byCounty.get(C.county[u]).length}` : ''}</div>
+        <h1>${where}<em>#${u} · ${coord}</em></h1></div>
+      <div class="fno"><div><span>${L('서식 번호', 'Form no.')}</span><b>${no}</b></div><div><span>${L('점검 등급', 'Level')}</span><b>${lvn}</b></div><div><span>${L('위험 지수', 'Danger index')}</span><b>${dz} / 100</b></div><div><span>${L('자료 생성', 'Data built')}</span><b>${M.generated.slice(0, 10)}</b></div></div></div>
     <div class="note">${L('초안 — 해커톤 시제품이며 정부 공식 서식이 아닙니다. 경보가 아니고 붕괴 시점을 예측하지 않습니다. A부는 위성 자료로 자동 작성된 참고 정보이며, 판정은 B부의 현장 점검으로 합니다.', 'Draft — a hackathon prototype, not an official government form. Not a warning and not a forecast of when a slope will fail. Part A is filled in automatically from satellite data for reference; the judgment is made in the field, in Part B.')}</div>
+    <div class="top">
+      <div class="dial"><span class="k">${L('위험 지수', 'Danger index')}</span><b>${dz}<small>/100</small></b>
+        <div class="scale"><i></i><i></i><i></i><u style="left:${dz}%"></u></div><div class="ticks"><span style="left:0">0</span><span style="left:50%">50</span><span style="left:80%">80</span><span style="left:100%">100</span></div>
+        <div class="rk">${rk >= 0 ? L(`시·군 점검 순서 <b>${rk + 1}번째</b> / ${byCounty.get(C.county[u]).length} · ${K ? '전국' : '전체'} <b>${rankAll.get(u).toLocaleString()}</b> / ${order.length.toLocaleString()}`, `<b>No. ${rk + 1}</b> of ${byCounty.get(C.county[u]).length} in the district · <b>${rankAll.get(u).toLocaleString()}</b> of ${order.length.toLocaleString()} ${K ? 'nationwide' : 'in the area'}`) : L('우선 점검 목록에 없음', 'not on the check-first list')}</div>
+        <div class="parts"><div><span>${L('사면', 'SLOPE')}</span>${bar(C.hz[u] / 100, RED, 0)}<b>${Math.round(C.hz[u])}</b></div><div><span>${L('사면 아래', 'BELOW')}</span>${bar(C.ex[u] / 100, '#f3f1ec', 0)}<b>${C.ex[u]}</b></div></div></div>
+      <div><div class="kick" style="margin-bottom:1mm">${L('이 사면에 대한 모델 출력', 'What each model said about this slope')}</div><div class="stack">${modelTiles(u, F)}</div></div>
+    </div>
     <div class="part">${partA}<span>${L('자동 작성 · 수정하지 말 것', 'pre-printed · do not edit')}</span></div>
     ${h2('A1', L('위치', 'Location'))}
     ${kv([
       [[L('행정구역', 'District'), `<b>${where}</b>`], [L('사면 번호', 'Slope no.'), `<b>#${u}</b> &nbsp;<small>${K ? L('전국 90 m 지도', 'nationwide 90 m map') : L('경북 20 m 지도', 'regional 20 m map')}</small>`]],
       [[L('좌표 (WGS84)', 'Coordinates (WGS84)'), `<b>${coord}</b><br><small>${dms(C.lat[u], 'N', 'S')} &nbsp; ${dms(C.lon[u], 'E', 'W')}</small>`], [L('분석 단위', 'Unit of analysis'), `${L('육각 격자', 'hexagon')} ${L('약', 'about')} ${CELL.km2} km²<br><small>${L(`중심에서 반경 약 ${CELL.r} m (지도의 점선 원)`, `about ${CELL.r} m around the centre (dashed circle on the map)`)}</small>`]],
       [[L('고도', 'Elevation'), `${C.elev[u].toFixed(0)} m`], [L('평균 경사 · 방향', 'Mean slope · facing'), `${C.slope[u].toFixed(0)}° · ${compass(C.aspect[u], lang)}${L('향', '')} (${C.aspect[u].toFixed(0)}°)`]],
-      [[L('점검 등급', 'Inspection level'), `<span class="lv l${F.lv}">${lvn}</span>`], [L('점검 순위', 'Rank'), rk >= 0 ? `${L('시·군 내', 'in the district')} <b>${rk + 1}</b> / ${byCounty.get(C.county[u]).length} &nbsp;·&nbsp; ${K ? L('전국', 'nationwide') : L('전체', 'whole area')} <b>${rankAll.get(u).toLocaleString()}</b> / ${order.length.toLocaleString()}` : L('우선 점검 목록에 없음', 'not on the check-first list')]],
-      [[L('위험 지수', 'Danger index'), `<span class="big">${Math.round(C.danger[u])}</span> / 100`], [L('지수 구성', 'Made of'), `${L('사면', 'slope')} <b>${Math.round(C.hz[u])}</b> / 100 &nbsp;·&nbsp; ${L('사면 아래', 'below the slope')} <b>${C.ex[u]}</b> / 100`]],
     ])}
-    <div class="maps" style="margin-top:2.4mm">${map(u, 11, false, L('위치도', 'Locator'), 5000)}${map(u, CELL.z, true, L('상세도', 'Detail'), K ? 400 : 200)}</div>
-    <div class="find"><div><b>${L('찾아가는 길', 'Getting there')}</b> — ${L('QR 코드를 찍으면 카카오맵에서 이 좌표가 열립니다. 점선 원이 점검 범위입니다.', 'Scan the QR code to open this point in Kakao Map. The dashed circle is the area to inspect.')}<div class="url">${kakao}</div>
-      <div style="margin-top:1.2mm">${L('접근로·주차 위치 메모', 'Access and parking notes')}: ${ln(88)}</div></div><div class="qr" data-url="${kakao}"></div></div>
-    ${h2('A2', L('선정 사유', 'Why this slope is listed'), L('AI 모델과 레이더가 든 이유', 'from the AI model and the radar'))}
-    <ul class="why"><li data-n="①">${F.mv}</li><li data-n="②">${F.rank}${F.rs.length ? ' — ' + F.rs.map((r) => r.s).join(' · ') : ''}</li><li data-n="③">${L('사면 아래 약 300 m 이내', 'Within about 300 m downslope')}: ${F.below}</li>${C.label[u] ? `<li data-n="④">${L('이 사면에 2026년 7월 붕괴 후보지가 있음 (자동 탐지, 사람이 아직 확인하지 않음)', 'A July 2026 scar candidate lies on this slope (automatic, not yet checked by a person)')}</li>` : ''}</ul>
-    ${h2('A3', L('이 사면에서 먼저 볼 것', 'What to look at first here'))}
-    <ul class="why">${F.look.slice(0, 5).map((s) => `<li data-n="▸">${s}</li>`).join('')}</ul>
+    <div class="maps" style="margin-top:2.4mm"><div class="map" data-osm="loc" data-u="${u}"></div><div class="map" data-osm="det" data-u="${u}"></div></div>
+    <div class="find"><div><b>${L('찾아가는 길', 'Getting there')}</b> — ${L('QR 코드를 찍으면 카카오맵에서 이 좌표가 열립니다. 점선 원이 점검 범위, 붉은 점들이 모의 토석류 경로입니다.', 'Scan the QR code to open this point in Kakao Map. The dashed circle is the area to inspect; red marks are the simulated debris path.')}<div class="url">${kakao}</div>
+      <div style="margin-top:1.2mm">${L('접근로·주차 위치 메모', 'Access and parking notes')}: ${ln(88)}</div></div><div class="qr">${qrSVG(kakao)}</div></div>
     ${pf(1)}</section>`;
 
-  // ---------- page 2: the measurements ----------
+  // ---------- page 2: why it is listed, what to look at first, what happens if it lets go ----------
+  const RO = M.runout, sim = F.sim, tb = sim && Number.isFinite(C.rf_tbld[u]), hasFlow = !!(G && G.flowsOf(u).length);
+  const flowStats = sim ? `<div class="fstats">
+      <div class="hot"><b>${r10(C.rf_len[u])}<small> m</small></b><span>${L('도달 거리 (보수적 경우, 목록 기준)', 'reach, cautious case (decides the list)')}</span></div>
+      <div><b>${r10(C.ro_len[u])}<small> m</small></b><span>${L('도달 거리 (2026 붕괴지 맞춤)', 'reach, best fit to the 2026 scars')}</span></div>
+      <div><b>${Math.round(C.rf_drop[u])}<small> m</small></b><span>${L('낙차', 'vertical drop')}</span></div>
+      <div><b>${Math.round(C.rf_vmax[u])}<small> m/s</small></b><span>${L('최고 속도', 'top speed')} · ${Math.round(C.rf_vmax[u] * 3.6)} km/h</span></div>
+      <div class="${tb ? 'hot' : ''}"><b>${tb ? Math.round(C.rf_tbld[u]) + '<small> s</small>' : '—'}</b><span>${L('첫 건물까지', 'to the first building')}</span></div>
+      <div><b>${C.rf_bld[u]}<small> ${L('동', 'bldg')}</small>${C.rf_road[u] ? `<small> + ${L('도로', 'road')}</small>` : ''}</b><span>${L('닿는 건물 (OpenStreetMap, 목록 기준)', 'buildings reached (OpenStreetMap, used for the list)')}<span class="hitn"></span></span></div></div>
+    <div class="phys"><b>${L('계산 방법', 'How it was computed')}</b> — ${L(`가장 가파른 지점에서 ${RO?.release?.size_m ?? 40} m × ${RO?.release?.size_m ?? 40} m × ${RO?.release?.depth_m ?? 1.5} m (${(RO?.release?.volume_m3 ?? 2400).toLocaleString()} m³) 붕괴를 놓고 20 m 지형 위 10 m 격자에서 천수 방정식(Voellmy 마찰)을 GPU로 풀었습니다. 2026년 7월 붕괴지 ${RO?.calibration?.n_scars ?? 33}곳으로는 마찰이 좁혀지지 않아 두 경우(μ ${RO?.calibration?.mu_far ?? 0.06}, ξ ${RO?.calibration?.xi_far ?? 200} / μ ${RO?.calibration?.mu ?? 0.27}, ξ ${RO?.calibration?.xi ?? 100})를 계산하고 멀리 가는 쪽으로 목록을 정합니다. 색 = 흐름이 그 칸에 닿는 시각, 옅은 칸 = 보수적 경우에만 덮이는 곳.${C.rf_left[u] ? ' <b>흐름이 계산 창 밖으로 나가 실제 도달 거리는 더 길 수 있음.</b>' : ''}`,
+      `a ${RO?.release?.size_m ?? 40} m × ${RO?.release?.size_m ?? 40} m × ${RO?.release?.depth_m ?? 1.5} m slab (${(RO?.release?.volume_m3 ?? 2400).toLocaleString()} m³) let go at the steepest spot; shallow-water equations with Voellmy friction solved on the GPU on a 10 m grid over 20 m terrain. The ${RO?.calibration?.n_scars ?? 33} scars of July 2026 do not pin the friction down, so two cases are run (μ ${RO?.calibration?.mu_far ?? 0.06}, ξ ${RO?.calibration?.xi_far ?? 200} and μ ${RO?.calibration?.mu ?? 0.27}, ξ ${RO?.calibration?.xi ?? 100}) and the farther one decides the list. Colour = when the flow reaches a cell; pale cells are covered in the cautious case only.${C.rf_left[u] ? ' <b>The flow left the simulation window, so the real reach may be longer.</b>' : ''}`)}</div>`
+    : C.reach ? `<div class="fstats" style="grid-template-columns:repeat(4,1fr)">
+      <div class="hot"><b>${r10(C.reach[u])}<small> m</small></b><span>${L('도달 거리 (보수적 경우, 목록 기준)', 'reach, cautious case (decides the list)')}</span></div>
+      <div><b>${r10(C.reach_fit[u])}<small> m</small></b><span>${L('도달 거리 (2026 붕괴지 맞춤)', 'reach, best fit to the 2026 scars')}</span></div>
+      <div><b>${C.bld[u]}<small> ${L('동', 'bldg')}</small>${C.road[u] ? `<small> + ${L('도로', 'road')}</small>` : ''}</b><span>${L('도달 거리 안 (OpenStreetMap)', 'inside that reach (OpenStreetMap)')}</span></div>
+      <div><b>${C.reach_src[u] === 2 ? 'GPU' : 'ML 3'}</b><span>${C.reach_src[u] === 2 ? L('이 격자는 GPU로 직접 모의', 'this cell was simulated on the GPU') : L(`예측값 · 처음 보는 시·군에서 R² ${M.reach.far.r2_heldout.toFixed(2)}, 오차 ×${M.reach.far.err_factor_heldout.toFixed(2)}`, `predicted · R² ${M.reach.far.r2_heldout.toFixed(2)} and error ×${M.reach.far.err_factor_heldout.toFixed(2)} on unseen counties`)}</span></div></div>
+    <div class="phys"><b>${L('계산 방법', 'How it was computed')}</b> — ${L(`경북 산불 지역의 위험 사면 ${M.reach.simulated_slopes.toLocaleString()}곳에서 GPU 토석류 모의를 돌리고, 그 도달 거리를 지형 특성 ${M.reach.features.length}개로 배우는 LightGBM(ML 3)을 학습해 전국 모든 사면에 적용했습니다. 지도의 부채꼴은 그 거리를 사면 방향으로 그린 것이며 실제 흐름은 계곡을 따릅니다. 오차는 시뮬레이터 대비이며 실제 붕괴 대비가 아닙니다.`, `GPU debris-flow runs on ${M.reach.simulated_slopes.toLocaleString()} flagged slopes in the North Gyeongsang burn area taught a LightGBM model (ML 3) how far debris travels from ${M.reach.features.length} terrain features; it is applied to every slope in Korea. The fan on the map draws that distance toward the slope's facing; real flows follow the valley. Its error is against the simulator, not against real failures.`)}</div>` : `<div class="phys">${L('이 사면은 모의 대상이 아닙니다 (위험 순위 상위 5% 또는 이동 감지 사면만 모의).', 'This slope was not simulated (only slopes in the top 5% or moving were run).')}</div>`;
+  const rec = C.rec48 && Number.isFinite(C.rec48[u]) ? `<div class="trig"><b>${C.rec48[u].toFixed(0)}<small> mm / 48 h</small></b><p><em>${L('재점검 기준', 'Re-inspection trigger')}</em>${L(`2025년 산불 이후 이 사면이 견딘 48시간 최대 강우 (${fmtDate(Date.parse(M.rain_record.day0) + C.rec_day[u] * 864e5)}). 48시간 예보가 이 값을 넘으면 비가 그친 뒤 다시 점검하십시오. 과거 강우에 대한 사실이며 예측이 아닙니다 (ERA5, 10 km 격자).`, `The heaviest 48 h rain this slope has stood through since the 2025 fire (${fmtDate(Date.parse(M.rain_record.day0) + C.rec_day[u] * 864e5)}). If a 48 h forecast goes above it, inspect again once the rain stops. A fact about past rain, not a prediction (ERA5, 10 km grid).`)}</p></div>` : '';
+  const p2 = `<section class="page">${rh(partA)}
+    ${h2('A2', L('선정 사유', 'Why this slope is listed'), L('AI 모델과 레이더가 든 이유', 'from the models and the radar'))}
+    <ul class="why"><li data-n="①">${F.mv}</li><li data-n="②">${F.rank}${F.rs.length ? ' — ' + F.rs.map((r) => r.s).join(' · ') : ''}</li><li data-n="③" class="${C.bld[u] > 0 ? 'hot' : ''}">${L('사면 아래 약 300 m 이내', 'Within about 300 m downslope')}: ${F.below}</li>${C.label[u] ? `<li data-n="④">${L('이 사면에 2026년 7월 붕괴 후보지가 있음 (자동 탐지, 사람이 아직 확인하지 않음)', 'A July 2026 scar candidate lies on this slope (automatic, not yet checked by a person)')}</li>` : ''}</ul>
+    ${h2('A3', L('이 사면에서 먼저 볼 것', 'What to look at first here'))}
+    <ul class="why">${F.look.slice(0, 5).map((s) => `<li data-n="▸">${s}</li>`).join('')}</ul>
+    ${h2('A4', L('이 사면이 무너진다면', 'If this slope lets go'), sim ? L('GPU 토석류 모의 · 실제 세계 지도', 'GPU debris-flow simulation · on the real world') : C.reach ? L('ML 3 토석류 도달 거리', 'ML 3 debris reach') : '')}
+    <div class="vmap"><canvas class="big" data-u="${u}" data-h="${rec ? 350 : 420}" width="${695 * 3}" height="${(rec ? 350 : 420) * 3}" style="height:${rec ? 350 : 420}px"></canvas><span class="tag">${sim ? L('모의 토석류 · 도착 시각', 'simulated debris flow · arrival time') : L('도달 거리', 'debris reach')}</span><span class="att">${L('건물·도로 Overture Maps · 토지피복 ESA WorldCover · 수관고 NASA GEDI · 지형 Copernicus DEM · 도북 기준', 'Buildings, roads: Overture Maps · land cover: ESA WorldCover · canopy: NASA GEDI · relief: Copernicus DEM · grid north')}</span></div>
+    ${flowStats}
+    <div class="key">${hasFlow ? `<span class="ramp">0 s <i></i> 120 s+</span><span>${L('도착 시각', 'arrival')}</span>` : ''}${!sim && !hasFlow && C.reach ? `<span><span class="sw" style="background:rgba(199,52,31,.3);border:1px dashed var(--red)"></span>${L('ML 3 도달 거리', 'ML 3 reach')}</span>` : ''}${hasFlow ? `<span><span class="sw" style="background:var(--red);outline:.5pt solid #111"></span>${L('흐름 아래 건물', 'building under the flow')}</span>` : ''}<span><span class="sw" style="background:#5b5852"></span>${L('건물', 'building')}</span>${G?.flowCells ? `<span><span class="sw" style="background:rgba(199,52,31,.15)"></span>${L('이웃 사면의 모의', 'neighbours\' runs')}</span>` : ''}<span><span class="sw" style="border-top:1.5px solid rgba(140,88,40,.7);height:0"></span>${L('등고선', 'contours')}</span></div>
+    ${rec}
+    <div class="safe"><b>${L('점검자 안전', 'Inspector safety')}</b><br>${L('2인 이상 점검. 호우 중이거나 호우 직후(24시간 이내)에는 사면에 오르지 말고 원거리에서 관찰. 균열이 눈에 띄게 벌어지거나, 사면에서 흙탕물이 솟거나, 땅 울림·나무 꺾이는 소리가 나면 즉시 사면 옆 방향으로 대피하고 119와 시·군 재난상황실에 알릴 것.', 'Inspect in pairs. During heavy rain or within 24 hours after it, stay off the slope and observe from a distance. If a crack is visibly widening, muddy water bursts from the slope, or you hear rumbling or trees snapping, leave sideways across the slope at once and call 119 and the district disaster office.')}${hasFlow || C.reach ? L(' 토석류 경로·계곡 출구에 서 있지 말 것.', ' Do not stand in the debris path or at a gully mouth.') : ''}</div>
+    ${pf(2)}</section>`;
+
+  // ---------- page 3: the radar, the AI's inputs, ground cover, rain ----------
   const trs = D.tracks.filter((tr) => Number.isFinite(C['sig_' + tr.id][u]) && C['sig_' + tr.id][u] > 0 || C['meas_' + tr.id][u]).map((tr) => {
     const id = tr.id, v = C['cum_' + id][u], s = C['sig_' + id][u], ok = C['meas_' + id][u] > 0 && Number.isFinite(v), z = ok && s > 0 ? v / s : NaN, se = C['sens_' + id][u], c0 = C['cohpre_' + id][u], c1 = C['cohstorm_' + id][u];
     return `<tr><td><b>${id}</b> <small>${tr.name}</small></td><td class="c">${tr.dir === 'ascending' ? L('상향 ↑', 'ascending ↑') : L('하향 ↓', 'descending ↓')}</td><td class="n c">${day(tr.dates[0])} – ${day(tr.dates[tr.dates.length - 1])} <small>(${tr.dates.length}${L('회', ' passes')})</small></td>
       <td class="n c"><b>${ok ? sg(v) : '—'}</b></td><td class="n c">${ok ? '±' + s.toFixed(1) : '—'}</td><td class="n c">${Number.isFinite(z) ? Math.abs(z).toFixed(1) + '×' : '—'}</td><td class="n c">${Number.isFinite(se) ? Math.abs(se).toFixed(2) : '—'}</td><td class="n c">${Number.isFinite(c0) ? c0.toFixed(2) : '—'} → ${Number.isFinite(c1) ? c1.toFixed(2) : '—'}</td>
       <td class="c">${ok ? L('측정됨', 'measured') : L('측정 불가', 'not measurable')}</td></tr>`;
   }).join('');
-  const radarBlock = F.radar && trs ? `${C.vd ? `<table class="f"><tr><th style="width:38mm">${L('사면 방향 이동 속도 (모든 궤도 종합)', 'Rate along the slope (all tracks combined)')}</th><td>${F.mv}</td></tr></table><div style="height:1.6mm"></div>` : ''}<table class="f"><thead><tr><th>${L('궤도', 'Track')}</th><th>${L('비행 방향', 'Pass')}</th><th>${L('관측 기간 (2026)', 'Period (2026)')}</th><th>${L('누적 이동 cm', 'Movement cm')}</th><th>${L('잡음 cm', 'Noise cm')}</th><th>${L('잡음 대비', 'vs noise')}</th><th>${L('방향 민감도', 'Sensitivity')}</th><th>${L('긴밀도 전→폭우', 'Coherence pre→storm')}</th><th>${L('상태', 'Status')}</th></tr></thead>${trs}</table>
-      <div style="height:1.6mm"></div>${chart(u)}
+  const sx = solverData(D, u), up = sx && !sx.moving && sx.z <= -4;
+  const solver = sx ? `<div class="solve"><div class="hd"><span class="kick">${L('사면 아래 방향 속도', 'Speed down the slope')}</span><b>${sg(sx.v, 0)} ± ${sx.s.toFixed(0)}</b><span class="kick" style="letter-spacing:.06em">${L('mm / 월 · 폭우 이후', 'mm a month · after the storm')}</span>
+      <span class="tagx ${sx.moving ? 'mv' : ''}">${sx.moving ? L('아래로 이동 중', 'MOVING DOWNHILL') : up ? L('위 방향 변화 · 미끄러짐 아님', 'READS UPHILL · NOT SLIDING') : L(`감지 없음 · 월 ${Math.ceil(Math.abs(sx.v) + 2 * sx.s)} mm 초과 배제`, `NOTHING DETECTABLE · OVER ${Math.ceil(Math.abs(sx.v) + 2 * sx.s)} MM/MO RULED OUT`)}</span>
+      <p>${L(`폭우 전 속도, 폭우 때의 계단, 폭우 후 속도를 영상쌍 23개 전체에 일반화 최소제곱으로 맞춤. 감지 기준 ${M.velocity?.z_detect ?? 4}σ.`, `Rate before the storm, a step at the storm and the rate after it, fitted by generalised least squares to all 23 image pairs. Detection needs ${M.velocity?.z_detect ?? 4}σ.`)}</p></div>
+      <div class="ch">${solverSVG(sx, lang, { W: 520, H: 170 })}<div class="hint">${sx.tracks.length ? solverLegend(sx, lang) + ' &nbsp; ' : ''}${L('점 = 각 궤도의 통과를 사면 방향으로 투영 · 선 = 풀이 · 띠 = ±2σ', 'dots = each pass projected onto the slope · line = the solved model · band = ±2σ')}</div></div></div><div style="height:1.6mm"></div>` : '';
+  const radarBlock = F.radar && trs ? `${solver}<table class="f"><thead><tr><th>${L('궤도', 'Track')}</th><th>${L('비행 방향', 'Pass')}</th><th>${L('관측 기간 (2026)', 'Period (2026)')}</th><th>${L('누적 이동 cm', 'Movement cm')}</th><th>${L('잡음 cm', 'Noise cm')}</th><th>${L('잡음 대비', 'vs noise')}</th><th>${L('방향 민감도', 'Sensitivity')}</th><th>${L('긴밀도 전→폭우', 'Coherence pre→storm')}</th><th>${L('상태', 'Status')}</th></tr></thead>${trs}</table>
+      <div style="height:1.4mm"></div>${chart(u)}
       <div class="foot">${L('이동량은 레이더 시선 방향 값이며 사면을 따라 실제로 움직인 거리와 다릅니다. "방향 민감도"는 사면 아래 방향으로 1 cm 움직일 때 레이더가 보는 크기(0–1)로, 0에 가까우면 그 궤도는 이 사면의 이동을 거의 못 봅니다. 양수는 위성 쪽으로의 이동이며, 방향은 영상쌍 23개 모두에서 기상 자료와 대조해 확인했습니다. "긴밀도"가 낮으면(식생·지표 변화) 측정 신뢰도가 떨어집니다.', 'Movement is along the radar line of sight, not the distance moved down the slope. "Sensitivity" is how much of 1 cm of downslope movement the radar sees (0–1); near 0 that track is almost blind to this slope. Positive is toward the satellite; the direction was checked against weather data on all 23 image pairs. Low "coherence" (vegetation or surface change) means a less reliable measurement.')}</div>`
-    : `<table class="f"><tr><td style="padding:3mm">${F.mv}<br><small>${L('이 사면은 AI 취약도 순위와 사면 아래 시설만으로 선정되었습니다. 레이더 이동 측정값이 없으므로 B3 변형 징후 점검이 유일한 이동 확인 수단입니다.', 'This slope was chosen from the AI susceptibility rank and what lies below it only. With no radar measurement, the B3 signs of movement are the only check on movement.')}</small></td></tr></table>`;
-  const p2 = `<section class="page">${rh(partA)}
-    ${h2('A4', L('레이더 이동 측정 (NISAR)', 'Radar movement (NISAR)'), L('L밴드 파장 24.2 cm · 12일 간격', 'L-band, 24.2 cm wavelength · every 12 days'))}
+    : `${solver}<table class="f"><tr><td style="padding:3mm">${F.mv}<br><small>${L('이 사면은 AI 위험 순위와 사면 아래 시설만으로 선정되었습니다. 레이더 이동 측정값이 없으므로 B3 변형 징후 점검이 유일한 이동 확인 수단입니다.', 'This slope was chosen from the AI risk rank and what lies below it only. With no radar measurement, the B3 signs of movement are the only check on movement.')}</small></td></tr></table>`;
+  const p3 = `<section class="page">${rh(partA)}
+    ${h2('A5', L('레이더 이동 측정 (NISAR)', 'Radar movement (NISAR)'), L('L밴드 파장 24.2 cm · 12일 간격', 'L-band, 24.2 cm wavelength · every 12 days'))}
     ${radarBlock}
-    ${h2('A5', L('AI 판정 근거', 'What the AI saw'))}
+    ${h2('A6', L('AI 판정 근거', 'What the AI saw'))}
     ${kv([
-      [[L('취약도 순위', 'Susceptibility rank'), `${L('전체', 'all')} ${D.n.toLocaleString()}${L('개 사면 중 상위', ' slopes: top')} <b>${Math.max(1, Math.round((1 - F.pct) * 100))}%</b>`], [L('이동 탐지', 'Movement detector'), F.radar ? `${C.moving[u] ? `<b>${L('이동 감지', 'movement detected')}</b>` : L('감지 안 됨', 'none detected')}${Number.isFinite(C.zmax[u]) && C.zmax[u] > 0 ? ` &nbsp;<small>${L('최대', 'peak')} ${C.zmax[u].toFixed(1)}× ${L('잡음', 'noise')}</small>` : ''}` : L('레이더 자료 없음', 'no radar data')]],
+      [[L('위험 순위', 'Risk rank'), `${L('전체', 'all')} ${D.n.toLocaleString()}${L('개 사면 중 상위', ' slopes: top')} <b>${Math.max(1, Math.round((1 - F.pct) * 100))}%</b>`], [L('이동 탐지', 'Movement detector'), F.radar ? `${C.moving[u] ? `<b>${L('이동 감지', 'movement detected')}</b>` : L('감지 안 됨', 'none detected')}${Number.isFinite(C.zmax[u]) && C.zmax[u] > 0 ? ` &nbsp;<small>${L('최대', 'peak')} ${C.zmax[u].toFixed(1)}× ${L('잡음', 'noise')}</small>` : ''}` : L('레이더 자료 없음', 'no radar data')]],
       ...F.rs.map((r, i) => [[`${L('주요 요인', 'Main factor')} ${i + 1}`, r.s, 3]]),
     ])}
-    ${h2('A6', L('지표 · 강우', 'Ground cover · rain'), L('Sentinel-2 · ERA5', 'Sentinel-2 · ERA5'))}
+    ${h2('A7', L('지표 · 강우', 'Ground cover · rain'), L('Sentinel-2 · ERA5', 'Sentinel-2 · ERA5'))}
     ${kv([
       [[L('산불 피해 강도', 'Burn severity'), `dNBR ${C.dnbr[u].toFixed(2)} <small>${C.dnbr[u] >= 0.44 ? L('(심함)', '(high)') : C.dnbr[u] >= 0.27 ? L('(중간)', '(moderate)') : C.dnbr[u] >= 0.1 ? L('(약함)', '(low)') : L('(피해 없음)', '(unburned)')}</small>`], [L('불탄 면적', 'Burned share'), `${Math.round(C.burn[u] * 100)}% <small>${L('중간 이상 피해', 'moderate or worse')}</small>`]],
       [[L('식생 (2026.6)', 'Vegetation (Jun 2026)'), `NDVI ${C.ndvi[u].toFixed(2)}${C.ndvi[u] < 0.6 ? ` <small>${L('(빈약)', '(sparse)')}</small>` : ''}`], K && C.ndvi_latest ? [L('식생 (최근)', 'Vegetation (latest)'), Number.isFinite(C.ndvi_latest[u]) ? `NDVI ${C.ndvi_latest[u].toFixed(2)}` : '—'] : [L('광학 관측', 'Optical view'), C.seen[u] ? L('폭우 뒤 구름 없는 영상 있음', 'cloud-free image after the storm') : L('폭우 뒤 구름 없는 영상 없음', 'no cloud-free image after the storm')]],
       [[L('폭우 강수 (7.18–19)', 'Storm rain (18–19 Jul)'), `<b>${C.rain_storm[u].toFixed(0)} mm</b>`], [L('폭우 전 30일 강수', 'Rain in the 30 days before'), `${C.rain_ante[u].toFixed(0)} mm${K && C.rain_season && Number.isFinite(C.rain_season[u]) ? ` <small>· ${L('6–10월 합계', 'Jun–Oct total')} ${C.rain_season[u].toFixed(0)} mm</small>` : ''}`]],
     ])}
-    ${h2('A7', L('사면 아래 (약 300 m 이내)', 'Below the slope (within about 300 m)'), 'OpenStreetMap')}
+    ${h2('A8', L('사면 아래 (약 300 m 이내)', 'Below the slope (within about 300 m)'), 'OpenStreetMap')}
     ${kv([[[L('건물', 'Buildings'), `<b>${C.bld[u].toFixed(0)}</b>${L('동', '')} <small>${L('농촌 주택은 지도에 빠져 있을 수 있음 → B7에서 실제 수 확인', 'rural houses may be missing from the map → count them in B7')}</small>`], [L('주요 도로', 'Main road'), C.road[u] > 0 ? L('있음', 'yes') : L('없음', 'none')]]])}
-    ${h2('A8', L('점검 이력', 'Earlier inspections'), L('이전 점검이 있으면 기록', 'fill in if the slope was inspected before'))}
+    ${h2('A9', L('점검 이력', 'Earlier inspections'), L('이전 점검이 있으면 기록', 'fill in if inspected before'))}
     <table class="f"><thead><tr><th style="width:30mm">${L('점검일', 'Date')}</th><th style="width:44mm">${L('점검자', 'Inspector')}</th><th style="width:24mm">${L('판정 (A–D)', 'Judgment (A–D)')}</th><th>${L('조치 내용', 'Action taken')}</th></tr></thead>${'<tr><td class="w"></td><td></td><td></td><td></td></tr>'.repeat(2)}</table>
-    <div class="foot"><b>${L('등급 규칙', 'Level rule')}</b> — ${L('"우선 점검": 레이더가 이동을 감지했거나 AI 취약도가 상위 5%이고, 아래쪽 약 300 m 이내에 건물이나 주요 도로가 있는 사면. "관찰": 이동 감지 또는 취약도 상위 20%. 위험 지수 80–100은 우선 점검, 50–79는 관찰입니다. AI 모델은 2026년 7월 폭우 때의 붕괴지(자동 탐지 ' + M.suscept.n_failed + '곳, 사람이 아직 확인하지 않음)로 학습했습니다. 이동이 없는 사면이 안전하다는 뜻은 아닙니다.', '"Check first": the radar detected movement or the AI ranks the slope in the top 5%, and a building or main road lies within about 300 m downslope. "Watch": movement detected, or top 20%. Danger index 80–100 is check first, 50–79 is watch. The AI model learned from slopes that failed in the July 2026 storm (' + M.suscept.n_failed + ' found automatically, not yet checked by a person). No movement does not mean a slope is safe.')}</div>
-    <div class="safe"><b>${L('점검자 안전', 'Inspector safety')}</b><br>${L('2인 이상 점검. 호우 중이거나 호우 직후(24시간 이내)에는 사면에 오르지 말고 원거리에서 관찰. 균열이 눈에 띄게 벌어지거나, 사면에서 흙탕물이 솟거나, 땅 울림·나무 꺾이는 소리가 나면 즉시 사면 옆 방향으로 대피하고 119와 시·군 재난상황실에 알릴 것.', 'Inspect in pairs. During heavy rain or within 24 hours after it, stay off the slope and observe from a distance. If a crack is visibly widening, muddy water bursts from the slope, or you hear rumbling or trees snapping, leave sideways across the slope at once and call 119 and the district disaster office.')}</div>
-    ${pf(2)}</section>`;
+    <div class="foot"><b>${L('등급 규칙', 'Level rule')}</b> — ${L('"우선 점검": 레이더가 이동을 감지했거나 AI 위험 순위가 상위 5%이고, 아래쪽 약 300 m 이내에 건물이나 주요 도로가 있는 사면. "관찰": 이동 감지 또는 상위 20%. 위험 지수 80–100은 우선 점검, 50–79는 관찰입니다. AI 모델은 2026년 7월 폭우 때의 붕괴지(자동 탐지 ' + M.suscept.n_failed + '곳, 사람이 아직 확인하지 않음)로 학습했습니다. 이동이 없는 사면이 안전하다는 뜻은 아닙니다.', '"Check first": the radar detected movement or the AI risk rank puts the slope in the top 5%, and a building or main road lies within about 300 m downslope. "Watch": movement detected, or top 20%. Danger index 80–100 is check first, 50–79 is watch. The AI model learned from slopes that failed in the July 2026 storm (' + M.suscept.n_failed + ' found automatically, not yet checked by a person). No movement does not mean a slope is safe.')}</div>
+    ${pf(3)}</section>`;
 
-  // ---------- page 3: visit, slope, signs of movement ----------
-  const p3 = `<section class="page">${rh(partB)}
+  // ---------- page 4: visit, slope, signs of movement ----------
+  const b1 = `<section class="page">${rh(partB)}
     <div class="part">${partB}<span>${L('현장에서 수기 작성', 'filled in by hand on site')}</span></div>
     ${h2('B1', L('점검 개요', 'The visit'))}
     ${kv([
@@ -328,11 +395,11 @@ function form(u) {
       [L('과거 붕괴 흔적 (오래된 붕괴지)', 'Old landslide scar')],
       [L('올해 발생한 붕괴·세굴', 'Failure or scouring this year'), L('폭 ___ m · 길이 ___ m', 'width ___ m · length ___ m')],
     ], true)}
-    ${pf(3)}</section>`;
+    ${pf(4)}</section>`;
 
-  // ---------- page 4: water, vegetation, structures ----------
+  // ---------- page 5: water, vegetation, structures ----------
   const ST = [L('없음', 'None'), L('양호', 'Sound'), L('균열·변형', 'Cracked'), L('파손·막힘', 'Broken')];
-  const p4 = `<section class="page">${rh(partB)}
+  const b2 = `<section class="page">${rh(partB)}
     ${h2('B4', L('물 · 배수', 'Water and drainage'), `${L('위성', 'satellite')}: ${L('폭우', 'storm')} ${C.rain_storm[u].toFixed(0)} mm · ${L('전 30일', '30 days before')} ${C.rain_ante[u].toFixed(0)} mm`)}
     ${signs([
       [L('사면 중·하부 용수 (물이 스며 나옴)', 'Seepage on the middle or lower slope'), L('맑음 / 탁함', 'clear / muddy')],
@@ -367,18 +434,20 @@ function form(u) {
       <tr><td>${L('대피 경로 · 대피소', 'Escape route · shelter')}</td><td class="c">—</td><td>${cb(L('확인', 'Checked'), L('미확인', 'Not checked'))} ${L('대피소', 'shelter')} ${ln(38)}</td></tr>
       <tr><td>${L('주민 면담', 'Talked to residents')}</td><td class="c">—</td><td>${cb(L('이상 징후 들음', 'They reported signs'), L('없음', 'Nothing'), L('면담 못함', 'No one met'))}</td></tr>
     </table>
-    ${pf(4)}</section>`;
+    ${pf(5)}</section>`;
 
-  // ---------- page 5: check the satellite, judgment, signatures ----------
+  // ---------- page 6: check the satellite, judgment, signatures ----------
   const YN = cb(L('맞음', 'Right'), L('다름', 'Wrong'), L('판단 불가', 'Can\'t tell'));
   const x8 = [
     F.radar && F.b ? [C.moving[u] ? (slide(u) ? L(`레이더: 사면 방향 월 ${sg(slide(u).v, 0)} ± ${slide(u).s.toFixed(0)} mm 이동 감지`, `Radar: ${sg(slide(u).v, 0)} ± ${slide(u).s.toFixed(0)} mm a month along the slope`) : L(`레이더: 궤도 ${F.b.id}에서 ${sg(F.b.v)} cm 이동 감지`, `Radar: ${sg(F.b.v)} cm of movement on track ${F.b.id}`)) : L('레이더: 감지되는 이동 없음', 'Radar: no detectable movement'), cb(L('변형 징후 확인', 'Signs found'), L('징후 없음', 'No signs'), L('판단 불가', 'Can\'t tell'))] : null,
     ...F.rs.map((r) => [`AI: ${r.s}`, YN]),
     C.label[u] ? [L('2026년 7월 붕괴 후보지 (자동 탐지)', 'July 2026 scar candidate (automatic)'), cb(L('실제 붕괴', 'Real failure'), L('벌채·개간', 'Clearing'), L('기타', 'Other'), L('확인 불가', 'Can\'t tell'))] : null,
     [L(`지도 자료: 건물 ${C.bld[u].toFixed(0)}동, 주요 도로 ${C.road[u] > 0 ? '있음' : '없음'}`, `Map data: ${C.bld[u].toFixed(0)} building(s), main road ${C.road[u] > 0 ? 'yes' : 'none'}`), YN],
+    isSim(u) ? [L(`모의 토석류 경로: ${compass(C.rf_dir[u], lang)} 방향 약 ${r10(C.rf_len[u])} m (2쪽 지도)`, `Simulated debris path: about ${r10(C.rf_len[u])} m to the ${compass(C.rf_dir[u], lang)} (map on page 2)`), cb(L('실제 계곡·물길을 따름', 'Follows a real gully or channel'), L('경로가 다름', 'Path looks different'), L('판단 불가', 'Can\'t tell'))]
+      : C.reach ? [L(`ML 3 도달 거리: 약 ${r10(C.reach[u])} m`, `ML 3 reach: about ${r10(C.reach[u])} m`), cb(L('그만큼 갈 수 있음', 'Debris could get that far'), L('더 짧음', 'Shorter'), L('더 김', 'Farther'))] : null,
     [L(`"${lvn}" 등급이 현장 상황에 비해`, `The level "${lvn}", compared with the site, is`), cb(L('타당', 'About right'), L('과대', 'Too high'), L('과소', 'Too low'))],
   ].filter(Boolean);
-  const p5 = `<section class="page">${rh(partB)}
+  const b3 = `<section class="page">${rh(partB)}
     ${h2('B8', L('위성 결과 현장 대조', 'Checking the satellite against the ground'), L('이 칸의 답은 모델을 고치는 데 쓰입니다', 'these answers are used to correct the model'))}
     <table class="f"><thead><tr><th>${L('위성·AI가 말한 것', 'What the satellite and AI said')}</th><th style="width:78mm">${L('현장에서 본 것', 'What you found')}</th></tr></thead>${x8.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
     ${h2('B9', L('종합 판정', 'Overall judgment'), L('하나만 선택', 'choose one'))}
@@ -399,10 +468,10 @@ function form(u) {
     ${h2('B12', L('서명', 'Signatures'))}
     <table class="f sig"><thead><tr><th style="width:24mm"></th><th>${L('소속 · 직급', 'Office · post')}</th><th>${L('성명', 'Name')}</th><th>${L('서명', 'Signature')}</th><th style="width:30mm">${L('날짜', 'Date')}</th></tr></thead>
       ${[L('점검자', 'Inspector'), L('점검자', 'Inspector'), L('확인자', 'Reviewed by')].map((s) => `<tr><th>${s}</th><td></td><td></td><td></td><td></td></tr>`).join('')}</table>
-    ${pf(5)}</section>`;
+    ${pf(6)}</section>`;
 
-  // ---------- page 6: sketch and photo log ----------
-  const p6 = `<section class="page">${rh(partB)}
+  // ---------- page 7: sketch and photo log ----------
+  const b4 = `<section class="page">${rh(partB)}
     ${h2('B13', L('현장 약도', 'Site sketch'), `${L('한 칸 = 5 mm · 축척 1 :', 'one square = 5 mm · scale 1 :')} ${ln(14)}`)}
     <div class="grid">${GRID}<div class="north">▲<br>N</div><div class="lg">${L('표시할 것: 사면 윤곽과 능선, 균열(~~~), 단차(┬┬┬), 용수(●), 물길(→), 낙석(▲), 건물(■), 도로(═), 시설물, B3·B4 항목 번호, 사진 촬영 위치와 방향(①→)', 'Mark: slope outline and ridge, cracks (~~~), steps (┬┬┬), seepage (●), water paths (→), rockfall (▲), buildings (■), roads (═), structures, B3 and B4 item numbers, photo positions and directions (①→)')}</div></div>
     ${h2('B14', L('단면 약도', 'Cross-section'), L('사면 위(왼쪽)에서 아래(오른쪽)로', 'from the top of the slope (left) to the foot (right)'))}
@@ -411,8 +480,8 @@ function form(u) {
     <table class="f"><thead><tr><th style="width:9mm">${L('번호', 'No.')}</th><th style="width:38mm">${L('촬영 위치 · 방향', 'From where · facing')}</th><th>${L('찍은 대상', 'What it shows')}</th><th style="width:20mm">${L('B3·B4 항목', 'B3/B4 item')}</th><th style="width:36mm">${L('파일명 · 시각', 'File · time')}</th></tr></thead>
       ${Array.from({ length: 10 }, (_, i) => `<tr><td class="c">${'①②③④⑤⑥⑦⑧⑨⑩'[i]}</td><td class="w"></td><td></td><td></td><td></td></tr>`).join('')}</table>
     <div class="foot">${L('이 점검서는 GeoSentry 팀(2026 NASA Space Apps Challenge 서울)이 만든 시제품입니다. 점검 항목은 급경사지·산사태 취약지 현장 조사에서 일반적으로 확인하는 징후를 따랐으며, 정부 고시 서식이나 법정 평가표를 대체하지 않습니다. 건물 자료: OpenStreetMap. 지형: Copernicus DEM. 광학: Sentinel-2. 강우: ERA5. 레이더: NASA-ISRO NISAR.', 'This form is a prototype by the GeoSentry team (NASA Space Apps Challenge 2026, Seoul). The items follow the signs usually checked in field surveys of steep slopes and landslide-prone areas; it does not replace any official form or statutory assessment sheet. Buildings: OpenStreetMap. Terrain: Copernicus DEM. Optical: Sentinel-2. Rain: ERA5. Radar: NASA-ISRO NISAR.')}</div>
-    ${pf(6)}</section>`;
-  let html = p1 + p2 + p3 + p4 + p5 + p6;
+    ${pf(7)}</section>`;
+  let html = p1 + p2 + p3 + b1 + b2 + b3 + b4;
   if (!K && C.sim) {                                          // regional map: flagged slopes use the simulated debris flow (p11), not the 300 m rule
     const swap = [['아래쪽 약 300 m 이내에 건물이나 주요 도로가 있는 사면', '모의 토석류가 건물이나 주요 도로에 닿는 사면'], ['a building or main road lies within about 300 m downslope', 'a simulated debris flow from the slope reaches a building or main road']];
     if (C.sim[u] > 0) swap.push(['아래쪽 약 300 m 이내 건물', '모의 토석류가 닿는 건물'], ['within about 300 m downslope (OpenStreetMap)', 'reached by the simulated debris flow (OpenStreetMap)'],
@@ -427,9 +496,50 @@ function form(u) {
   return html.replaceAll('300 m', (K ? 360 : 300) + ' m');      // downslope search distance: k05 / p08
 }
 
+// ---- maps, once the pages are in the document ------------------------------------------------
+async function drawMaps(root, my) {
+  if (!G) return;
+  const jobs = [];
+  root.querySelectorAll('.map[data-osm]').forEach((el) => {
+    const u = +el.dataset.u, loc = el.dataset.osm === 'loc', W = el.clientWidth, H = el.clientHeight;
+    const fl = G.flowsOf(u), reach = !isSim(u) && !fl.length && C.reach ? C.reach[u] : 0;     // the fan only where no run was drawn
+    let lat = C.lat[u], lon = C.lon[u], z = 11;
+    if (!loc) {                                                  // road map, fitted to the cell, its flow and its reach
+      const f = frameFor(G, u, { flows: fl, reach: reach + G.cellR * 0.4, aspect: C.aspect[u], min: K ? 1100 : 520, pad: 1.15, aspectRatio: W / H });
+      const toLL = G.fitLL(f.cx, f.cz, 8000), [la, lo] = toLL(f.cx, f.cz); lat = la; lon = lo;
+      z = Math.min(17, Math.log2(156543.03392 * Math.cos(lat * Math.PI / 180) / (f.w / W)));
+      el._ll = toLL;
+    }
+    const m = osmMap({ W, H, lat, lon, z }), [cx, cy] = m.px(C.lat[u], C.lon[u]), r = CELL.r / m.mpp;
+    let marks = '';
+    if (loc) marks = `<circle cx="${cx}" cy="${cy}" r="11" fill="none" stroke="${RED}" stroke-width="2.6"/><circle cx="${cx}" cy="${cy}" r="3" fill="${RED}"/>`;
+    else {
+      if (reach) { const R = (reach + G.cellR * 0.4) / m.mpp, a = (C.aspect[u] - 90) * Math.PI / 180, h = 38 * Math.PI / 180;
+        marks += `<path d="M${cx} ${cy}L${(cx + Math.cos(a - h) * R).toFixed(1)} ${(cy + Math.sin(a - h) * R).toFixed(1)}A${R.toFixed(1)} ${R.toFixed(1)} 0 0 1 ${(cx + Math.cos(a + h) * R).toFixed(1)} ${(cy + Math.sin(a + h) * R).toFixed(1)}Z" fill="rgba(199,52,31,.16)" stroke="${RED}" stroke-width="1.8" stroke-dasharray="6 3"/>`; }
+      marks += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="rgba(255,255,255,.08)" stroke="#111" stroke-width="2" stroke-dasharray="7 4"/><path d="M${cx - 7} ${cy}h14M${cx} ${cy - 7}v14" stroke="#111" stroke-width="2.2"/>`;
+    }
+    el.innerHTML = `${m.tiles}<canvas width="${W * 2}" height="${H * 2}"></canvas><svg viewBox="0 0 ${W} ${H}">${marks}${m.deco}</svg><span class="tag">${loc ? L('위치도', 'Locator') : L('상세도', 'Detail')}</span><span class="att">© OpenStreetMap</span>`;
+    if (!loc && fl.length) flowsOnOSM(G, el.querySelector('canvas'), m, fl, el._ll);
+  });
+  root.querySelectorAll('canvas.big').forEach((cv) => {
+    const u = +cv.dataset.u, fl = G.flowsOf(u), sim = isSim(u), reach = !sim && !fl.length && C.reach ? C.reach[u] : 0;
+    const f = frameFor(G, u, { flows: fl, reach: reach + G.cellR * 0.4, aspect: C.aspect[u], min: K ? 1500 : 640, pad: 1.12, aspectRatio: 695 / +cv.dataset.h });
+    const ghost = G.flowsNear(f.hx, f.hz, f.w).filter((i) => !fl.includes(i));
+    jobs.push(vectorMap(G, cv, { cx: f.cx, cz: f.cz, hx: f.hx, hz: f.hz, mpp: f.w / 695, dpr: 3, hexR: G.cellR, flows: fl, ghost,
+      fan: reach ? { r: reach + G.cellR * 0.4, az: C.aspect[u] } : null, ko: lang === 'ko' }).then((hits) => {
+      if (my !== ticket) return;
+      const el = cv.closest('.page').querySelector('.hitn');
+      if (el && fl.length) el.textContent = L(` · 지도(Overture)에서는 ${hits}동`, ` · ${hits} on this map (Overture)`);
+    }));
+  });
+  await Promise.all(jobs);
+}
+
 // ---- toolbar and render ------------------------------------------------------------
 const $ = (s) => document.querySelector(s);
-function render() {
+let ticket = 0;
+async function render() {
+  const my = ++ticket;
   document.documentElement.lang = lang;
   document.title = L('GeoSentry 사면 현장 점검서', 'GeoSentry slope field inspection form');
   const list = byCounty.get(county) || [], onList = list.includes(sel), at = Math.max(0, list.indexOf(sel));
@@ -442,15 +552,16 @@ function render() {
   $('#back').href = `sheet.html?lang=${lang}&county=${county}${AREA === 'region' ? '&area=region' : ''}`;
   const us = onList && count > 1 ? list.slice(at, at + count) : [sel];
   $('#out').innerHTML = us.map(form).join('');
-  hillshades();
+  // fit each page: shrink its type until the footer clears the last block
   document.querySelectorAll('.page').forEach((pg) => {
     const pf = pg.querySelector('.pf'), last = pf.previousElementSibling;
-    for (let fs = 8.4; fs >= 7 && pf.getBoundingClientRect().top - last.getBoundingClientRect().bottom < 10; fs -= 0.2) pg.style.fontSize = fs + 'pt';
+    for (let fs = 8.4; fs >= 6.8 && pf.getBoundingClientRect().top - last.getBoundingClientRect().bottom < 8; fs -= 0.2) pg.style.fontSize = fs + 'pt';
   });
-  if (window.qrcode) document.querySelectorAll('.qr').forEach((el) => { const q = window.qrcode(0, 'M'); q.addData(el.dataset.url); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 2, margin: 0, scalable: true }); });
-  else document.querySelectorAll('.find').forEach((el) => { el.style.gridTemplateColumns = '1fr'; });
   const p = new URLSearchParams({ u: sel, lang }); if (count > 1) p.set('n', count); if (AREA === 'region') p.set('area', 'region');
   history.replaceState(null, '', '?' + p);
+  $('#status').textContent = L('지도 그리는 중…', 'drawing maps…');
+  await drawMaps($('#out'), my);
+  if (my === ticket) $('#status').textContent = '';
 }
 $('#county').onchange = (e) => { county = +e.target.value; sel = byCounty.get(county)[0]; render(); };
 $('#slope').onchange = (e) => { sel = +e.target.value; render(); };
