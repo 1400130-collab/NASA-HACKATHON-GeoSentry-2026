@@ -71,8 +71,9 @@ export async function loadAll(onProgress, base = BASE) {
     series: new Int16Array(out.series.buffer, out.series.byteOffset, out.series.byteLength / 2), coh: out.coh, nd: m.units.nd,
     tracks: TRACKS.map((t) => ({ id: t, ...m.tracks[t], days: m.tracks[t].dates.map(dayOf) })),
     images: m.images || REGION_IMAGES, trueColour: !!m.images,
-    view: korea ? { exag: m.view.exag, exagMax: m.view.exag_max, unitDist: 2.4, countyDist: 16, provDist: 46, minDist: 0.45, near: 0.04 }
-      : { exag: 2.6, exagMax: 5, unitDist: 9, countyDist: 62, provDist: 62, minDist: 2.5, near: 0.5 },
+    // minDist: how close the camera may come. About 140 m, street level among the 3D buildings (js/world.js).
+    view: korea ? { exag: m.view.exag, exagMax: m.view.exag_max, unitDist: 2.4, countyDist: 16, provDist: 46, minDist: 0.022, near: 0.04 }
+      : { exag: 2.6, exagMax: 5, unitDist: 9, countyDist: 62, provDist: 62, minDist: 0.14, near: 0.5 },
   };
   D.sx = (kmx) => kmx / k - D.Ws / 2; D.sz = (kmz) => kmz / k - D.Hs / 2;
   if (runout) {

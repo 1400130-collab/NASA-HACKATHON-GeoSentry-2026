@@ -1,7 +1,7 @@
-import { STR, reason, compass, featName } from './i18n.js?v=11';
+import { STR, reason, compass, featName } from './i18n.js?v=12';
 import { addScores, checkOrder } from './score.js';
-import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js?v=4';
-import { DAY0, DAYS, dayOf, AREA } from './data.js?v=2';
+import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js?v=5';
+import { DAY0, DAYS, dayOf, AREA } from './data.js?v=3';
 import { playSolver } from './inversion.js';
 const stored = () => { try { return localStorage.getItem('sw_lang'); } catch { return null; } };
 
@@ -55,7 +55,7 @@ export class UI {
     }
     const ex = $('#exag'); ex.max = this.D.view.exagMax; ex.value = this.D.view.exag; $('#exagOut').textContent = '×' + (+ex.value).toFixed(1);
     $('#areaSel').innerHTML = `<a class="${AREA === 'korea' ? 'on' : ''}" href="map.html" data-i18n="area_kr_s" data-tip="area_kr"></a><a class="${AREA === 'region' ? 'on' : ''}" href="map.html?area=region" data-i18n="area_rg_s" data-tip="area_rg"></a>`;
-    const togs = [['borders', 1], ['roads', 1], ['labels', 1], ['edges', 1], ['scars', 0]];
+    const togs = [['env', 1], ['trees', 1], ['borders', 1], ['roads', 1], ['labels', 1], ['edges', 1], ['scars', 0]];      // env, trees: the real-world layers (js/world.js)
     $('#debrisSwitch').hidden = !this.D.runout;
     $('#toggles').innerHTML = togs.map(([k, on]) => `<label class="tog"><input type="checkbox" data-k="${k}" ${on ? 'checked' : ''}><span data-i18n="t_${k}"></span></label>`).join('');
     $('#toggles').onchange = $('#debrisSwitch').onchange = $('#bldSwitch').onchange = (e) => a.setToggle(e.target.dataset.k, e.target.checked);

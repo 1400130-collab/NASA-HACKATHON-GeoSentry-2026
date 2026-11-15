@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { fetchBin } from './data.js?v=2';
+import { fetchBin } from './data.js?v=3';
 
 // Colour ramps: one source for both the shader and the legends (sRGB hex stops).
 export const RAMPS = {
@@ -43,7 +43,9 @@ void main() {
 }`;
 
 const FRAG = /* glsl */`
-uniform sampler2D tNormal, tUnitId, tA, tB, tC, tD, tRamp, tImgA, tImgB, tRadar, tCoast;
+uniform sampler2D tNormal, tUnitId, tA, tB, tC, tD, tRamp, tImgA, tImgB, tRadar, tCoast, tLand, tDetail, tDetail2;
+uniform vec2 uDetailC, uDetail2C;
+uniform float uLandOn, uDetailOn, uDetailH, uDetail2On, uDetail2H;
 uniform vec2 uSize40, uHalf;
 uniform float uHalo;
 uniform int uMode, uTrack;
@@ -61,6 +63,7 @@ float unitId(vec2 uv) {
   return floor(t.r * 255.0 + 0.5) + floor(t.g * 255.0 + 0.5) * 256.0 + floor(t.b * 255.0 + 0.5) * 65536.0;
 }
 float hatch() { return step(0.55, fract((gl_FragCoord.x + gl_FragCoord.y) / 7.0)); }
+float gPulse;      // 1 close up, 0 where a slope is only a few pixels: there the check-first glow holds steady instead of twinkling
 
 // colour (rgb, alpha) of the unit under uv for the current layer; e = extra glow
 vec4 unitColor(vec2 uv, out float glow) {
@@ -74,7 +77,7 @@ vec4 unitColor(vec2 uv, out float glow) {
   vec4 c = vec4(0.0);
   if (uMode == 1) {
     int l = int(A.r + 0.5);
-    if (l == 3) { float ph = fract(id * 0.618034); float pu = 0.5 + 0.5 * sin(uTime * 2.2 + ph * 6.2832); c = vec4(uLevelC[3], 0.93); glow = 0.25 + 0.55 * pu; }
+    if (l == 3) { float ph = fract(id * 0.618034); float pu = 0.5 + (0.5 * sin(uTime * 2.2 + ph * 6.2832)) * gPulse; c = vec4(uLevelC[3], 0.93); glow = 0.25 + 0.55 * pu; }
     else if (l == 2) c = vec4(uLevelC[2] * 0.82, 0.5);
     else if (l == 1) c = vec4(uLevelC[1], 0.13);
     else c = vec4(uLevelC[0], 0.5 * hatch());
@@ -136,6 +139,25 @@ void main() {
   float cd = uHalo > 0.5 ? texture2D(tCoast, uv).r : 0.0;
   vec3 fl = floorCol(vW.xz, 1.0);
   if (sea && uHalo > 0.5) base = mix(vec3(0.016, 0.052, 0.082), vec3(0.01, 0.03, 0.05), smoothstep(0.0, 0.45, cd));
+  // the real ground (js/world.js): land cover over the whole map, and near the camera a sharper picture with fields,
+  // water, roads and railways. It only replaces the slate base colour, so the relief shading stays and every slope
+  // layer below is drawn over it exactly as before.
+  if (uLandOn > 0.001 && !sea && !abroad) {
+    vec4 lc = texture2D(tLand, uv);
+    vec3 g = lc.rgb; float a = lc.a;
+    if (uDetail2On > 0.001) {                                               // the wide picture, then the sharp one inside it
+      vec2 q = (vW.xz - uDetail2C) / (2.0 * uDetail2H) + 0.5, e = min(q, 1.0 - q);
+      float w = smoothstep(0.0, 0.07, min(e.x, e.y)) * uDetail2On;
+      if (w > 0.0) { vec4 d = texture2D(tDetail2, q); g = g * (1.0 - d.a * w) + d.rgb * w; a = max(a, d.a * w); }
+    }
+    if (uDetailOn > 0.001) {
+      vec2 q = (vW.xz - uDetailC) / (2.0 * uDetailH) + 0.5, e = min(q, 1.0 - q);
+      float w = smoothstep(0.0, 0.07, min(e.x, e.y)) * uDetailOn;
+      if (w > 0.0) { vec4 d = texture2D(tDetail, q); g = g * (1.0 - d.a * w) + d.rgb * w; a = max(a, d.a * w); }
+    }
+    g *= 0.82 + 0.5 * smoothstep(60.0, 1100.0, hm);                         // a little lighter with height, like the slate it replaces
+    base = mix(base, g, a * uLandOn);
+  }
   if (abroad) { base = mix(vec3(0.028, 0.034, 0.038), vec3(0.03, 0.036, 0.042), uHalo); shade = 1.0; sea = true; }      // outside South Korea: flat, no data
   vec3 col = base * shade;
 
@@ -147,6 +169,7 @@ void main() {
 
   // per-unit layer, 4 taps across the pixel footprint
   vec2 dx = dFdx(uv), dy = dFdy(uv);
+  gPulse = 1.0 - smoothstep(0.12, 0.45, max(length(dx * uSize40), length(dy * uSize40)));
   float gl0, gl1, gl2, gl3;
   vec4 o0 = unitColor(uv + 0.125 * dx + 0.375 * dy, gl0), o1 = unitColor(uv - 0.375 * dx + 0.125 * dy, gl1);
   vec4 o2 = unitColor(uv + 0.375 * dx - 0.125 * dy, gl2), o3 = unitColor(uv - 0.125 * dx - 0.375 * dy, gl3);
@@ -212,6 +235,7 @@ export class Terrain {
     const { W80, H80, h, n } = D, Wkm = D.Ws, Hkm = D.Hs;
     // regional: 160 m mesh by default (0.65 M triangles), ultra 80 m. Nationwide: 1.1 km by default (0.75 M), ultra 720 m.
     const s = D.korea ? (quality === 'low' ? 4 : (quality === 'ultra' ? 2 : 3)) : (quality === 'low' ? 3 : (quality === 'ultra' ? 1 : 2));
+    this.step = s;                                              // world-geo.js rebuilds this exact surface to stand buildings on it
     const nx = Math.floor((W80 - 1) / s) + 1, nz = Math.floor((H80 - 1) / s) + 1;
     const pos = new Float32Array(nx * nz * 3), uv = new Float32Array(nx * nz * 2);
     let maxH = 0;
@@ -272,6 +296,8 @@ export class Terrain {
       uScanO: { value: [new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2()] },
       uScanD: { value: [new THREE.Vector2(0, -1), new THREE.Vector2(0, -1), new THREE.Vector2(0, -1)] },
       uScanP: { value: [0, 0, 0] }, uScanI: { value: [0, 0, 0] },
+      tLand: { value: blank }, tDetail: { value: blank }, uLandOn: { value: 0 }, uDetailOn: { value: 0 }, uDetailH: { value: 1 }, uDetailC: { value: new THREE.Vector2() },
+      tDetail2: { value: blank }, uDetail2On: { value: 0 }, uDetail2H: { value: 1 }, uDetail2C: { value: new THREE.Vector2() },
       uScanC: { value: TRACK_COLORS.map(lc) }, uLevelC: { value: LEVEL_COLORS.map(lc) }, uFog: { value: lc('#05090d') },
     };
     this.mesh = new THREE.Mesh(geo, new THREE.ShaderMaterial({ uniforms: this.uniforms, vertexShader: VERT, fragmentShader: FRAG }));

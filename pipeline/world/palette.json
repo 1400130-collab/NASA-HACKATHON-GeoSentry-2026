@@ -1,0 +1,49 @@
+{
+  "land": [
+    "#22323a",
+    "#24402f",
+    "#39472f",
+    "#44512f",
+    "#534d30",
+    "#5d5650",
+    "#5c574b",
+    "#143a56",
+    "#27494f"
+  ],
+  "tree_tall": "#1b3626",
+  "water": "#154463",
+  "water_line": "#2a6a8f",
+  "farmland": "#5a5333",
+  "orchard": "#465633",
+  "park": "#33552f",
+  "grass": "#455a33",
+  "residential": "#5a534e",
+  "industrial": "#565662",
+  "commercial": "#62574f",
+  "institution": "#5a5647",
+  "cemetery": "#3b4d3a",
+  "sand": "#6e6654",
+  "rock": "#55554f",
+  "road": [
+    "#f0c070",
+    "#e9bd78",
+    "#d9c7a2",
+    "#bdb7a8",
+    "#9a978e",
+    "#7d7b75",
+    "#6a6863"
+  ],
+  "road_w": [
+    26,
+    20,
+    15,
+    12,
+    9,
+    6.5,
+    4.5
+  ],
+  "rail": "#9fb3c4",
+  "building_roof": "#b9aa8e",
+  "building_wall": "#6f665a",
+  "building_flat": "#857b68"
+}

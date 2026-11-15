@@ -4,10 +4,13 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { loadAll, DAYS, AREA } from './data.js?v=2';
-import { Terrain } from './terrain.js?v=4';
-import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=11';
-import { UI } from './ui.js?v=15';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { loadAll, DAYS, AREA } from './data.js?v=3';
+import { Terrain } from './terrain.js?v=5';
+import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=12';
+import { UI } from './ui.js?v=16';
+import { World } from './world.js?v=8';
+import { makeGeo } from './world-geo.js';
 
 const qs = new URLSearchParams(location.search);
 const quality = qs.get('q') || ((navigator.hardwareConcurrency || 8) <= 4 || /Mobi|Android/i.test(navigator.userAgent) ? 'mid' : 'high');
@@ -26,15 +29,37 @@ const controls = new MapControls(camera, canvas);
 Object.assign(controls, { enableDamping: true, dampingFactor: 0.08, minDistance: 2.5, maxDistance: 330, maxPolarAngle: 1.47, zoomToCursor: true, screenSpacePanning: false });
 controls.target.set(0, 0, 0);
 
-const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: quality === 'ultra' ? 4 : 0 });      // multisampling a half-float target cost about 40% of the frame
+const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: quality === 'ultra' || quality === 'high' ? 4 : 0 });      // multisampling: about 1.5 ms a frame on a laptop GPU, and what stops building edges crawling; off on weaker devices
 const composer = new EffectComposer(renderer, rt);
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.55, 1.0);
 composer.addPass(bloom); composer.addPass(new OutputPass());
+// Edge smoothing (FXAA, after Timothy Lottes). The scene is drawn without multisampling, which is what makes the edges
+// of buildings, trees and thin lines crawl while the camera moves; one cheap pass over the finished picture calms them.
+const fxaa = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uInv: { value: new THREE.Vector2(1, 1) } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 uInv; varying vec2 vUv;
+    void main(){
+      vec3 lw = vec3(0.299, 0.587, 0.114); vec4 m = texture2D(tDiffuse, vUv);
+      float nw = dot(texture2D(tDiffuse, vUv + vec2(-1.0, -1.0) * uInv).rgb, lw), ne = dot(texture2D(tDiffuse, vUv + vec2(1.0, -1.0) * uInv).rgb, lw);
+      float sw = dot(texture2D(tDiffuse, vUv + vec2(-1.0, 1.0) * uInv).rgb, lw), se = dot(texture2D(tDiffuse, vUv + vec2(1.0, 1.0) * uInv).rgb, lw), mm = dot(m.rgb, lw);
+      float lo = min(mm, min(min(nw, ne), min(sw, se))), hi = max(mm, max(max(nw, ne), max(sw, se)));
+      vec2 dir = vec2(-((nw + ne) - (sw + se)), (nw + sw) - (ne + se));
+      float red = max((nw + ne + sw + se) * 0.03125, 0.0078125);
+      dir = clamp(dir / (min(abs(dir.x), abs(dir.y)) + red), vec2(-8.0), vec2(8.0)) * uInv;
+      vec3 a = 0.5 * (texture2D(tDiffuse, vUv + dir * (1.0 / 3.0 - 0.5)).rgb + texture2D(tDiffuse, vUv + dir * (2.0 / 3.0 - 0.5)).rgb);
+      vec3 b = a * 0.5 + 0.25 * (texture2D(tDiffuse, vUv - dir * 0.5).rgb + texture2D(tDiffuse, vUv + dir * 0.5).rgb);
+      float lb = dot(b, lw);
+      gl_FragColor = vec4(lb < lo || lb > hi ? a : b, m.a);
+    }`,
+});
+composer.addPass(fxaa);
 const inset = { l: 0, r: 0, t: 0, b: 0 };
 function resize() {
   const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h, false); composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(w, h);
+  fxaa.uniforms.uInv.value.set(1 / (w * renderer.getPixelRatio()), 1 / (h * renderer.getPixelRatio()));
   bloom.setSize(w * renderer.getPixelRatio() / 2, h * renderer.getPixelRatio() / 2);      // the glow is blurry anyway, so it gets a quarter of the pixels
   camera.aspect = w / h;
   // the controls cover the left and right edges, so the map is centred in the part between them
@@ -65,6 +90,10 @@ document.body.classList.add(D.korea ? 'area-korea' : 'area-region');
 const terrain = app.terrain = new Terrain(D, quality);
 scene.add(terrain.group);
 const U = terrain.uniforms;
+// the real world on the terrain: 3D buildings, trees, land cover, water, local roads (data/world/). It only adds to the scene.
+const world = app.world = new World(D, terrain, { quality, poke: (ms) => app.poke?.(ms) });
+scene.add(world.group);
+D.surfAt = makeGeo({ korea: D.korea, k: D.k, Ws: D.Ws, Hs: D.Hs, W80: D.W80, H80: D.H80, step: terrain.step, h: D.h }).surface;   // height of the mesh as drawn
 const vectors = makeVectors(D, U.uExag);
 vectors.scars.visible = false;
 Object.values(vectors).forEach((v) => scene.add(v));
@@ -162,7 +191,8 @@ app.setTrueColour = (on) => { app.state.tc = on; app.setImage(app.state.img); ui
 app.setRain = (mm) => { app.state.rain = mm; U.uRain.value = mm; ui.rain(mm); };      // forecast, mm in 48 h (rain layer)
 app.setExag = (v) => { U.uExag.value = v; if (app.state.sel >= 0) placeBeacon(app.state.sel); };
 let dimmed = null;                                             // the slope colours fade while the flows play, so the flows are what you see
-app.setToggle = (k, on) => { if (k === 'debris') { if (!on) { debris.clear(); if (dimmed !== null) U.uOverlay.value = dimmed; dimmed = null; } else { if (dimmed === null) dimmed = U.uOverlay.value; U.uOverlay.value = 0.12; debris.fireAll(); if (D.korea) flyTo({ x: D.region.x, z: D.region.z + 1, dist: 24, polar: 0.82, az: -0.2, dur: 2.6 }); } } else if (k === 'labels') labelsOn = on; else if (k === 'edges') U.uEdges.value = on ? 1 : 0; else { vectors[k].visible = on; if (k === 'borders' && vectors.provinces) vectors.provinces.visible = on; } };
+app.setToggle = (k, on) => { if (k === 'debris') { if (!on) { debris.clear(); if (dimmed !== null) U.uOverlay.value = dimmed; dimmed = null; } else { if (dimmed === null) dimmed = U.uOverlay.value; U.uOverlay.value = 0.12; debris.fireAll(); if (D.korea) flyTo({ x: D.region.x, z: D.region.z + 1, dist: 24, polar: 0.82, az: -0.2, dur: 2.6 }); } } else if (k === 'labels') labelsOn = on; else if (k === 'edges') U.uEdges.value = on ? 1 : 0; else if (k === 'env' || k === 'trees' || k === 'buildings') world.setOn(k, on); else {      // buildings: the small blocks far away and the real 3D ones up close
+  vectors[k].visible = on; if (k === 'borders' && vectors.provinces) vectors.provinces.visible = on; } };
 app.setCounty = (id) => {
   app.state.county = id; U.uCounty.value = id; ui.list(); const c = D.meta.counties.find((c) => c.id === id);
   if (c && c.cx !== null) flyTo({ x: D.sx(c.cx), z: D.sz(c.cz), dist: D.view.countyDist, polar: 0.8, az: -0.2 });
@@ -258,7 +288,20 @@ canvas.addEventListener('pointerup', (e) => {
   if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5 || app.state.story) return;
   const p = pickAt(e.clientX, e.clientY); app.select(p && p.unit >= 0 ? p.unit : -1, false);
 });
-canvas.addEventListener('wheel', () => { idle = 0; app.ui.hintOff(); }, { passive: true });
+// Zoom. The controls would jump one step per wheel notch; instead every notch moves a goal distance and the camera
+// glides to it, towards (or away from) the ground under the pointer. Touch pinch is still the controls' own.
+let zoom = null;
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault(); e.stopImmediatePropagation();            // keep the wheel from the controls
+  idle = 0; app.ui.hintOff();
+  if (tween || app.state.story) return;
+  const dy = Math.max(-260, Math.min(260, e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? innerHeight : 1)));
+  const dist = camera.position.distanceTo(controls.target);
+  const goal = Math.min(controls.maxDistance, Math.max(controls.minDistance, (zoom ? zoom.goal : dist) * Math.exp(dy * (e.ctrlKey ? 0.011 : 0.0017))));
+  const p = pickAt(e.clientX, e.clientY);
+  zoom = { goal, ax: p ? p.x : controls.target.x, az: p ? p.z : controls.target.z };
+  poke(500);
+}, { capture: true, passive: false });
 
 // ---- frame loop ------------------------------------------------------------------------------
 const clock = new THREE.Clock(); let time = 0, idle = 0, frame = 0;
@@ -289,7 +332,7 @@ function tick(now) {
     ui.hoverTip(u, ptr[0], ptr[1]);
   }
   const settling = Math.abs(app.imgT - U.uImgOn.value) > 0.003 || Math.abs(app.radT - U.uRadarOn.value) > 0.003;
-  const hot = app.state.playing || tween || app.state.story || revealing || down || settling || beacon.group.visible || debris?.active || now < hotUntil;   // the selection beacon pulses, so it needs every frame
+  const hot = app.state.playing || tween || app.state.story || revealing || down || settling || beacon.group.visible || debris?.active || world.busy || zoom || now < hotUntil;   // the selection beacon pulses, so it needs every frame
   const due = softAt && now >= softAt;
   const gap = hot ? HOT_GAP : due ? 0 : LIVE ? 48 : Infinity;
   if (now - lastFrame < gap) return;
@@ -305,7 +348,26 @@ function tick(now) {
     idle += dt;
     if (LIVE && idle > 25 && !down) { const a = dt * 0.012, p = camera.position.clone().sub(controls.target); p.applyAxisAngle(THREE.Object3D.DEFAULT_UP, a); camera.position.copy(controls.target).add(p); }
   }
+  if (zoom && (tween || app.state.story)) zoom = null;
+  if (zoom) {                                                  // glide towards the goal distance, keeping the ground under the pointer where it is
+    const off = camera.position.clone().sub(controls.target), r = zoom.goal / off.length();
+    if (Math.abs(Math.log(r)) < 0.0015) zoom = null;
+    else {
+      const f = Math.pow(r, 1 - Math.exp(-Math.min(dt, 0.034) * 9));      // the first frame after a pause reports a long dt: no lurch
+      controls.target.x = zoom.ax + (controls.target.x - zoom.ax) * f; controls.target.z = zoom.az + (controls.target.z - zoom.az) * f;
+      camera.position.copy(controls.target).addScaledVector(off, f);
+    }
+  }
   controls.update();
+  // never under the ground: close up and tilted, the camera would otherwise sink into the hillside behind it
+  if (Math.abs(camera.position.x) < D.Ws / 2 && Math.abs(camera.position.z) < D.Hs / 2) {
+    const floor = D.surfAt(camera.position.x, camera.position.z) * U.uExag.value + 0.03 / D.k;      // 30 m above the surface
+    if (camera.position.y < floor) { camera.position.y = floor; camera.lookAt(controls.target); }
+  }
+  // close to the ground the near and far planes come in with the camera, so buildings a few metres away are not cut off
+  const cd = camera.position.distanceTo(controls.target), near = Math.min(D.view.near, Math.max(D.view.near * 0.008, cd * 0.04)), far = Math.min(2500, Math.max(400, cd * 3000));
+  if (Math.abs(near - camera.near) > camera.near * 0.04 || far !== camera.far) { camera.near = near; camera.far = far; camera.updateProjectionMatrix(); }
+  world.update(camera, controls.target, dt, renderer.domElement.height); vectors.roads.material.uniforms.uCut.value = world.roadCut;
   U.uImgOn.value += (app.imgT - U.uImgOn.value) * Math.min(1, dt * 4); U.uRadarOn.value += (app.radT - U.uRadarOn.value) * Math.min(1, dt * 4);
   terrain.update(dt, time); debris?.update(dt, camera, renderer); sats.forEach((s) => s.update(dt, time)); rain.update(dt, time); clouds.update(dt, time);
   if (revealing) { U.uRevealP.value = U.uScanP.value[0]; if (!sats[0].active) { revealing = false; U.uRevealOn.value = 0; } }
@@ -320,7 +382,7 @@ ui = app.ui = new UI(app);
 ui.tab('list'); app.setMode('level'); app.setTrack(0); ui.image(app.state.img);
 terrain.setTime(app.state.day); rain.setDay(app.state.day); app.relabel(); ui.time(app.state.day);
 bar.style.width = '100%'; msg.textContent = 'Ready';
-app.home = home; window.__app = app; app.gfx = { renderer, composer, bloom, scene, camera, resize };      // handles for profiling in the console
+app.home = home; window.__app = app; app.gfx = { renderer, composer, bloom, scene, camera, controls, resize };      // handles for profiling in the console
 requestAnimationFrame(tick);
 await sleep(500);
 document.getElementById('intro').classList.add('done');
