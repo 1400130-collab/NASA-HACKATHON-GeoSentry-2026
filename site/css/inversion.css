@@ -59,9 +59,12 @@ html[lang="ko"] .hero h1 { font-size: clamp(38px, min(6vw, 10.5vh), 92px); }
 .hero .row > div { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 18px 40px; }
 .hero .lede { font-size: clamp(15px, min(1.2vw, 2.2vh), 18px); line-height: 1.5; max-width: 46ch; margin: 0; }
 .hero .actions { flex: none; }
-.hero .actions { gap: 16px; }
-.hero .actions .btn { font-size: 21px; padding: 24px 34px; border-radius: 8px; gap: 14px; }
-@media (max-width: 600px) { .hero .actions .btn { font-size: 18px; padding: 20px 26px; } }
+.hero .actions { gap: 12px; }
+.hero .actions .btn { font-size: 16px; padding: 15px 24px; border-radius: 6px; gap: 10px; }
+@media (max-width: 600px) {
+  .hero .actions { flex: 1 1 100%; min-width: 0; }
+  .hero .actions .btn { font-size: 15px; padding: 13px 18px; flex: 1 1 auto; justify-content: center; }
+}
 
 /* the four engines sit on one straight slope that falls left to right. Each engine starts where the slope
    crosses its column, marked by a still node. */
