@@ -6,12 +6,12 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { loadAll, DAYS, AREA } from './data.js';
 import { Terrain } from './terrain.js';
-import { Satellite, Rain, Clouds, Beacon, makeVectors } from './fx.js';
-import { UI } from './ui.js?v=5';
+import { Satellite, Rain, Clouds, Beacon, PastMarks, makeVectors } from './fx.js?v=3';
+import { UI } from './ui.js?v=7';
 
 const qs = new URLSearchParams(location.search);
 const quality = qs.get('q') || ((navigator.hardwareConcurrency || 8) <= 4 || /Mobi|Android/i.test(navigator.userAgent) ? 'mid' : 'high');
-const MODE_ID = { img: 0, level: 1, suscept: 2, move: 3, burn: 4, coh: 5, ifg: 6 };
+const MODE_ID = { img: 0, level: 1, suscept: 2, move: 3, burn: 4, coh: 5, ifg: 6, past: 0 };      // past landslides: bare relief under the markers
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -57,6 +57,8 @@ if (D.korea) {                                                  // city district
     c.en = `${en} ${low.startsWith(pre) ? low.slice(pre.length).replace(/gu$/, '-gu').replace(/^./, (x) => x.toUpperCase()) : c.en}`;
   }
 }
+// the ten-year record of past landslides and the places it names (nationwide map only: their positions are in its grid)
+D.past = D.korea ? await fetch('data/history.json').then((r) => r.json()).then((h) => (h.events?.length ? h : null)).catch(() => null) : null;
 app.state.img = D.img0; app.state.tc = D.trueColour;
 camera.near = D.view.near; camera.updateProjectionMatrix(); controls.minDistance = D.view.minDist;
 document.body.classList.add(D.korea ? 'area-korea' : 'area-region');
@@ -69,6 +71,8 @@ Object.values(vectors).forEach((v) => scene.add(v));
 const sats = D.tracks.map((t, i) => new Satellite(t.id, i, terrain)); sats.forEach((s) => scene.add(s.group));
 const rain = new Rain(D), clouds = new Clouds(D), beacon = new Beacon();
 scene.add(rain.mesh, clouds.mesh, beacon.group);
+const past = D.past ? new PastMarks(D, D.past.events) : null;
+if (past) scene.add(past.group);
 
 // ---- place labels (HTML, projected each frame) -----------------------------------------
 const labHost = document.getElementById('labels'); let labels = [], labelsOn = true;
@@ -81,6 +85,10 @@ app.relabel = (lang) => {
     D.meta.counties.filter((c) => c.units > 120 && c.cx !== null).forEach((c) => add(ko ? c.ko : c.en, D.sx(c.cx), D.sz(c.cz), 'cty', 0.5, c.units));
   } else D.meta.counties.filter((c) => c.units > 2500 && c.cx !== null).forEach((c) => add(ko ? c.ko : c.en, D.sx(c.cx), D.sz(c.cz), 'cty', 2.2, c.units));
   D.vectors.towns.forEach((t) => add(ko ? t.ko : t.en, D.sx(t.x), D.sz(t.z), 'town', D.korea ? 0.15 : 0.5, 2e6));
+  if (past) D.past.events.forEach((e, i) => {                  // a name and its years at the top of each past-landslide marker
+    add('', D.sx(e.x), D.sz(e.z), 'past', 0, 9e6); const l = labels.at(-1); l.mark = past.items[i];
+    l.el.innerHTML = `${ko ? e.ko : e.en}<i>${e.years.join(' · ')}</i>`;
+  });
   labels.sort((a, b) => b.rank - a.rank);                      // provinces, then towns, then counties by size: the first to claim a spot keeps it
   for (const l of labels) { l.w = l.el.offsetWidth; l.h = l.el.offsetHeight; }
 };
@@ -89,8 +97,8 @@ function placeLabels() {
   const w = innerWidth, h = innerHeight, far = camera.position.distanceTo(controls.target), bare = !!app.state.story;
   const x0 = bare ? 0 : inset.l - 8, x1 = w - (bare ? 0 : inset.r), y1 = h - 84, placed = [];
   for (const l of labels) {
-    v3.set(l.x, D.hAt(l.x, l.z) * U.uExag.value + l.lift, l.z).project(camera);
-    const hide = D.korea ? (l.cls === 'prov' && far < 22) || (l.cls === 'cty' && (far > 34 || far < 2.5)) || (l.cls === 'town' && (far > 70 || far < 2))
+    v3.set(l.x, D.hAt(l.x, l.z) * U.uExag.value + (l.mark ? l.mark.top * 1.3 : l.lift), l.z).project(camera);
+    const hide = l.mark ? app.state.mode !== 'past' : D.korea ? (l.cls === 'prov' && far < 22) || (l.cls === 'cty' && (far > 34 || far < 2.5)) || (l.cls === 'town' && (far > 70 || far < 2))
       : (l.cls === 'cty' && far < 28) || (l.cls === 'town' && far > 190);
     const sx = (v3.x * 0.5 + 0.5) * w, sy = (-v3.y * 0.5 + 0.5) * h;
     let vis = labelsOn && v3.z < 1 && sx > x0 + l.w / 2 && sx < x1 - l.w / 2 && sy > 56 && sy < y1 && !hide;
@@ -139,6 +147,7 @@ let ui;
 app.setMode = (m) => {
   app.state.mode = m; U.uMode.value = MODE_ID[m]; app.imgT = m === 'img' ? 1 : 0; app.radT = m === 'ifg' ? 1 : 0;
   if (m === 'img') app.setImage(app.state.img); if (m === 'ifg') terrain.setRadar(D.tracks[app.state.track].id);
+  if (past) past.group.visible = m === 'past';
   ui.mode(m);
 };
 app.setTrack = (i) => { app.state.track = i; U.uTrack.value = i; terrain.timeKey = null; terrain.setTime(app.state.day); if (app.state.mode === 'ifg') terrain.setRadar(D.tracks[i].id); ui.track(i); };
@@ -159,6 +168,7 @@ app.setProvince = (id) => {                                   // nationwide only
   app.state.prov = id; app.state.county = 0; U.uCounty.value = 0; ui.list(); const p = D.meta.provinces?.find((p) => p.id === id);
   if (p) flyTo({ x: D.sx(p.cx), z: D.sz(p.cz), dist: D.view.provDist * Math.min(1.4, Math.max(0.45, Math.sqrt(p.units / 9000))), polar: 0.8, az: -0.2 }); else flyTo(home());
 };
+app.flyPast = (i) => { const e = D.past.events[i]; flyTo({ x: D.sx(e.x), z: D.sz(e.z), dist: e.level === 'town' ? 9 : 16, polar: 0.95, az: -0.25, dur: 2.2 }); };
 app.setHover = (u) => { app.state.hover = u; U.uHover.value = u >= 0 ? u + 1 : -1; app.soft?.(); };
 function placeBeacon(u) { const x = D.sx(D.col.x[u]), z = D.sz(D.col.z[u]); beacon.place(x, D.hAt(x, z) * U.uExag.value, z); }
 app.select = (u, fly) => {
@@ -264,7 +274,7 @@ function tick(now) {
     ui.hoverTip(u, ptr[0], ptr[1]);
   }
   const settling = Math.abs(app.imgT - U.uImgOn.value) > 0.003 || Math.abs(app.radT - U.uRadarOn.value) > 0.003;
-  const hot = app.state.playing || tween || app.state.story || revealing || down || settling || now < hotUntil;
+  const hot = app.state.playing || tween || app.state.story || revealing || down || settling || beacon.group.visible || now < hotUntil;   // the selection beacon pulses, so it needs every frame
   const due = softAt && now >= softAt;
   const gap = hot ? HOT_GAP : due ? 0 : LIVE ? 48 : Infinity;
   if (now - lastFrame < gap) return;
@@ -285,6 +295,7 @@ function tick(now) {
   terrain.update(dt, time); sats.forEach((s) => s.update(dt, time)); rain.update(dt, time); clouds.update(dt, time);
   if (revealing) { U.uRevealP.value = U.uScanP.value[0]; if (!sats[0].active) { revealing = false; U.uRevealOn.value = 0; } }
   if (beacon.group.visible) beacon.update(time, camera.position.distanceTo(beacon.group.position));
+  if (past?.group.visible) past.update(camera, U.uExag.value);
   placeLabels();
   composer.render();
 }

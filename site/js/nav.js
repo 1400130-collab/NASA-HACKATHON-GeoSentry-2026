@@ -14,6 +14,8 @@ const MENU = [
     ['hindsight', '01 · Hindsight test'], ['detection', '02 · Detection test'], ['did-not-work', '03 · What did not work'],
     ['checks', '04 · Checks'], ['by-province', '05 · By province'], ['limits', '06 · Limits'],
     ['uncertainty', '07 · Uncertainty'], ['radar-check', '08 · Radar check']] },
+  { page: 'history.html', title: 'History', items: [
+    ['impact', '01 · Impact index'], ['lives', '02 · Lives'], ['scoring', '03 · Scoring']] },
   { page: 'about.html', title: 'About', items: [
     ['mission', '01 · Mission'], ['in-numbers', '02 · In numbers'], ['why-here', '03 · Why here'], ['who-we-asked', '04 · Who we asked'],
     ['principles', '05 · Principles'], ['team', '06 · Team'], ['data', '07 · Data sources'], ['tools', '08 · How it was built'],
@@ -69,8 +71,9 @@ function build() {
     </div>`).join('')}</div>`;
 
   // header placement: inside the site masthead, or the map's top bar; otherwise a fixed button at the top left
-  const host = document.querySelector('.masthead .wrap') || document.querySelector('#top');
+  const host = document.querySelector('.masthead .wrap') || document.querySelector('#top'), bar = host ? null : document.querySelector('body > .bar');
   if (host) host.prepend(btn);
+  else if (bar) { btn.style.cssText = 'color:#fff;margin:0 2px 0 -6px'; bar.prepend(btn); }      // the printable sheets: in their dark top bar
   else { btn.style.cssText = 'position:fixed;top:12px;left:16px;z-index:999;background:rgba(17,19,20,.85);margin:0'; document.body.appendChild(btn); }
   document.body.append(scrim, drawer);
 

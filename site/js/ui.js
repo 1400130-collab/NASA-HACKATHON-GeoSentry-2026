@@ -1,4 +1,4 @@
-import { STR, reason, compass, featName } from './i18n.js?v=5';
+import { STR, reason, compass, featName } from './i18n.js?v=7';
 import { addScores, checkOrder } from './score.js';
 import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js';
 import { DAY0, DAYS, dayOf, AREA } from './data.js';
@@ -42,8 +42,8 @@ export class UI {
   build() {
     const a = this.app;
     const modeBtn = (m) => `<button class="mode" data-m="${m}" role="radio"><i></i><b data-i18n="m_${m}"></b></button>`;
-    $('#modes').innerHTML = MODES.map(modeBtn).join(''); $('#modesAdv').innerHTML = ADV.map(modeBtn).join('');
-    $('#left').addEventListener('click', (e) => { const b = e.target.closest('.mode'); if (b) a.setMode(b.dataset.m); });
+    $('#modes').innerHTML = (this.D.past ? [...MODES, 'past'] : MODES).map(modeBtn).join(''); $('#modesAdv').innerHTML = ADV.map(modeBtn).join('');
+    $('#left').addEventListener('click', (e) => { const b = e.target.closest('.mode'), p = e.target.closest('[data-past]'); if (b) a.setMode(b.dataset.m); else if (p) a.flyPast(+p.dataset.past); });
     $('#tracks').innerHTML = this.D.tracks.map((t, i) => `<button data-t="${i}"><span class="dot" style="background:${TRACK_COLORS[i]}"></span>${t.id} ${t.dir === 'ascending' ? '↑' : '↓'}</button>`).join('');
     $('#tracks').onclick = (e) => { const b = e.target.closest('button'); if (b) a.setTrack(+b.dataset.t); };
     this.imgButtons();
@@ -123,7 +123,13 @@ export class UI {
     const m = this.app.state.mode, L = this.D.meta.levels.levels, t = (k) => this.t(k);
     const grad = (name) => `linear-gradient(90deg, ${RAMPS[name].join(',')})`;
     let h = `<div class="ttl">${t('lg_' + m)}</div>`;
-    if (m === 'level') {
+    if (m === 'past') {                                         // the places, newest first; a click flies there
+      const P = this.D.past, ko = this.lang === 'ko', yr = new Map(P.years.map((y) => [y.y, y])), ys = P.years.map((y) => y.y);
+      const tip = (e) => e.years.map((y) => this.t('past_tip', { y, d: yr.get(y).deaths, a: yr.get(y).area_ha.toLocaleString() })).join(' / ');
+      h = `<div class="ttl">${this.t('lg_past', { a: Math.min(...ys), b: Math.max(...ys) })}</div>`
+        + P.events.map((e, i) => `<div class="row pick" data-past="${i}" title="${esc(tip(e))}"><i class="sw dot"></i><b>${esc(ko ? e.ko : e.en)}</b><span>${e.years.join(' · ')}</span></div>`).join('')
+        + `<div class="note">${t('past_note')}</div><a class="more-link" href="history.html?lang=${this.lang}">${t('past_more')} <span>→</span></a>`;
+    } else if (m === 'level') {
       const cnt = [L.not_measurable, L.no_signal, L.watch, L.check_first];
       h += [3, 2, 1, 0].map((l) => `<div class="row" title="${esc(t('lv' + l + '_d'))}"><i class="sw ${l === 0 ? 'hatch' : ''}" style="${l ? `background:${LEVEL_COLORS[l]}` : ''}">${l >= 2 ? LV_ICON[l] : ''}</i><b>${t('lv' + l)}${l >= 2 ? `<em>${l === 3 ? '80–100' : '50–79'}</em>` : ''}<small>${t('lv' + l + '_s')}</small></b><span>${cnt[l].toLocaleString()}</span></div>`).join('');
     } else if (m === 'suscept') h += `<div class="ramp" style="background:${grad('suscept')}"></div><div class="ticks"><span>${t('low')}</span><span>${t('high')}</span></div>`;
@@ -209,7 +215,7 @@ export class UI {
       <div class="sec" ${D.korea && !C.rcov[u] ? 'hidden' : ''}><h4>${t('history')} <span style="text-transform:none;letter-spacing:0">(${t('cm')})</span></h4><div id="dchart" class="chart"></div>
         <div class="cleg">${T.map((tr, i) => C['meas_' + tr.id][u] ? `<span><i style="background:${TRACK_COLORS[i]}"></i>${tr.id} ${tr.dir === 'ascending' ? '↑' : '↓'}</span>` : '').join('')}<span><i style="background:#555;height:8px;opacity:.5"></i>${t('noise')}</span></div>
         ${meas ? `<div class="caveat" style="border:0;padding:0;margin-top:6px">${esc(t('w_meas', { t: meas }))}. ${esc(t('sign'))}</div>` : ''}</div>
-      <div class="links"><button id="dFly">${t('fly')}</button><a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/link/map/SLOPEWATCH,${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}">${t('kakao')}</a><button id="dCopy">${t('copy')}</button></div>
+      <div class="links"><button id="dFly">${t('fly')}</button><a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/link/map/SLOPEWATCH,${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}">${t('kakao')}</a><button id="dCopy">${t('copy')}</button><a class="btn" target="_blank" href="form.html?u=${u}&lang=${this.lang}${AREA === 'region' ? '&area=region' : ''}">${t('form')}</a></div>
       <div class="caveat">${t('caveat')}</div>`;
     $('#dFly').onclick = () => this.app.flyToUnit(u);
     $('#dCopy').onclick = (e) => { navigator.clipboard?.writeText(`${C.lat[u].toFixed(6)}, ${C.lon[u].toFixed(6)}`); e.target.textContent = t('copied'); };

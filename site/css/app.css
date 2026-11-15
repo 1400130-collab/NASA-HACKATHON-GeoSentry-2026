@@ -127,6 +127,13 @@ nav button.primary:hover { background: var(--red); color: #0b0c0d; }
 #legend .row em { font: 10.5px/1 var(--mono); font-style: normal; color: var(--mute); margin-left: 7px; }
 #legend .row span { font: 12px/1 var(--mono); color: var(--ink2); }
 #legend .note { color: var(--mute); font-size: 11.5px; margin-top: 8px; line-height: 1.4; }
+#legend .row.pick { cursor: pointer; }
+#legend .row.pick:hover b { color: #fff; }
+#legend .row.pick:hover span { color: var(--red); }
+.sw.dot { width: 9px; height: 9px; margin: 0 auto; border-radius: 50%; background: var(--red); }
+#legend .more-link { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; }
+#legend .more-link span { display: inline-block; color: var(--red); transition: transform .2s; }
+#legend .more-link:hover span { transform: translateX(3px); }
 .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-grid; place-items: center; font: 800 9px/1 var(--sans); color: #0b0c0d; font-style: normal; }
 .sw.hatch { background: repeating-linear-gradient(45deg, #7a7a76 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px #7a7a76; }
 .switch { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; padding: 4px 0; cursor: pointer; font-size: 13.5px; font-weight: 500; user-select: none; }
@@ -301,6 +308,8 @@ nav button.primary:hover { background: var(--red); color: #0b0c0d; }
 .lab { position: absolute; left: 0; top: 0; opacity: 0; color: rgba(243, 241, 236, .82); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 1px 6px #000, 0 0 2px #000; white-space: nowrap; transition: opacity .3s; }
 .lab.town { font-size: 12px; letter-spacing: .02em; text-transform: none; color: #fff; }
 .lab.town::before { content: ""; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #fff; margin-right: 6px; vertical-align: middle; }
+.lab.past { font-size: 12.5px; font-weight: 700; letter-spacing: 0; text-transform: none; color: #fff; }
+.lab.past i { font: 500 11px/1 var(--mono); font-style: normal; color: var(--red); margin-left: 7px; }
 .lab.prov { font-size: 12.5px; letter-spacing: .1em; color: #fff; font-weight: 700; }
 .area-korea .lab.cty { font-size: 10.5px; letter-spacing: .04em; text-transform: none; color: rgba(243, 241, 236, .72); }
 .area-korea .lab.town { font-size: 11px; }

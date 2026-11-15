@@ -4,7 +4,7 @@ import { STR, featName } from './i18n.js?v=2';
 const KEY = 'sw_lang';
 const $$ = (s) => [...document.querySelectorAll(s)];
 let lang = document.documentElement.lang === 'ko' ? 'ko' : 'en';
-let M = null;
+let M = null, H = null;                                // H: the past-landslide record (data/history.json), only on pages that ask for it
 
 const int = (v) => Math.round(v).toLocaleString('en-US');
 const pc = (v, d = 0) => (v * 100).toFixed(d);
@@ -42,8 +42,76 @@ function numbers(m) {
   };
 }
 
+// ---- past landslides (history.html): the Korea Forest Service's national record by year, ranked by an impact index.
+// Each part is that year's figure as a share of the worst year in the record, weighted by H.weights, so a year that
+// was worst for deaths, area and cost alike scores 100.
+function hist() {
+  if (H.rows) return H;
+  const Y = [...H.years].sort((a, b) => a.y - b.y), w = H.weights, max = (k) => Math.max(...Y.map((r) => r[k]), 1);
+  H.max = { deaths: max('deaths'), area_ha: max('area_ha'), cost_mkrw: max('cost_mkrw') };
+  H.rows = Y.map((r) => {
+    const life = 100 * w.lives * r.deaths / H.max.deaths, land = 100 * (w.area * r.area_ha / H.max.area_ha + w.cost * r.cost_mkrw / H.max.cost_mkrw);
+    return { ...r, life, land, index: life + land };
+  });
+  return H;
+}
+function histNumbers() {
+  const R = hist().rows, w = H.weights, sum = (k, rows = R) => rows.reduce((a, r) => a + r[k], 0), top = (k) => [...R].sort((a, b) => b[k] - a[k])[0];
+  const late = R.slice(-3), dl = sum('deaths', late), d = sum('deaths');
+  return {
+    hDeaths: d, hArea: int(sum('area_ha')), hCost: (sum('cost_mkrw') / 1e6).toFixed(2), hCostKo: int(sum('cost_mkrw') / 100),
+    hFrom: R[0].y, hTo: R.at(-1).y, hYears: R.length, hWorst: top('index').y, hDeadliest: top('deaths').y,
+    hLate: pc(dl / d), hLateN: dl, hLateFrom: late[0].y, hEarlyN: d - dl, hEarlyTo: R.at(-4).y,
+    hwLives: pc(w.lives), hwArea: pc(w.area), hwCost: pc(w.cost), hUpdated: H.source.updated,
+  };
+}
+
+function impact(el) {
+  const ko = lang === 'ko', R = hist().rows, mx = H.max, mode = el.dataset.mode || 'index', split = mode === 'index' || mode === 'year';
+  const won = (m) => (ko ? `${int(m / 100)}<small>억 원</small>` : `₩${(m / 1000).toFixed(1)}<small> bn</small>`);
+  const dead = (n) => (ko ? (n ? `사망 <b>${n}명</b>` : '사망 없음') : (n ? `<b>${n}</b> death${n > 1 ? 's' : ''}` : 'no deaths'));
+  const key = { index: 'index', deaths: 'deaths', area: 'area_ha', cost: 'cost_mkrw' }[mode];
+  const rows = [...R].sort((a, b) => (mode === 'year' ? b.y - a.y : b[key] - a[key] || b.index - a.index));
+  const tabs = [['index', ko ? '피해 지수' : 'Impact index'], ['deaths', ko ? '사망자' : 'Lives lost'], ['area', ko ? '면적' : 'Hillside lost'], ['cost', ko ? '복구비' : 'Repair bill'], ['year', ko ? '연도순' : 'By year']];
+  const val = (r) => (mode === 'deaths' ? r.deaths : mode === 'area' ? `${int(r.area_ha)}<small> ha</small>` : mode === 'cost' ? won(r.cost_mkrw) : r.index.toFixed(0));
+  const bar = (r) => (split ? `<i class="life" style="width:${r.life.toFixed(2)}%"></i><i class="land" style="width:${r.land.toFixed(2)}%"></i>`
+    : `<i class="${mode === 'deaths' ? 'life' : 'land'}" style="width:${(r[key] / mx[key] * 100).toFixed(2)}%"></i>`);
+  el.dataset.mode = mode;
+  el.innerHTML = `<div class="chips">${tabs.map(([k, n]) => `<button type="button" data-mode="${k}" aria-pressed="${k === mode}">${n}</button>`).join('')}</div>
+    <p class="key">${split ? `<span>${ko ? '인명 피해' : 'lives lost'}</span><span>${ko ? '산사태 면적 + 복구비' : 'hillside lost + repair bill'}</span><em>${ko ? '100 = 모든 항목에서 최악인 해' : '100 = worst year on every count'}</em>`
+      : `<em>${ko ? '막대 = 기록상 최악인 해 대비' : 'bars are a share of the worst year on record'}</em>`}</p>
+    <ol>${rows.map((r, i) => `<li style="--k:${i}"><span class="pos">${String(i + 1).padStart(2, '0')}</span><b class="yr">${r.y}</b>
+      <div><div class="bar"><span>${bar(r)}</span></div>
+        <div class="meta"><span>${dead(r.deaths)}</span><span>${int(r.area_ha)} ha</span><span>${won(r.cost_mkrw).replace(/<\/?small>/g, '')}</span>${r.note_en ? `<em>${ko ? r.note_ko : r.note_en}</em>` : ''}</div></div>
+      <b class="val">${val(r)}</b></li>`).join('')}</ol>`;
+  el.onclick = (e) => { const b = e.target.closest('button[data-mode]'); if (b && b.dataset.mode !== mode) { el.dataset.mode = b.dataset.mode; impact(el); } };
+}
+
+// what the record and our index cannot say. The first line works out how much weight on lives would swap the top two years.
+function hlimits(el) {
+  const ko = lang === 'ko', [a, b] = [...hist().rows].sort((p, q) => q.index - p.index), mx = H.max;
+  const L = (r) => r.deaths / mx.deaths, D = (r) => (r.area_ha / mx.area_ha + r.cost_mkrw / mx.cost_mkrw) / 2;
+  const flip = L(b) > L(a) && D(a) > D(b) ? (D(a) - D(b)) / (D(a) - D(b) + L(b) - L(a)) : null;
+  const close = flip == null ? '' : ko ? ` ${a.y}년과 ${b.y}년은 차이가 작아, 인명 피해 비중을 ${pc(flip)}%보다 높이면 ${b.y}년이 1위가 됩니다.` : ` ${a.y} and ${b.y} are close: count lives for more than ${pc(flip)}% and ${b.y} comes first.`;
+  el.innerHTML = (ko ? [
+    `피해 지수는 공식 지표가 아니라 저희가 정한 가중치입니다.${close}`,
+    '사망자는 자연 산지에서 난 산사태로 숨진 사람만 셉니다. 절개지 붕괴, 침수 등 다른 호우 사망자는 들어 있지 않습니다.',
+    '복구비는 산사태뿐 아니라 계류·임도까지 포함한 산림 분야 전체 복구비이며, 물가 상승을 반영하지 않은 그해 금액입니다.',
+    '전국 합계뿐이고 위치 정보가 없어, 이 기록으로 저희 지도를 검증할 수는 없습니다.',
+  ] : [
+    `The index is our own weighting, not an official score.${close}`,
+    'Deaths are only those from landslides on natural mountain slopes. Cut slopes, floods and other storm deaths are not in it.',
+    "The repair bill covers all forest damage (landslides, streams, forest roads) in that year's won, not adjusted for inflation.",
+    'National totals only. The table has no locations, so it cannot be used to check our map.',
+  ]).map((x) => `<li>${x}</li>`).join('');
+}
+function hsource(el) {
+  const S = H.source, ko = lang === 'ko';
+  el.innerHTML = `${ko ? '출처' : 'Source'}: <a href="${S.url}" target="_blank" rel="noopener">${ko ? S.ko : S.en}</a>. ${ko ? `${S.basis_ko} 기준, ${S.updated} 갱신, ${S.retrieved} 확인.` : `Compiled from ${S.basis_en}. Updated ${S.updated}, read ${S.retrieved}.`}`;
+}
+
 function fill() {
-  const N = numbers(M);
+  const N = { ...numbers(M), ...(H ? histNumbers() : {}) };
   $$('[data-n]').forEach((el) => { el.dataset.v = N[el.dataset.n] ?? '?'; if (!el.dataset.counting) el.textContent = el.dataset.v; });
 }
 
@@ -235,7 +303,7 @@ function inject(el) {
   });
 }
 
-const BLOCKS = { tracks, importance, counties, checks, limits, capture, inject, versus, waffle, detbars, phase };
+const BLOCKS = { tracks, importance, counties, checks, limits, capture, inject, versus, waffle, detbars, phase, impact, hlimits, hsource };
 function render() {
   if (!M) return;
   fill();
@@ -421,5 +489,6 @@ const ba = document.getElementById('ba');
 if (ba) ba.querySelector('input').addEventListener('input', (e) => ba.style.setProperty('--x', e.target.value + '%'));
 if (heroEl) import('./hero.js?v=28').then((m) => m.startHero(heroEl, document.querySelector('.closer'))).catch((e) => { heroEl.classList.add('nogl'); document.documentElement.classList.add('nogl'); console.warn('3D hero unavailable, showing the still image', e); });
 
-fetch(document.body.dataset.meta || 'data/meta.json').then((r) => r.json()).then((m) => { M = m; render(); pending = $$('.rv'); reveal(); $$('.hero [data-count]').forEach(countUp); })
+const json = (u) => fetch(u).then((r) => r.json());
+Promise.all([json(document.body.dataset.meta || 'data/meta.json'), document.body.dataset.history ? json(document.body.dataset.history) : null]).then(([m, h]) => { M = m; H = h; render(); pending = $$('.rv'); reveal(); $$('.hero [data-count]').forEach(countUp); })
   .catch(() => { $$('[data-n]').forEach((el) => { el.textContent = '?'; }); $$('.rv').forEach((el) => el.classList.add('in')); });

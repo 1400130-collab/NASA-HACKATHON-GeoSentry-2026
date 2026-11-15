@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOPEWATCH · history</title>
+<meta name="description" content="Ten years of landslides in South Korea, ranked by lives lost and damage done.">
+<meta name="theme-color" content="#0b0c0d">
+<script>document.documentElement.classList.add('js'); try { document.documentElement.lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch (e) {}</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
+<link rel="stylesheet" href="css/site.css?v=40">
+</head>
+<body data-meta="data/korea/meta.json" data-history="data/history.json">
+<header class="masthead solid"><div class="wrap">
+  <a class="wordmark" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a>
+  <nav>
+    <a href="method.html"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="history.html" aria-current="page"><span lang="en">History</span><span lang="ko">피해 기록</span></a>
+    <a class="opt" href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a class="out" href="sheet.html" data-lang-href="sheet.html"><span lang="en">Inspection sheets</span><span lang="ko">점검표</span></a>
+    <a class="go" href="map.html" data-lang-href="map.html"><span lang="en">Open map</span><span lang="ko">지도 열기</span></a>
+  </nav>
+  <button class="langbtn" type="button">KO</button>
+</div></header>
+<main class="wrap">
+  <section class="pagehead">
+    <h1 lang="en">What landslides cost.</h1>
+    <h1 lang="ko">산사태가 남긴 피해.</h1>
+    <p class="lede" lang="en">Korea's official record, <span data-n="hFrom">…</span> to <span data-n="hTo">…</span>, ranked.</p>
+    <p class="lede" lang="ko"><span data-n="hFrom">…</span>~<span data-n="hTo">…</span>년 공식 기록에 순위를 매겼습니다.</p>
+    <div class="stats rv">
+      <div class="stat"><b class="hot"><span data-n="hDeaths" data-count>…</span></b><span lang="en">lives lost</span><span lang="ko">사망자</span></div>
+      <div class="stat"><b><span data-n="hArea" data-count>…</span><small>ha</small></b><span lang="en">of hillside came down</span><span lang="ko">산사태 면적</span></div>
+      <div class="stat">
+        <b lang="en">₩<span data-n="hCost" data-count>…</span><small>tn</small></b>
+        <b lang="ko"><span data-n="hCost" data-count>…</span><small>조 원</small></b>
+        <span lang="en">to repair forest damage</span><span lang="ko">산림 분야 복구비</span>
+      </div>
+      <div class="stat"><b data-n="hWorst">…</b><span lang="en">the worst year on our index</span><span lang="ko">피해 지수가 가장 높은 해</span></div>
+    </div>
+  </section>
+
+  <section class="sec full" id="impact">
+    <div class="side"><b>01</b><span lang="en">Impact index</span><span lang="ko">피해 지수</span></div>
+    <div>
+      <h2 lang="en">Which years hit hardest?</h2>
+      <h2 lang="ko">어느 해의 피해가 가장 컸나?</h2>
+      <div class="rank rv" data-block="impact"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="lives">
+    <div class="side"><b>02</b><span lang="en">Lives</span><span lang="ko">인명 피해</span></div>
+    <div>
+      <h2 lang="en">Most of the deaths are recent</h2>
+      <h2 lang="ko">사망자 대부분은 최근에 나왔다</h2>
+      <div class="bignum">
+        <b><span data-n="hLate" data-count>…</span>%</b>
+        <div>
+          <p lang="en"><span data-n="hLateN">…</span> of the <span data-n="hDeaths">…</span> deaths came in the last three years, <span data-n="hLateFrom">…</span> to <span data-n="hTo">…</span>.</p>
+          <p lang="ko">사망자 <span data-n="hDeaths">…</span>명 가운데 <span data-n="hLateN">…</span>명이 최근 3년(<span data-n="hLateFrom">…</span>~<span data-n="hTo">…</span>년)에 나왔습니다.</p>
+          <p class="small" lang="en">The seven years before, <span data-n="hFrom">…</span> to <span data-n="hEarlyTo">…</span>, had <span data-n="hEarlyN">…</span>. The Forest Service's own caution applies: yearly totals follow that summer's rain, so this is a record, not a forecast.</p>
+          <p class="small" lang="ko">그 전 7년(<span data-n="hFrom">…</span>~<span data-n="hEarlyTo">…</span>년)은 <span data-n="hEarlyN">…</span>명이었습니다. 산림청도 밝혔듯 연도별 수치는 그해 여름 강우에 따라 크게 달라지므로, 이것은 기록이지 전망이 아닙니다.</p>
+        </div>
+      </div>
+      <div class="actions"><a class="btn" href="map.html" data-lang-href="map.html"><span lang="en">See the slopes to check first</span><span lang="ko">우선 점검 사면 보기</span><span class="arr">→</span></a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="scoring">
+    <div class="side"><b>03</b><span lang="en">Scoring</span><span lang="ko">산정 방식</span></div>
+    <div>
+      <h2 lang="en">How the index is built</h2>
+      <h2 lang="ko">지수를 만든 방법</h2>
+      <div class="cards three">
+        <div><i><span data-n="hwLives">…</span>%</i><span class="k" lang="en">Lives lost</span><span class="k" lang="ko">인명 피해</span>
+          <p lang="en">Deaths that year, as a share of the deadliest year.</p><p lang="ko">그해 사망자 수를 사망자가 가장 많았던 해와 견준 비율.</p></div>
+        <div><i><span data-n="hwArea">…</span>%</i><span class="k" lang="en">Hillside lost</span><span class="k" lang="ko">산사태 면적</span>
+          <p lang="en">Hectares of landslide, as a share of the worst year.</p><p lang="ko">산사태 면적(ha)을 면적이 가장 컸던 해와 견준 비율.</p></div>
+        <div><i><span data-n="hwCost">…</span>%</i><span class="k" lang="en">Repair bill</span><span class="k" lang="ko">복구비</span>
+          <p lang="en">Forest restoration cost, as a share of the costliest year.</p><p lang="ko">산림 분야 복구비를 복구비가 가장 컸던 해와 견준 비율.</p></div>
+      </div>
+      <p lang="en">A year that was the worst on all three would score 100.</p>
+      <p lang="ko">세 항목 모두에서 최악인 해라면 100점이 됩니다.</p>
+      <ul class="plain" data-block="hlimits"></ul>
+      <p class="src" data-block="hsource"></p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <div>
+    <b>SLOPEWATCH</b>
+    <p lang="en">Prototype for NASA Space Apps Challenge 2026, Seoul. Not a warning system.</p>
+    <p lang="ko">NASA Space Apps Challenge 2026 서울 출품 시제품. 경보 시스템이 아닙니다.</p>
+    <p class="mono"><span lang="en">Record updated</span><span lang="ko">기록 갱신일</span> <span data-n="hUpdated">…</span></p>
+  </div>
+  <nav>
+    <a href="map.html" data-lang-href="map.html"><span lang="en">Map</span><span lang="ko">지도</span></a>
+    <a href="sheet.html" data-lang-href="sheet.html"><span lang="en">Inspection sheet</span><span lang="ko">점검표</span></a>
+    <a href="method.html"><span lang="en">Method</span><span lang="ko">방법</span></a>
+    <a href="results.html"><span lang="en">Results</span><span lang="ko">검증</span></a>
+    <a href="history.html"><span lang="en">History</span><span lang="ko">피해 기록</span></a>
+    <a href="about.html"><span lang="en">About</span><span lang="ko">소개</span></a>
+    <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
+  </nav>
+</div></footer>
+<script type="module" src="js/site.js?v=44"></script>
+<script src="js/nav.js?v=4" defer></script>
+</body>
+</html>

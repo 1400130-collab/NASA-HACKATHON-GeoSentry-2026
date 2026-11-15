@@ -222,3 +222,30 @@ export class Beacon {
     this.ring.scale.setScalar(0.2 + f * Math.max(0.5, camDist * 0.03)); this.ring.material.opacity = 0.9 * (1 - f);
   }
 }
+
+// Places where landslides killed people in the last ten years (data/history.json): a thin red beam over a ground ring.
+// They hold still, so they cost no frames; update() resizes them to the camera so they read the same at any zoom.
+export class PastMarks {
+  constructor(D, events) {
+    this.D = D; this.group = new THREE.Group(); this.group.visible = false;
+    const bg = new THREE.CylinderGeometry(1, 1, 1, 12, 1, true); bg.translate(0, 0.5, 0);
+    const beam = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+      vertexShader: `varying float vY; void main(){ vY = position.y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `varying float vY; void main(){ float a = pow(clamp(1.0 - vY, 0.0, 1.0), 1.4); gl_FragColor = vec4(vec3(1.0, 0.3, 0.18) * a * 0.9, 1.0); }` });
+    const rg = new THREE.RingGeometry(0.8, 1, 48); rg.rotateX(-Math.PI / 2);
+    const ring = new THREE.MeshBasicMaterial({ color: 0xff4d2e, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
+    const dg = new THREE.CircleGeometry(0.26, 20); dg.rotateX(-Math.PI / 2);
+    this.items = events.map((e) => {
+      const o = new THREE.Group(), it = { o, x: D.sx(e.x), z: D.sz(e.z), top: 1, beam: new THREE.Mesh(bg, beam), flat: new THREE.Group() };
+      it.flat.add(new THREE.Mesh(rg, ring), new THREE.Mesh(dg, ring)); o.add(it.beam, it.flat); o.position.set(it.x, 0, it.z); this.group.add(o);
+      return it;
+    });
+  }
+  update(camera, exag) {
+    for (const it of this.items) {
+      it.o.position.y = this.D.hAt(it.x, it.z) * exag;
+      const d = camera.position.distanceTo(it.o.position), s = Math.max(0.04, d * 0.0062);
+      it.top = d * 0.032; it.beam.scale.set(s * 0.16, it.top, s * 0.16); it.flat.scale.setScalar(s);
+    }
+  }
+}

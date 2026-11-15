@@ -1,0 +1,44 @@
+{
+  "about": "National landslide damage in South Korea by year. Typed in from the official indicator table below; not produced by the pipeline.",
+  "source": {
+    "en": "Korea Forest Service, 'Landslide damage' national indicator (e-Nara Jipyo no. 1311)",
+    "ko": "산림청 「산사태피해현황」 (e-나라지표 1311)",
+    "basis_en": "Central Disaster and Safety Countermeasures Headquarters, damage recovery plans",
+    "basis_ko": "중앙안전재난대책본부 피해복구계획서",
+    "url": "https://www.index.go.kr/unify/idx-info.do?idxCd=1311",
+    "table": "https://www.index.go.kr/unity/potal/eNara/sub/showStblGams3.do?stts_cd=131101&idx_cd=1311&freq=Y&period=2016:2025",
+    "updated": "2026-10-12",
+    "retrieved": "2026-11-15"
+  },
+  "weights": { "lives": 0.5, "area": 0.25, "cost": 0.25 },
+  "years": [
+    { "y": 2016, "deaths": 0, "area_ha": 54, "cost_mkrw": 16866 },
+    { "y": 2017, "deaths": 2, "area_ha": 94, "cost_mkrw": 21488 },
+    { "y": 2018, "deaths": 0, "area_ha": 56, "cost_mkrw": 22842 },
+    { "y": 2019, "deaths": 3, "area_ha": 156, "cost_mkrw": 53428,
+      "note_en": "Seven typhoons", "note_ko": "태풍 7개 영향",
+      "ref": "https://www.index.go.kr/unify/idx-info.do?idxCd=1311" },
+    { "y": 2020, "deaths": 9, "area_ha": 1343, "cost_mkrw": 393463,
+      "note_en": "54-day monsoon · Gokseong, Gapyeong", "note_ko": "54일 장마 · 곡성, 가평",
+      "ref": "https://www.index.go.kr/unify/idx-info.do?idxCd=1311" },
+    { "y": 2021, "deaths": 0, "area_ha": 27, "cost_mkrw": 14999 },
+    { "y": 2022, "deaths": 0, "area_ha": 327, "cost_mkrw": 82110 },
+    { "y": 2023, "deaths": 13, "area_ha": 459, "cost_mkrw": 142822,
+      "note_en": "July storm · North Gyeongsang", "note_ko": "7월 집중호우 · 경북 북부",
+      "ref": "https://m.seoul.co.kr/news/2023/07/19/20230719800002" },
+    { "y": 2024, "deaths": 2, "area_ha": 179, "cost_mkrw": 65687 },
+    { "y": 2025, "deaths": 17, "area_ha": 612, "cost_mkrw": 208888,
+      "note_en": "July downpour · Sancheong, Gapyeong", "note_ko": "7월 극한호우 · 산청, 가평",
+      "ref": "https://www.newsis.com/view/NISX20250720_0003259038" }
+  ],
+  "events_about": "Places named in news reports of landslides that killed people. Marked at the town (eup/myeon) or the county centre, not the slope itself. x and z are km in the nationwide map grid (EPSG:5179, as in data/korea/vectors.json).",
+  "events": [
+    {"en": "Sancheong", "ko": "산청", "years": [2025], "level": "town", "place_ko": "산청읍", "lon": 127.90275, "lat": 35.4135, "x": 312.25, "z": 369.44, "ref": "https://www.earticle.net/Article/A477745"},
+    {"en": "Gapyeong", "ko": "가평", "years": [2020, 2025], "level": "county", "place_ko": "가평군", "lon": 127.4511, "lat": 37.8203, "x": 271.38, "z": 102.53, "ref": "https://www.etoday.co.kr/news/view/1925390"},
+    {"en": "Yecheon", "ko": "예천", "years": [2023], "level": "town", "place_ko": "감천면", "lon": 128.51646, "lat": 36.73414, "x": 366.44, "z": 222.55, "ref": "https://www.kbmaeil.com/article/202308160369596"},
+    {"en": "Yeongju", "ko": "영주", "years": [2023], "level": "county", "place_ko": "영주시", "lon": 128.5983, "lat": 36.8799, "x": 373.56, "z": 206.3, "ref": "https://m.seoul.co.kr/news/2023/07/19/20230719800002"},
+    {"en": "Bonghwa", "ko": "봉화", "years": [2023], "level": "county", "place_ko": "봉화군", "lon": 128.9196, "lat": 36.9352, "x": 402.1, "z": 199.79, "ref": "https://m.seoul.co.kr/news/2023/07/19/20230719800002"},
+    {"en": "Mungyeong", "ko": "문경", "years": [2023], "level": "county", "place_ko": "문경시", "lon": 128.1423, "lat": 36.7003, "x": 333.05, "z": 226.6, "ref": "https://m.seoul.co.kr/news/2023/07/19/20230719800002"},
+    {"en": "Gokseong", "ko": "곡성", "years": [2020], "level": "town", "place_ko": "오산면", "lon": 127.12158, "lat": 35.23403, "x": 241.25, "z": 389.35, "ref": "https://blogs.agu.org/landslideblog/2020/08/05/south-korea-2/"}
+  ]
+}

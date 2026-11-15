@@ -4,125 +4,212 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SLOPEWATCH 점검표</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <style>
-  :root { --ink: #111; --mute: #666; --line: #d8d8d4; --check: #c7341f; --watch: #b97a00; }
+  :root { --ink: #111; --mute: #5c5c5c; --line: #111; --soft: #b9b9b4; --fill: #ecece8; --red: #c7341f; --amber: #d99a1c; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #e9e9e6; color: var(--ink); font: 12px/1.45 "Roboto", "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, sans-serif; }
-  .bar { position: sticky; top: 0; z-index: 2; background: #111; color: #fff; padding: 10px 16px; display: flex; gap: 10px; align-items: center; }
-  .bar select, .bar button { font: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid #555; background: #222; color: #fff; cursor: pointer; }
+  body { margin: 0; background: #0b0c0d; color: var(--ink); font: 8.4pt/1.4 "Roboto", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; }
+  .bar { position: sticky; top: 0; z-index: 5; background: #0b0c0d; color: #fff; padding: 10px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+  .bar .brand { font-weight: 800; letter-spacing: .08em; margin-right: 6px; color: #fff; text-decoration: none; border: 0; background: none; padding: 0; }
+  .bar select, .bar button, .bar a { font: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid #444; background: #1a1b1d; color: #fff; cursor: pointer; text-decoration: none; max-width: 210px; }
+  .bar .go { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
   .bar .sp { flex: 1; }
-  .page { width: 210mm; min-height: 297mm; margin: 14px auto; background: #fff; padding: 13mm 13mm 10mm; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
-  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
-  h1 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
-  h1 small { display: block; font-size: 11px; font-weight: 500; color: var(--mute); letter-spacing: .1em; }
-  .meta { text-align: right; color: var(--mute); font-size: 10.5px; }
-  .draft { margin: 8px 0; padding: 6px 9px; border: 1px solid var(--check); color: var(--check); border-radius: 5px; font-size: 11px; }
-  .top { display: grid; grid-template-columns: 1fr 62mm; gap: 8mm; margin: 8px 0 10px; }
-  canvas { width: 100%; border: 1px solid var(--line); border-radius: 4px; display: block; }
-  .facts b { font-size: 20px; display: block; line-height: 1.1; }
-  .facts div { padding: 6px 0; border-bottom: 1px solid var(--line); }
-  .facts span { color: var(--mute); font-size: 10.5px; }
-  .key { display: flex; gap: 12px; margin-top: 8px; font-size: 10.5px; color: var(--mute); flex-wrap: wrap; }
-  .key i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-  table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
-  th { text-align: left; font-weight: 600; color: var(--mute); border-bottom: 1.5px solid var(--ink); padding: 4px 5px; font-size: 9.5px; }
-  td { padding: 5px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  td .no { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--check); color: #fff; font-weight: 700; font-size: 9.5px; }
-  .mv { color: #1c5cab; font-weight: 600; }
-  .box { width: 12px; height: 12px; border: 1.2px solid var(--ink); display: inline-block; }
-  footer { margin-top: 8px; color: var(--mute); font-size: 9.5px; line-height: 1.4; }
-  @media print { body { background: #fff; } .bar { display: none; } .page { margin: 0; box-shadow: none; width: auto; min-height: 0; padding: 0; } @page { size: A4; margin: 12mm; } tr { break-inside: avoid; } }
+  .doc { width: 210mm; min-height: 297mm; margin: 14px auto; background: #fff; padding: 11mm 12mm 12mm; }
+  header.h1 { display: grid; grid-template-columns: 1fr auto; gap: 6mm; align-items: end; border-bottom: 2.2pt solid var(--line); padding-bottom: 2mm; }
+  header.h1 h1 { margin: 0; font-size: 20pt; font-weight: 800; letter-spacing: -.02em; line-height: 1.12; }
+  header.h1 small { display: block; font-size: 7.5pt; letter-spacing: .14em; color: var(--mute); font-weight: 600; margin-bottom: 1mm; }
+  .fno { border: 1pt solid var(--line); font-size: 7.5pt; }
+  .fno div { display: grid; grid-template-columns: 19mm 33mm; }
+  .fno div + div { border-top: .5pt solid var(--line); }
+  .fno span { background: var(--fill); padding: .8mm 1.5mm; border-right: .5pt solid var(--line); }
+  .fno b { padding: .8mm 1.5mm; font-variant-numeric: tabular-nums; }
+  .note { margin: 2.2mm 0; padding: 1.4mm 2mm; border: .8pt solid var(--red); color: var(--red); font-size: 7.8pt; }
+  .sum { display: grid; grid-template-columns: repeat(6, 1fr); border: .8pt solid var(--line); }
+  .sum div { padding: 1.6mm 2mm 1.8mm; }
+  .sum div + div { border-left: .5pt solid var(--line); }
+  .sum b { display: block; font-size: 16pt; font-weight: 800; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .sum b small { font-size: 8pt; font-weight: 600; letter-spacing: 0; }
+  .sum span { font-size: 7.4pt; color: var(--mute); }
+  .sum .hot { background: var(--ink); color: #fff; } .sum .hot span { color: #ddd; }
+  .map { position: relative; width: 100%; height: 340px; overflow: hidden; border: .5pt solid var(--line); background: #eee; margin-top: 2.4mm; }
+  .map canvas, .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .map img { position: absolute; max-width: none; }
+  .map .att { position: absolute; right: 0; bottom: 0; background: rgba(255,255,255,.85); padding: 0 1mm; font-size: 6pt; color: #333; }
+  .key { display: flex; gap: 5mm; margin: 1.2mm 0 0; font-size: 7.4pt; color: var(--mute); flex-wrap: wrap; align-items: center; }
+  .key i { display: inline-block; width: 2.6mm; height: 2.6mm; border-radius: 50%; margin-right: 1mm; vertical-align: -.3mm; }
+  .key em { font-style: normal; margin-left: auto; }
+  h2 { margin: 3.4mm 0 1.2mm; font-size: 10pt; font-weight: 800; display: flex; align-items: baseline; gap: 2mm; break-after: avoid; }
+  h2 em { font-style: normal; font-weight: 500; font-size: 7.5pt; color: var(--mute); margin-left: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  table.f th, table.f td { border: .5pt solid var(--line); padding: 1.1mm 1.4mm; vertical-align: middle; text-align: left; }
+  table.f th { background: var(--fill); font-weight: 600; font-size: 7.4pt; text-align: center; white-space: nowrap; }
+  table.f td.c { text-align: center; }
+  table.f td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.f small { color: var(--mute); font-size: 7pt; }
+  table.list { font-size: 7.8pt; table-layout: fixed; }
+  table.list th { white-space: normal; line-height: 1.2; }
+  table.list tr { break-inside: avoid; }
+  table.list thead { display: table-header-group; }
+  .no { display: inline-grid; place-items: center; width: 5mm; height: 5mm; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 700; font-size: 7.4pt; text-decoration: none; }
+  .dz { font-size: 11.5pt; font-weight: 800; letter-spacing: -.02em; }
+  .mv { font-weight: 700; }
+  .mv::before { content: "▲ "; font-size: 6.5pt; }
+  .abcd { display: inline-block; margin-top: .8mm; letter-spacing: .32em; font-weight: 600; color: #8a8a85; white-space: nowrap; padding-left: .3em; }
+  .ln { display: inline-block; border-bottom: .5pt solid var(--ink); height: 3.4mm; vertical-align: bottom; margin: 0 .6mm; }
+  .end { break-inside: avoid; }
+  .sig td { height: 11mm; }
+  .foot { margin-top: 2.4mm; font-size: 7.2pt; color: var(--mute); line-height: 1.45; }
+  @media print {
+    body { background: #fff; } .bar { display: none; }
+    .doc { margin: 0; padding: 0 .4mm; width: auto; min-height: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
 </style>
+<style id="pg"></style>
 </head>
 <body>
-<div class="bar"><b>SLOPEWATCH</b><select id="county"></select><select id="count"><option>15</option><option selected>25</option><option>40</option></select><span class="sp"></span><button id="lang">English</button><button onclick="print()">🖨 Print / PDF</button></div>
-<div class="page" id="page">Loading…</div>
+<div class="bar"><a class="brand" href="index.html">SLOPEWATCH</a><select id="prov"></select><select id="county"></select><select id="count"></select><span class="sp"></span><a id="map"></a><a id="forms"></a><button id="lang"></button><button class="go" id="print" onclick="print()"></button></div>
+<div class="doc" id="doc">Loading…</div>
 <script type="module">
-import { loadAll, BASE } from './js/data.js';
-import { addScores } from './js/score.js';
+// The district priority sheet: one district's check-first slopes in inspection order, on paper.
+//   sheet.html?county=214&n=25      &area=region for the 20 m North Gyeongsang map, &lang=en for English
+// Each row carries the form number of that slope's six-page field form (form.html).
+import { loadAll, BASE, AREA } from './js/data.js';
+import { addScores, checkOrder } from './js/score.js';
 import { reason, compass } from './js/i18n.js';
+
 const qs = new URLSearchParams(location.search);
 let lang = qs.get('lang') || 'ko';
-const T = {
-  ko: { title: '사면 점검 우선순위표', sub: 'SLOPEWATCH · NISAR 레이더 기반', draft: '초안 — 해커톤 시제품입니다. 경보가 아니며 붕괴 시점을 예측하지 않습니다. 현장 점검 순서를 정하는 참고 자료입니다.',
-    made: '작성', data: '자료 기간: 2026.6.21 – 10.20 (NISAR)', datakr: '위성: Sentinel-2 (Planetary Computer) · NISAR는 경북만', check: '우선 점검 사면', watch: '관찰 사면', moving: '이동 감지 사면', listed: '이 표의 사면 수',
-    h: ['번호', '좌표 (위도, 경도)', '경사·방향', '등급 사유', '레이더 이동 (cm)', '사면 아래', '점검'], lv3: '우선 점검', lv2: '관찰', none: '잡음 이내', notmeas: '측정 불가',
-    bld: (n) => `건물 ${n}동`, road: '주요 도로', top: (p) => `취약도 상위 ${p}%`, moved: '이동 감지', dz: (v) => `위험 지수 ${v}`,
-    foot: '등급 규칙: 이동이 감지되었거나 취약도 상위 5%이면서 아래쪽 약 300 m 이내에 건물 또는 주요 도로가 있으면 "우선 점검". 이동량은 레이더 시선 방향이며 ± 뒤는 잡음 수준입니다. 건물 자료는 OpenStreetMap으로, 농촌 주택이 빠져 있을 수 있습니다. 붕괴 라벨은 자동 탐지이며 사람이 아직 확인하지 않았습니다. 이동이 없는 사면이 안전하다는 뜻은 아닙니다.', key: ['우선 점검', '관찰', '표의 번호'] },
-  en: { title: 'Slope inspection priority sheet', sub: 'SLOPEWATCH · from NISAR radar', draft: 'Draft — a hackathon prototype. Not a warning and not a forecast of when a slope will fail. A guide to the order of field inspection.',
-    made: 'Made', data: 'Data period: 21 Jun – 20 Oct 2026 (NISAR)', datakr: 'Satellite: Sentinel-2 (Planetary Computer) · NISAR in North Gyeongsang only', check: 'Check-first slopes', watch: 'Watch slopes', moving: 'Slopes with movement', listed: 'Slopes on this sheet',
-    h: ['No.', 'Coordinates (lat, lon)', 'Slope, facing', 'Why it is listed', 'Radar movement (cm)', 'Below the slope', 'Done'], lv3: 'Check first', lv2: 'Watch', none: 'within noise', notmeas: 'not measurable',
-    bld: (n) => `${n} building(s)`, road: 'main road', top: (p) => `top ${p}% susceptibility`, moved: 'movement detected', dz: (v) => `danger ${v}`,
-    foot: 'Rule: "Check first" means movement was detected or the slope is in the top 5% for susceptibility, and a building or main road lies within about 300 m downslope. Movement is along the radar line of sight; the figure after ± is the noise level. Buildings come from OpenStreetMap and may miss rural houses. Failure labels are automatic and not yet checked by a person. No movement does not mean a slope is safe.', key: ['Check first', 'Watch', 'Number on the sheet'] },
-};
+const L = (ko, en) => (lang === 'ko' ? ko : en);
 const D = addScores(await loadAll(() => {}));
-const C = D.col, M = D.meta;
-const withList = M.counties.filter((c) => { for (let u = 0; u < D.n; u++) if (C.level[u] === 3 && C.county[u] === c.id) return true; return false; });
-const sel = document.getElementById('county');
-const nCheck = (id) => { let k = 0; for (let u = 0; u < D.n; u++) if (C.level[u] === 3 && C.county[u] === id) k++; return k; };
-let county = +qs.get('county') || withList.slice().sort((a, b) => (D.korea ? nCheck(b.id) - nCheck(a.id) : b.units - a.units))[0].id;
-if (D.korea) withList.sort((a, b) => a.prov - b.prov || a.ko.localeCompare(b.ko, 'ko'));
-const normal = await new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.src = BASE + 'normal.jpg'; });
+const C = D.col, M = D.meta, K = D.korea, REG = AREA === 'region' ? '&area=region' : '';
+const DOWN = K ? 360 : 300;                                  // downslope search distance, m (k05 / p08)
+const order = checkOrder(D), byCounty = new Map();
+order.forEach((u) => { const c = C.county[u]; if (!byCounty.has(c)) byCounty.set(c, []); byCounty.get(c).push(u); });
+const counties = M.counties.filter((c) => byCounty.has(c.id));
+if (K) counties.sort((a, b) => a.prov - b.prov || a.ko.localeCompare(b.ko, 'ko'));
+const ranked = counties.slice().sort((a, b) => byCounty.get(b.id).length - byCounty.get(a.id).length);
+const provs = M.provinces ? M.provinces.filter((p) => counties.some((c) => c.prov === p.id)) : null;
+const provOf = (c) => (M.provinces ? M.provinces.find((p) => p.id === c.prov) : null);
+const cname = (c) => { const p = provOf(c); return (p ? L(p.ko, p.en) + (lang === 'ko' ? ' ' : ' · ') : (K ? '' : L('경상북도 ', 'North Gyeongsang · '))) + L(c.ko, c.en); };
+let county = +qs.get('county'); if (!byCounty.has(county)) county = ranked[0].id;
+let count = [15, 25, 50, 100].includes(+qs.get('n')) ? +qs.get('n') : 25;
+const normal = await new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = BASE + 'normal.jpg'; });
+
+const $ = (s) => document.querySelector(s);
+const sg = (v, d = 1) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+const fno = (u) => `SW-${K ? 'K' : 'R'}-${String(u).padStart(6, '0')}`;
+const ln = (mm = 16) => `<span class="ln" style="width:${mm}mm"></span>`;
+const best = (u) => { let b = null; D.tracks.forEach((tr) => { const v = C['cum_' + tr.id][u], s = C['sig_' + tr.id][u]; if (C['meas_' + tr.id][u] && Number.isFinite(v) && s > 0 && (!b || Math.abs(v / s) > Math.abs(b.v / b.s))) b = { v, s, id: tr.id }; }); return b; };
+
+// ---- the district map: OpenStreetMap tiles over our own hillshade (which shows if the tiles can't load) ----
+const MW = 702, MH = 340, mx = (lon) => (lon + 180) / 360, my = (lat) => (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2;
+function mapHTML(us) {                                      // us: the slopes that must be in view
+  let a0 = 1, a1 = 0, b0 = 1, b1 = 0, x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9, lat = 0;
+  us.forEach((u) => { const a = mx(C.lon[u]), b = my(C.lat[u]); a0 = Math.min(a0, a); a1 = Math.max(a1, a); b0 = Math.min(b0, b); b1 = Math.max(b1, b); x0 = Math.min(x0, C.x[u]); x1 = Math.max(x1, C.x[u]); z0 = Math.min(z0, C.z[u]); z1 = Math.max(z1, C.z[u]); lat += C.lat[u] / us.length; });
+  const zf = Math.min(14, Math.max(7, Math.log2(Math.min(MW * 0.86 / (256 * Math.max(a1 - a0, 1e-7)), MH * 0.8 / (256 * Math.max(b1 - b0, 1e-7))))));
+  const z = Math.ceil(zf), S = 256 * 2 ** (zf - z), n = 2 ** z;                    // tile size on paper: 128-256 px
+  const fx = (a0 + a1) / 2 * n - MW / 2 / S, fy = (b0 + b1) / 2 * n - MH / 2 / S, mpp = 156543.03392 * Math.cos(lat * Math.PI / 180) / 2 ** zf;
+  let t = '';
+  for (let ty = Math.floor(fy); ty < fy + MH / S; ty++) for (let tx = Math.floor(fx); tx < fx + MW / S; tx++)
+    t += `<img alt="" src="https://tile.openstreetmap.org/${z}/${tx}/${ty}.png" style="left:${((tx - fx) * S).toFixed(2)}px;top:${((ty - fy) * S).toFixed(2)}px;width:${(S + 0.5).toFixed(2)}px;height:${(S + 0.5).toFixed(2)}px" onerror="this.remove()">`;
+  const px = (u) => [(mx(C.lon[u]) * n - fx) * S, (my(C.lat[u]) * n - fy) * S];
+  const len = [200, 500, 1000, 2000, 5000, 10000, 20000, 50000].filter((m) => m / mpp <= 150).pop() || 200, bar = len / mpp;
+  return { px, mpp, ckm: [(x0 + x1) / 2, (z0 + z1) / 2], html: (marks) => `<div class="map"><canvas id="hs" width="${MW}" height="${MH}"></canvas>${t}<canvas id="dots" width="${MW * 2}" height="${MH * 2}"></canvas>
+    <svg viewBox="0 0 ${MW} ${MH}">${marks}
+      <g transform="translate(${MW - 20} 22)"><path d="M0 -14L6 6L0 2L-6 6Z" fill="#111" stroke="#fff" stroke-width="1"/><text y="19" text-anchor="middle" font-size="10" font-weight="800" stroke="#fff" stroke-width="2.5" paint-order="stroke">N</text></g>
+      <g transform="translate(10 ${MH - 12})"><rect x="-4" y="-15" width="${(bar + 8).toFixed(1)}" height="22" fill="rgba(255,255,255,.85)"/><path d="M0 0h${bar.toFixed(1)}M0 -4v8M${bar.toFixed(1)} -4v8" stroke="#111" stroke-width="1.6" fill="none"/><text x="2" y="-5" font-size="9.5" font-weight="700">${len >= 1000 ? len / 1000 + ' km' : len + ' m'}</text></g>
+    </svg><span class="att">© OpenStreetMap</span></div>` };
+}
+function paintMap(m) {
+  const cv = $('#hs'), g = cv.getContext('2d', { willReadFrequently: true });
+  if (normal) {
+    const km = m.mpp / 1000, w = MW * km, h = MH * km, sx = normal.width / D.Wkm, sy = normal.height / D.Hkm;
+    g.fillStyle = '#eee'; g.fillRect(0, 0, MW, MH);
+    g.imageSmoothingQuality = 'high'; g.drawImage(normal, (m.ckm[0] - w / 2) * sx, (m.ckm[1] - h / 2) * sy, w * sx, h * sy, 0, 0, MW, MH);
+    const im = g.getImageData(0, 0, MW, MH), d = im.data;
+    for (let i = 0; i < d.length; i += 4) {                     // normal map -> light hillshade
+      const nx = (d[i] / 255 - 0.5) * 2.4, ny = (d[i + 1] / 255 - 0.5) * 2.4, l = 1 / Math.hypot(nx * 2, ny * 2, 1);
+      d[i] = d[i + 1] = d[i + 2] = 150 + 105 * Math.min(1, Math.max(0, (-0.55 * nx * 2 + 0.55 * ny * 2 + 0.63) * l) * 1.15);
+    }
+    g.putImageData(im, 0, 0);
+  }
+  const dg = $('#dots').getContext('2d'); dg.scale(2, 2);
+  for (const [lv, col, r] of [[2, K ? 'rgba(217,154,28,.8)' : 'rgba(217,154,28,.45)', K ? 1.7 : 1.1], [3, 'rgba(199,52,31,.95)', K ? 2.8 : 2.2]]) {
+    dg.fillStyle = col;
+    for (let u = 0; u < D.n; u++) if (C.level[u] === lv && C.county[u] === county) { const [x, y] = m.px(u); if (x > -5 && y > -5 && x < MW + 5 && y < MH + 5) { dg.beginPath(); dg.arc(x, y, r, 0, 6.3); dg.fill(); } }
+  }
+}
 
 function render() {
-  const t = T[lang], c = M.counties.find((x) => x.id === county), N = +document.getElementById('count').value, prov = M.provinces ? M.provinces.find((p) => p.id === c.prov) : null;
-  document.documentElement.lang = lang; document.getElementById('lang').textContent = lang === 'ko' ? 'English' : '한국어';
-  sel.innerHTML = withList.map((x) => { const p = M.provinces ? M.provinces.find((q) => q.id === x.prov) : null; return `<option value="${x.id}" ${x.id === county ? 'selected' : ''}>${p ? (lang === 'ko' ? p.ko + ' ' : p.en + ' · ') : ''}${lang === 'ko' ? x.ko : x.en}</option>`; }).join('');
-  const us = []; let nWatch = 0, nMove = 0;
-  for (let u = 0; u < D.n; u++) if (C.county[u] === county) { if (C.level[u] === 3) us.push(u); if (C.level[u] === 2) nWatch++; if (C.moving[u]) nMove++; }
-  us.sort((a, b) => C.danger[b] - C.danger[a] || C.pct[b] - C.pct[a] || a - b);      // the same order as the map: danger index, highest first
-  const top = us.slice(0, N);
-  const rows = top.map((u, i) => {
-    let best = null;
-    D.tracks.forEach((tr) => { const v = C['cum_' + tr.id][u], s = C['sig_' + tr.id][u]; if (C['meas_' + tr.id][u] && Number.isFinite(v) && (!best || Math.abs(v / s) > Math.abs(best.v / best.s))) best = { v, s, id: tr.id }; });
-    const why = [`<b>${t.dz(Math.round(C.danger[u]))}</b>`];
-    if (C.moving[u]) why.push(`<span class="mv">${t.moved}</span>`);
-    if (C.pct[u] >= 0.8) why.push(t.top(Math.max(1, Math.round((1 - C.pct[u]) * 100))));
-    [[C.r1[u], C.v1[u]], [C.r2[u], C.v2[u]]].forEach(([r, v]) => { if (r >= 0) why.push(reason(M.features[r], v, lang)); });
-    const below = [C.bld[u] > 0 ? t.bld(C.bld[u]) : '', C.road[u] > 0 ? t.road : ''].filter(Boolean).join(', ');
-    const mv = best ? `${best.v > 0 ? '+' : ''}${best.v.toFixed(1)} ± ${best.s.toFixed(1)} <span style="color:#888">(${best.id})</span>${C.moving[u] ? '' : `<br><span style="color:#888">${t.none}</span>`}` : t.notmeas;
-    return `<tr><td><span class="no">${i + 1}</span></td><td class="n">${C.lat[u].toFixed(5)}, ${C.lon[u].toFixed(5)}</td><td class="n">${C.slope[u].toFixed(0)}° ${compass(C.aspect[u], lang)}</td><td>${why.join(' · ')}</td><td class="n ${C.moving[u] ? 'mv' : ''}">${mv}</td><td>${below}</td><td><span class="box"></span></td></tr>`;
-  }).join('');
-  document.getElementById('page').innerHTML = `
-    <header><h1><small>${t.sub}</small>${prov ? (lang === 'ko' ? prov.ko + ' ' : prov.en + ' · ') : ''}${lang === 'ko' ? c.ko : c.en} · ${t.title}</h1><div class="meta">${t.made} ${M.generated.slice(0, 10)}<br>${D.korea ? t.datakr : t.data}</div></header>
-    <div class="draft">${t.draft}</div>
-    <div class="top"><div><canvas id="map" width="1100" height="760"></canvas><div class="key"><span><i style="background:var(--check)"></i>${t.key[0]}</span><span><i style="background:#e9b44c"></i>${t.key[1]}</span><span><i style="background:#111;border-radius:50%"></i>${t.key[2]}</span></div></div>
-      <div class="facts"><div><b>${us.length.toLocaleString()}</b><span>${t.check}</span></div><div><b>${nWatch.toLocaleString()}</b><span>${t.watch}</span></div><div><b>${nMove}</b><span>${t.moving}</span></div><div><b>${top.length}</b><span>${t.listed}</span></div></div></div>
-    <table><thead><tr>${t.h.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
-    <footer>${t.foot}</footer>`;
-  drawMap(top);
-}
+  const c = M.counties.find((x) => x.id === county), all = byCounty.get(county), top = all.slice(0, count), name = cname(c), built = M.generated.slice(0, 10);
+  let nWatch = 0, nMove = 0, nBld = 0, nRoad = 0;
+  for (let u = 0; u < D.n; u++) if (C.county[u] === county) { if (C.level[u] === 2) nWatch++; if (C.moving[u]) nMove++; }
+  all.forEach((u) => { if (C.bld[u] > 0) nBld++; if (C.road[u] > 0) nRoad++; });
+  const place = ranked.findIndex((x) => x.id === county) + 1, title = L('사면 점검 우선순위표', 'Slope inspection priority sheet');
 
-function drawMap(top) {
-  const cv = document.getElementById('map'), g = cv.getContext('2d');
-  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
-  for (let u = 0; u < D.n; u++) if (C.county[u] === county) { x0 = Math.min(x0, C.x[u]); x1 = Math.max(x1, C.x[u]); z0 = Math.min(z0, C.z[u]); z1 = Math.max(z1, C.z[u]); }
-  const pad = D.korea ? 3 : 1.5; x0 -= pad; x1 += pad; z0 -= pad; z1 += pad;
-  const ar = cv.width / cv.height; let w = x1 - x0, h = z1 - z0;
-  if (w / h > ar) { const nh = w / ar; z0 -= (nh - h) / 2; h = nh; } else { const nw = h * ar; x0 -= (nw - w) / 2; w = nw; }
-  const sx = normal.width / D.Wkm, sy = normal.height / D.Hkm;
-  g.fillStyle = '#f4f4f1'; g.fillRect(0, 0, cv.width, cv.height);
-  g.drawImage(normal, x0 * sx, z0 * sy, w * sx, h * sy, 0, 0, cv.width, cv.height);
-  const im = g.getImageData(0, 0, cv.width, cv.height), d = im.data;
-  for (let i = 0; i < d.length; i += 4) {                      // normal map -> light hillshade
-    const nx = (d[i] / 255 - 0.5) * 2.4, ny = (d[i + 1] / 255 - 0.5) * 2.4, l = 1 / Math.hypot(nx * 2, ny * 2, 1);
-    const s = Math.max(0, (-0.55 * nx * 2 + 0.55 * ny * 2 + 0.63) * l), v = 150 + 105 * Math.min(1, s * 1.15);
-    d[i] = d[i + 1] = d[i + 2] = v;
-  }
-  g.putImageData(im, 0, 0);
-  const k = cv.width / w, px = (u) => [(C.x[u] - x0) * k, (C.z[u] - z0) * k], r = Math.max(1.6, (D.korea ? 0.45 : 0.14) * k);
-  for (const [lv, col] of [[2, 'rgba(233,180,76,.75)'], [3, 'rgba(199,52,31,.95)']]) { g.fillStyle = col; for (let u = 0; u < D.n; u++) if (C.level[u] === lv && C.county[u] === county) { const [x, y] = px(u); g.beginPath(); g.arc(x, y, r, 0, 6.3); g.fill(); } }
-  g.font = 'bold 17px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  top.forEach((u, i) => { const [x, y] = px(u); g.fillStyle = '#111'; g.beginPath(); g.arc(x, y, 13, 0, 6.3); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke(); g.fillStyle = '#fff'; g.fillText(i + 1, x, y + 1); });
-  g.fillStyle = '#111'; g.fillRect(24, cv.height - 30, 5 * k, 4); g.font = '15px system-ui'; g.textAlign = 'left'; g.fillText('5 km', 24, cv.height - 42);
+  // toolbar
+  document.documentElement.lang = lang; document.title = `SLOPEWATCH · ${L(c.ko, c.en)} ${L('점검표', 'inspection sheet')}`;
+  if (provs) $('#prov').innerHTML = provs.map((p) => `<option value="${p.id}" ${p.id === c.prov ? 'selected' : ''}>${L(p.ko, p.en)}</option>`).join(''); else $('#prov').hidden = true;
+  $('#county').innerHTML = counties.filter((x) => !provs || x.prov === c.prov).map((x) => `<option value="${x.id}" ${x.id === county ? 'selected' : ''}>${L(x.ko, x.en)} (${byCounty.get(x.id).length})</option>`).join('');
+  $('#count').innerHTML = [15, 25, 50, 100].map((n) => `<option value="${n}" ${n === count ? 'selected' : ''}>${L(`상위 ${n}곳`, `Top ${n}`)}</option>`).join('');
+  $('#lang').textContent = lang === 'ko' ? 'English' : '한국어'; $('#print').textContent = L('인쇄 / PDF', 'Print / PDF');
+  $('#map').textContent = L('지도', 'Map'); $('#map').href = `map.html?lang=${lang}${REG}`;
+  $('#forms').textContent = L('사면별 현장 점검서 ▸', 'Field form per slope ▸'); $('#forms').href = `form.html?county=${county}&n=5&lang=${lang}${REG}`;
+  $('#pg').textContent = `@page { size: A4; margin: 11mm 12mm 13mm; @bottom-left { content: "SLOPEWATCH · ${name.replace(/"/g, '')} · ${title}"; font: 7pt system-ui, sans-serif; color: #5c5c5c; } @bottom-right { content: counter(page) " / " counter(pages); font: 7pt system-ui, sans-serif; color: #5c5c5c; } }`;
+
+  const rows = top.map((u, i) => {
+    const b = best(u), why = [];
+    if (C.moving[u]) why.push(`<span class="mv">${L('이동 감지', 'movement detected')}</span>`);
+    if (C.pct[u] >= 0.8) why.push(L(`취약도 상위 ${Math.max(1, Math.round((1 - C.pct[u]) * 100))}%`, `top ${Math.max(1, Math.round((1 - C.pct[u]) * 100))}% susceptibility`));
+    [[C.r1[u], C.v1[u]], [C.r2[u], C.v2[u]]].forEach(([r, v]) => { if (r >= 0) why.push(reason(M.features[r], v, lang)); });
+    if (C.label[u]) why.push(L('2026.7 붕괴 후보지', 'Jul 2026 scar candidate'));
+    const below = [C.bld[u] > 0 ? L(`건물 ${C.bld[u]}동`, `${C.bld[u]} bldg`) : '', C.road[u] > 0 ? L('주요 도로', 'main road') : ''].filter(Boolean).join('<br>');
+    const mv = K && !C.rcov[u] ? `<small>${L('레이더 없음', 'no radar')}</small>` : !b ? `<small>${L('측정 불가', 'not measurable')}</small>`
+      : `<span class="n ${C.moving[u] ? 'mv' : ''}" style="white-space:nowrap">${sg(b.v)} ± ${b.s.toFixed(1)}</span><br><small>${L('궤도', 'track')} ${b.id}${C.moving[u] ? '' : ' · ' + L('잡음 이내', 'within noise')}</small>`;
+    return `<tr><td class="c"><a class="no" href="form.html?u=${u}&lang=${lang}${REG}" title="${L('이 사면의 현장 점검서', 'Field form for this slope')}">${i + 1}</a></td>
+      <td class="n"><b>${fno(u)}</b><br>${C.lat[u].toFixed(5)}, ${C.lon[u].toFixed(5)}</td><td class="c"><span class="dz">${Math.round(C.danger[u])}</span></td>
+      <td class="n c">${C.slope[u].toFixed(0)}° ${compass(C.aspect[u], lang)}<br><small>${C.elev[u].toFixed(0)} m</small></td><td>${why.join(' · ')}</td><td class="c">${mv}</td><td>${below}</td><td class="c"><span class="ln" style="width:15mm"></span><br><span class="abcd">ABCD</span></td></tr>`;
+  }).join('');
+  const m = mapHTML(top);
+  const marks = top.map((u, i) => { const [x, y] = m.px(u); return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="8" fill="#111" stroke="#fff" stroke-width="1.6"/><text y="3.2" text-anchor="middle" font-size="${i > 98 ? 7 : 9}" font-weight="700" fill="#fff">${i + 1}</text></g>`; }).reverse().join('');
+  const H = [L('순위', 'No.'), L('서식 번호 · 좌표 (위도, 경도)', 'Form no. · lat, lon'), L('위험 지수', 'Danger'), L('경사·방향', 'Slope, facing'), L('선정 사유', 'Why it is listed'), L('레이더 이동 cm', 'Radar cm'), L('사면 아래', 'Below'), L('점검일 · 판정', 'Date · result')];
+  const Wd = [8, 34, 12, 14, 0, 23, 17, 21];
+  $('#doc').innerHTML = `
+    <header class="h1"><h1><small>SLOPEWATCH · ${L('NISAR 레이더 + AI 취약도 기반', 'FROM NISAR RADAR + AI SUSCEPTIBILITY')}</small>${name}<br>${title}</h1>
+      <div class="fno"><div><span>${L('문서 번호', 'Sheet no.')}</span><b>SWL-${K ? 'K' : 'R'}-${String(county).padStart(3, '0')}</b></div><div><span>${L('자료 생성', 'Data built')}</span><b>${built}</b></div><div><span>${L('수록 사면', 'Slopes listed')}</span><b>${top.length} / ${all.length.toLocaleString()}</b></div></div></header>
+    <div class="note">${L('초안 — 해커톤 시제품이며 정부 공식 서식이 아닙니다. 경보가 아니고 붕괴 시점을 예측하지 않습니다. 현장 점검 순서를 정하는 참고 자료입니다.', 'Draft — a hackathon prototype, not an official government form. Not a warning and not a forecast of when a slope will fail. A guide to the order of field inspection.')}</div>
+    <div class="sum">
+      <div class="hot"><b>${all.length.toLocaleString()}</b><span>${L('우선 점검 사면', 'check-first slopes')}</span></div>
+      <div><b>${nWatch.toLocaleString()}</b><span>${L('관찰 사면', 'watch slopes')}</span></div>
+      <div><b>${nMove}</b><span>${L('레이더 이동 감지', 'with radar movement')}</span></div>
+      <div><b>${nBld.toLocaleString()}</b><span>${L('아래에 건물이 있는 우선 점검 사면', 'check-first slopes above buildings')}</span></div>
+      <div><b>${nRoad.toLocaleString()}</b><span>${L('아래에 주요 도로가 있는 우선 점검 사면', 'check-first slopes above a main road')}</span></div>
+      <div><b>${place}<small> / ${ranked.length}</small></b><span>${K ? L('전국 시·군·구 중 우선 점검 수 순위', 'rank among districts by check-first count') : L('지역 시·군 중 우선 점검 수 순위', 'rank among districts by check-first count')}</span></div>
+    </div>
+    ${m.html(marks)}
+    <div class="key"><span><i style="background:#111"></i>${L('이 표의 순위 번호', 'number on this sheet')}</span><span><i style="background:var(--red)"></i>${L('우선 점검 사면', 'check-first slopes')}</span><span><i style="background:var(--amber)"></i>${L('관찰 사면', 'watch slopes')}</span><em>${L('번호 순서 = 점검 순서 (위험 지수 높은 순)', 'number order = inspection order (highest danger index first)')}</em></div>
+    <h2>${L('점검 순서', 'Inspection order')}<em>${L('사면마다 6쪽 현장 점검서가 있습니다 — 서식 번호로 찾아 인쇄 · 판정 칸은 A–D 중 하나에 ○', 'each slope has a six-page field form — print it by form number · circle one of A–D under Result')}</em></h2>
+    <table class="f list"><colgroup>${Wd.map((w) => `<col${w ? ` style="width:${w}mm"` : ''}>`).join('')}</colgroup><thead><tr>${H.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+    <div class="end">
+      <h2>${L('점검 집계', 'Tally')}<em>A ${L('이상 없음', 'no concern')} · B ${L('관찰 (우기 전·호우 뒤 재점검)', 'observe (re-inspect before the rainy season and after heavy rain)')} · C ${L('정밀 조사 의뢰', 'detailed survey')} · D ${L('긴급 조치', 'urgent')}</em></h2>
+      <table class="f"><tr><th style="width:26mm">${L('점검 완료', 'Inspected')}</th><td>${ln(12)} / ${top.length}${L('곳', '')}</td><th style="width:10mm">A</th><td>${ln(10)}</td><th style="width:10mm">B</th><td>${ln(10)}</td><th style="width:10mm">C</th><td>${ln(10)}</td><th style="width:10mm">D</th><td>${ln(10)}</td></tr></table>
+      <table class="f sig" style="margin-top:1.6mm"><thead><tr><th style="width:26mm"></th><th>${L('부서 · 직급', 'Office · post')}</th><th>${L('성명', 'Name')}</th><th>${L('서명', 'Signature')}</th><th style="width:30mm">${L('날짜', 'Date')}</th></tr></thead>
+        <tr><th>${L('담당자', 'Officer')}</th><td></td><td></td><td></td><td></td></tr><tr><th>${L('확인자', 'Reviewed by')}</th><td></td><td></td><td></td><td></td></tr></table>
+      <div class="foot"><b>${L('등급 규칙', 'Level rule')}</b> — ${L(`"우선 점검": 레이더가 이동을 감지했거나 AI 취약도가 상위 5%이고, 아래쪽 약 ${DOWN} m 이내에 건물이나 주요 도로가 있는 사면. "관찰": 이동 감지 또는 취약도 상위 20%. 이동량은 레이더 시선 방향 값이며 ± 뒤는 잡음 수준입니다${K ? ' (NISAR 레이더는 경북 산불 지역만 처리, 그 밖은 AI 순위만으로 선정)' : ''}. 건물 자료는 OpenStreetMap으로, 농촌 주택이 빠져 있을 수 있습니다. AI 모델은 2026년 7월 폭우 때의 붕괴지(자동 탐지 ${M.suscept.n_failed}곳, 사람이 아직 확인하지 않음)로 학습했습니다. 이동이 없는 사면이 안전하다는 뜻은 아닙니다.`,
+        `"Check first": the radar detected movement or the AI ranks the slope in the top 5%, and a building or main road lies within about ${DOWN} m downslope. "Watch": movement detected, or top 20%. Movement is along the radar line of sight; the figure after ± is the noise level${K ? ' (NISAR radar was processed for the North Gyeongsang burn area only; elsewhere the AI rank alone decides)' : ''}. Buildings come from OpenStreetMap and may miss rural houses. The AI model learned from slopes that failed in the July 2026 storm (${M.suscept.n_failed} found automatically, not yet checked by a person). No movement does not mean a slope is safe.`)}
+        ${L('지형: Copernicus DEM · 광학: Sentinel-2 · 강우: ERA5 · 레이더: NASA-ISRO NISAR.', 'Terrain: Copernicus DEM · Optical: Sentinel-2 · Rain: ERA5 · Radar: NASA-ISRO NISAR.')}</div>
+    </div>`;
+  paintMap(m);
+  history.replaceState(null, '', `?county=${county}&n=${count}&lang=${lang}${REG}`);
 }
-sel.onchange = () => { county = +sel.value; render(); };
-document.getElementById('count').onchange = render;
-document.getElementById('lang').onclick = () => { lang = lang === 'ko' ? 'en' : 'ko'; render(); };
+$('#prov').onchange = (e) => { county = ranked.find((x) => x.prov === +e.target.value).id; render(); };
+$('#county').onchange = (e) => { county = +e.target.value; render(); };
+$('#count').onchange = (e) => { count = +e.target.value; render(); };
+$('#lang').onclick = () => { lang = lang === 'ko' ? 'en' : 'ko'; render(); };
 render();
 </script>
-<script src="js/nav.js?v=3" defer></script>
+<script src="js/nav.js?v=4" defer></script>
 </body>
 </html>
