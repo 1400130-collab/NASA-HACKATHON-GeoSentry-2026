@@ -1,4 +1,4 @@
-"""Download the public (no-login) layers for the nationwide SLOPEWATCH map, on one grid for all of South Korea.
+"""Download the public (no-login) layers for the nationwide GeoSentry map, on one grid for all of South Korea.
 
 Grid: EPSG:5179, 90 m (see pipeline/korea/common_kr.py). North Korea and Japan are masked out later.
 Sentinel-2 comes from Microsoft Planetary Computer (sentinel-2-l2a), read from the COG overviews (80 m)
@@ -30,7 +30,7 @@ from rasterio.windows import Window, from_bounds
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pipeline" / "korea"))
 from common_kr import PUB, CRS, RES, X0, Y1, W90, H90, BBOX_LL, S2_PERIODS, transform90, write_tif  # noqa: E402
 
-UA = {"User-Agent": "slopewatch-hackathon/0.2"}
+UA = {"User-Agent": "geosentry-hackathon/0.2"}
 T90 = transform90()
 os.environ.setdefault("GDAL_HTTP_MAX_RETRY", "4")
 os.environ.setdefault("GDAL_HTTP_RETRY_DELAY", "2")

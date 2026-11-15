@@ -1,4 +1,4 @@
-// SLOPEWATCH submission deck: 7 slides (the Seoul rules cap the demo deck at 7, title included).
+// GeoSentry submission deck: 7 slides (the Seoul rules cap the demo deck at 7, title included).
 // Every number comes from site/data/korea/meta.json or site/data/meta.json (runs of 13-14 Nov 2026).
 const pptxgen = require('pptxgenjs');
 const React = require('react');
@@ -9,12 +9,12 @@ const path = require('path');
 const { applyTheme } = require(process.env.SKILL + '/scripts/apply_theme.js');
 
 const IMG = path.join(__dirname, 'img');
-const OUT = process.argv[2] || path.join(__dirname, 'SLOPEWATCH.pptx');
+const OUT = process.argv[2] || path.join(__dirname, 'GeoSentry.pptx');
 const TEAM = process.env.TEAM || 'Team GeoSentry';
 const REPO = 'github.com/1400130-collab/NASA-HACKATHON-GeoSentry-2026';
 
 const THEME = {
-  name: 'SLOPEWATCH',
+  name: 'GeoSentry',
   headFontFace: 'Arial Black',
   bodyFontFace: 'Arial',
   colors: {
@@ -28,7 +28,7 @@ const HEX = { red: 'FF4D2E', amber: 'FFB020', ice: '6FC3D6', mute: '8C8A83', ink
 const pres = new pptxgen();
 pres.layout = 'LAYOUT_WIDE'; // 13.333 x 7.5
 pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
-pres.title = 'SLOPEWATCH: check these slopes first';
+pres.title = 'GeoSentry: check these slopes first';
 pres.subject = 'NASA Space Apps Challenge 2026 Seoul, Dancing with the Stars: SARs';
 pres.author = TEAM;
 const C = pres.SchemeColor;
@@ -65,7 +65,7 @@ pres.defineSlideMaster({
   objects: [
     { placeholder: { options: { name: 'eyebrow', type: 'body', x: M, y: 0.42, w: 9, h: 0.3, align: 'left', fontSize: 12, bold: true, color: RED, charSpacing: 3, margin: 0, valign: 'top' }, text: '' } },
     { placeholder: { options: { name: 'title', type: 'title', x: M, y: 0.74, w: CW, h: 1.08, align: 'left', fontSize: 30, color: INK, margin: 0, valign: 'top', lineSpacingMultiple: 0.95 }, text: '' } },
-    { text: { text: 'SLOPEWATCH  ·  NASA Space Apps Challenge 2026  ·  Seoul', options: { x: M, y: 7.02, w: 8, h: 0.26, fontSize: 10, color: MUTE, margin: 0, valign: 'middle' } } },
+    { text: { text: 'GeoSentry  ·  NASA Space Apps Challenge 2026  ·  Seoul', options: { x: M, y: 7.02, w: 8, h: 0.26, fontSize: 10, color: MUTE, margin: 0, valign: 'middle' } } },
   ],
   slideNumber: { x: W - M - 0.6, y: 7.02, w: 0.6, h: 0.26, fontSize: 10, color: MUTE, align: 'right', margin: 0 },
 });
@@ -92,8 +92,8 @@ const marker = (slide, n, x, y, d = 0.36) => {
   pres.addSection({ title: 'Problem' });
   let s = pres.addSlide({ masterName: 'TITLE', sectionTitle: 'Problem' });
   s.background = { path: path.join(IMG, 'hero.jpg') };
-  s.addImage({ data: await logo(HEX.red), x: M, y: 0.56, w: 0.42, h: 0.35, altText: 'SLOPEWATCH logo, a mountain outline' });
-  T(s, 'SLOPEWATCH', { x: M + 0.55, y: 0.5, w: 3.2, h: 0.46, fontSize: 18, fontFace: HEAD, charSpacing: 1, valign: 'middle' });
+  s.addImage({ data: await logo(HEX.red), x: M, y: 0.56, w: 0.42, h: 0.35, altText: 'GeoSentry logo, a mountain outline' });
+  T(s, 'GeoSentry', { x: M + 0.55, y: 0.5, w: 3.2, h: 0.46, fontSize: 18, fontFace: HEAD, charSpacing: 1, valign: 'middle' });
   T(s, 'NASA SPACE APPS CHALLENGE 2026  ·  SEOUL', { x: W - M - 6, y: 0.5, w: 6, h: 0.46, fontSize: 12, bold: true, color: INK2, charSpacing: 2, align: 'right', valign: 'middle' });
   s.addText('CHALLENGE  ·  DANCING WITH THE STARS: SARs', { placeholder: 'kicker' });
   s.addText('Check these slopes first.', { placeholder: 'title' });
@@ -112,7 +112,7 @@ const marker = (slide, n, x, y, d = 0.36) => {
     'Title, team, challenge, problem.',
     'We are a high school team from Seoul. Our challenge is Dancing with the Stars: SARs, using NISAR to see the Earth\'s surface change.',
     'Korea\'s landslide warnings are driven by rain and soil water. Nothing in that chain measures whether a hillside is already creeping. NISAR can.',
-    'SLOPEWATCH turns NISAR radar plus two machine-learning models into a short, ranked list of hillsides to inspect before the rainy season.',
+    'GeoSentry turns NISAR radar plus two machine-learning models into a short, ranked list of hillsides to inspect before the rainy season.',
     'The background is our live 3D map: red patches are "check first", amber are "watch".',
   ].join('\n'));
 
@@ -146,7 +146,7 @@ const marker = (slide, n, x, y, d = 0.36) => {
   T(s, 'The local government officer', { x: px + 0.3, y: 2.5, w: pw - 0.6, h: 0.45, fontSize: 20, bold: true });
   const steps = [
     ['LuCloudRain', 'National forecast', [{ text: 'Rain, soil water and a fixed hazard map. No measured movement.' }]],
-    ['LuUserRound', 'Local officer', [{ text: 'Chooses which slopes to check. ' }, { text: 'SLOPEWATCH fits here.', options: { color: RED, bold: true } }]],
+    ['LuUserRound', 'Local officer', [{ text: 'Chooses which slopes to check. ' }, { text: 'GeoSentry fits here.', options: { color: RED, bold: true } }]],
     ['LuLandmark', 'Situation meeting', [{ text: 'Decides whether to evacuate.' }]],
   ];
   for (let i = 0; i < steps.length; i++) {
@@ -230,7 +230,7 @@ const marker = (slide, n, x, y, d = 0.36) => {
   s.addText('03  ·  WHAT IT LOOKS LIKE', { placeholder: 'eyebrow' });
   s.addText([{ text: 'Click a slope. ', options: { color: INK } }, { text: 'See why it is on the list.', options: { color: INK2 } }], { placeholder: 'title' });
   const sx = M, sy = 2.0, sw = 8.6, sh = sw * 9 / 16;
-  s.addImage({ path: path.join(IMG, 'ui.jpg'), x: sx, y: sy, w: sw, h: sh, altText: 'Screenshot of the SLOPEWATCH 3D map: a selected check-first slope near Andong with a beacon, its danger index of 94 out of 100, the reasons, and the June to October radar timeline' });
+  s.addImage({ path: path.join(IMG, 'ui.jpg'), x: sx, y: sy, w: sw, h: sh, altText: 'Screenshot of the GeoSentry 3D map: a selected check-first slope near Andong with a beacon, its danger index of 94 out of 100, the reasons, and the June to October radar timeline' });
   s.addShape(pres.shapes.RECTANGLE, { x: sx, y: sy, w: sw, h: sh, fill: { type: 'none' }, line: { color: LINE, width: 0.75 } });
   marker(s, 1, sx + sw * 0.43, sy + sh * 0.47);
   marker(s, 2, sx + sw * 0.748, sy + sh * 0.30);
@@ -325,7 +325,7 @@ const marker = (slide, n, x, y, d = 0.36) => {
   const x2 = M + cw2 + 0.3;
   // drawn as shapes: Keynote drops pptxgenjs bar charts, and shapes survive Google Slides import unchanged
   label(s, 'Failed slopes inside the top 5% of the ranking', { x: x2 + 0.3, y: cy + 2.2, w: cw2 - 0.6, fontSize: 10 });
-  const bars = [['Random', 5], ['Steepness only', 10], ['Steep + burned', 15], ['SLOPEWATCH', 25]];
+  const bars = [['Random', 5], ['Steepness only', 10], ['Steep + burned', 15], ['GeoSentry', 25]];
   const bx = x2 + 2.05, bmax = cw2 - 2.05 - 0.85, by0 = cy + 2.55;
   bars.forEach(([name, v], i) => {
     const y = by0 + i * 0.4, me = i === bars.length - 1, bw = bmax * v / 25;
@@ -352,7 +352,7 @@ const marker = (slide, n, x, y, d = 0.36) => {
   // ===================================================== 7 · IMPACT, NEXT STEPS, REFERENCES
   pres.addSection({ title: 'Impact' });
   s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'Impact' });
-  s.addImage({ path: path.join(IMG, 'korea.jpg'), x: 8.35, y: 1.9, w: 4.95 * 1400 / 1468, h: 4.95, altText: 'The SLOPEWATCH map of all of South Korea, with watch and check-first hillsides speckled orange across the mountain provinces' });
+  s.addImage({ path: path.join(IMG, 'korea.jpg'), x: 8.35, y: 1.9, w: 4.95 * 1400 / 1468, h: 4.95, altText: 'The GeoSentry map of all of South Korea, with watch and check-first hillsides speckled orange across the mountain provinces' });
   s.addText('06  ·  IMPACT AND NEXT STEPS', { placeholder: 'eyebrow' });
   s.addText([{ text: '3,291 hillsides to check ', options: { color: INK } }, { text: 'before the next rainy season.', options: { color: INK2 } }], { placeholder: 'title' });
   const big = [['129,948', 'hillsides ranked in all 17 provinces', INK], ['22,768', 'to watch', AMBER], ['3,291', 'to check first: 2.5% of hillsides, each with a house or road below', RED]];

@@ -1,4 +1,4 @@
-// Capture clean frames of the live SLOPEWATCH 3D map for the deck.
+// Capture clean frames of the live GeoSentry 3D map for the deck.
 const puppeteer = require('puppeteer-core');
 const OUT = process.argv[2];
 const CH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';

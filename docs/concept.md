@@ -1,4 +1,4 @@
-# SLOPEWATCH concept (draft)
+# GeoSentry concept (draft)
 
 Draft notes written before the hackathon. Nothing here is built or validated.
 

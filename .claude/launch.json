@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "slopewatch-site",
+      "name": "geosentry-site",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",
@@ -14,7 +14,7 @@
       "port": 5173
     },
     {
-      "name": "slopewatch-site-2",
+      "name": "geosentry-site-2",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",
@@ -26,7 +26,7 @@
       "port": 5174
     },
     {
-      "name": "slopewatch-site-3",
+      "name": "geosentry-site-3",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",
@@ -38,7 +38,7 @@
       "port": 5175
     },
     {
-      "name": "slopewatch-site-4",
+      "name": "geosentry-site-4",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",

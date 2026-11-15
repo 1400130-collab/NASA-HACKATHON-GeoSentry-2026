@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SLOPEWATCH 사면 현장 점검서</title>
+<title>GeoSentry 사면 현장 점검서</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <style>
@@ -94,7 +94,7 @@
 </style>
 </head>
 <body>
-<div class="bar"><a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
+<div class="bar"><a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>GeoSentry</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
 <div id="out"><div class="page">Loading…</div></div>
 <script type="module">
 // One printable field inspection form per slope: six A4 pages.
@@ -228,7 +228,7 @@ function form(u) {
   const F = facts(u), no = fno(u), where = cname(C.county[u]), lvn = LV()[F.lv], rk = byCounty.get(C.county[u])?.indexOf(u) ?? -1;
   const coord = `${C.lat[u].toFixed(5)}°N, ${C.lon[u].toFixed(5)}°E`, kakao = `https://map.kakao.com/link/map/${no},${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}`;
   const GRID = '<svg><defs><pattern id="g5" width="18.898" height="18.898" patternUnits="userSpaceOnUse"><path d="M18.898 0H0V18.898" fill="none" stroke="#b4b4ae" stroke-width=".7"/></pattern></defs><rect width="100%" height="100%" fill="url(#g5)"/></svg>';
-  const P = 6, pf = (p) => `<div class="pf"><span>SLOPEWATCH · ${L('사면 현장 점검서', 'Slope field inspection form')} · ${no}</span><span>${L('자료 생성', 'data built')} ${M.generated.slice(0, 10)} · ${L('시제품 · 공식 서식 아님', 'prototype · not an official form')}</span><span>${p} / ${P}</span></div>`;
+  const P = 6, pf = (p) => `<div class="pf"><span>GeoSentry · ${L('사면 현장 점검서', 'Slope field inspection form')} · ${no}</span><span>${L('자료 생성', 'data built')} ${M.generated.slice(0, 10)} · ${L('시제품 · 공식 서식 아님', 'prototype · not an official form')}</span><span>${p} / ${P}</span></div>`;
   const rh = (part) => `<div class="rh"><span><b>${no}</b> &nbsp; ${where} &nbsp;·&nbsp; ${coord}</span><span>${part}</span></div>`;
   const partA = L('A. 위성 사전 조사', 'A. Satellite pre-survey'), partB = L('B. 현장 점검', 'B. Field inspection');
   const h2 = (n, t, e = '') => `<h2><i>${n}</i>${t}${e ? `<em>${e}</em>` : ''}</h2>`;
@@ -238,7 +238,7 @@ function form(u) {
 
   // ---------- page 1: where it is and why it is listed ----------
   const p1 = `<section class="page">
-    <header class="h1"><h1><small>SLOPEWATCH · ${L('NISAR 레이더 + AI 취약도 기반', 'FROM NISAR RADAR + AI SUSCEPTIBILITY')}</small>${L('사면 현장 점검서', 'Slope field inspection form')}</h1>
+    <header class="h1"><h1><small>GeoSentry · ${L('NISAR 레이더 + AI 취약도 기반', 'FROM NISAR RADAR + AI SUSCEPTIBILITY')}</small>${L('사면 현장 점검서', 'Slope field inspection form')}</h1>
       <div class="fno"><div><span>${L('서식 번호', 'Form no.')}</span><b>${no}</b></div><div><span>${L('점검 등급', 'Level')}</span><b>${lvn}</b></div><div><span>${L('위험 지수', 'Danger index')}</span><b>${Math.round(C.danger[u])} / 100</b></div></div></header>
     <div class="note">${L('초안 — 해커톤 시제품이며 정부 공식 서식이 아닙니다. 경보가 아니고 붕괴 시점을 예측하지 않습니다. A부는 위성 자료로 자동 작성된 참고 정보이며, 판정은 B부의 현장 점검으로 합니다.', 'Draft — a hackathon prototype, not an official government form. Not a warning and not a forecast of when a slope will fail. Part A is filled in automatically from satellite data for reference; the judgment is made in the field, in Part B.')}</div>
     <div class="part">${partA}<span>${L('자동 작성 · 수정하지 말 것', 'pre-printed · do not edit')}</span></div>
@@ -408,7 +408,7 @@ function form(u) {
     ${h2('B15', L('사진 대장', 'Photo log'), L('최소: 전경, 사면 상부, 사면 하부, 징후마다 1장, 사면 아래 건물', 'at least: overview, crest, toe, one per sign, buildings below'))}
     <table class="f"><thead><tr><th style="width:9mm">${L('번호', 'No.')}</th><th style="width:38mm">${L('촬영 위치 · 방향', 'From where · facing')}</th><th>${L('찍은 대상', 'What it shows')}</th><th style="width:20mm">${L('B3·B4 항목', 'B3/B4 item')}</th><th style="width:36mm">${L('파일명 · 시각', 'File · time')}</th></tr></thead>
       ${Array.from({ length: 10 }, (_, i) => `<tr><td class="c">${'①②③④⑤⑥⑦⑧⑨⑩'[i]}</td><td class="w"></td><td></td><td></td><td></td></tr>`).join('')}</table>
-    <div class="foot">${L('이 점검서는 SLOPEWATCH 팀(2026 NASA Space Apps Challenge 서울)이 만든 시제품입니다. 점검 항목은 급경사지·산사태 취약지 현장 조사에서 일반적으로 확인하는 징후를 따랐으며, 정부 고시 서식이나 법정 평가표를 대체하지 않습니다. 건물 자료: OpenStreetMap. 지형: Copernicus DEM. 광학: Sentinel-2. 강우: ERA5. 레이더: NASA-ISRO NISAR.', 'This form is a prototype by the SLOPEWATCH team (NASA Space Apps Challenge 2026, Seoul). The items follow the signs usually checked in field surveys of steep slopes and landslide-prone areas; it does not replace any official form or statutory assessment sheet. Buildings: OpenStreetMap. Terrain: Copernicus DEM. Optical: Sentinel-2. Rain: ERA5. Radar: NASA-ISRO NISAR.')}</div>
+    <div class="foot">${L('이 점검서는 GeoSentry 팀(2026 NASA Space Apps Challenge 서울)이 만든 시제품입니다. 점검 항목은 급경사지·산사태 취약지 현장 조사에서 일반적으로 확인하는 징후를 따랐으며, 정부 고시 서식이나 법정 평가표를 대체하지 않습니다. 건물 자료: OpenStreetMap. 지형: Copernicus DEM. 광학: Sentinel-2. 강우: ERA5. 레이더: NASA-ISRO NISAR.', 'This form is a prototype by the GeoSentry team (NASA Space Apps Challenge 2026, Seoul). The items follow the signs usually checked in field surveys of steep slopes and landslide-prone areas; it does not replace any official form or statutory assessment sheet. Buildings: OpenStreetMap. Terrain: Copernicus DEM. Optical: Sentinel-2. Rain: ERA5. Radar: NASA-ISRO NISAR.')}</div>
     ${pf(6)}</section>`;
   let html = p1 + p2 + p3 + p4 + p5 + p6;
   if (!K && C.sim) {                                          // regional map: flagged slopes use the simulated debris flow (p11), not the 300 m rule
@@ -429,7 +429,7 @@ function form(u) {
 const $ = (s) => document.querySelector(s);
 function render() {
   document.documentElement.lang = lang;
-  document.title = L('SLOPEWATCH 사면 현장 점검서', 'SLOPEWATCH slope field inspection form');
+  document.title = L('GeoSentry 사면 현장 점검서', 'GeoSentry slope field inspection form');
   const list = byCounty.get(county) || [], onList = list.includes(sel), at = Math.max(0, list.indexOf(sel));
   $('#county').innerHTML = counties.map((c) => `<option value="${c.id}" ${c.id === county ? 'selected' : ''}>${cname(c.id)} (${byCounty.get(c.id).length})</option>`).join('');
   $('#slope').innerHTML = (onList ? '' : `<option value="${sel}" selected>#${sel} · ${LV()[C.level[sel]]}</option>`) + list.map((u, i) => `<option value="${u}" ${u === sel ? 'selected' : ''}>${i + 1}${L('위', '')} · #${u} · ${L('지수', 'index')} ${Math.round(C.danger[u])}${C.moving[u] ? ' · ' + L('이동', 'moving') : ''}</option>`).join('');

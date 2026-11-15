@@ -1,4 +1,4 @@
-"""Shared grid, paths and helpers for the SLOPEWATCH pipeline.
+"""Shared grid, paths and helpers for the GeoSentry pipeline.
 
 Everything lives on the DEM grid: EPSG:32652, 20 m pixels, 3892 x 5404.
 NISAR 80 m layers are a sub-grid of it (offset 4 px in x, 0 in y).
