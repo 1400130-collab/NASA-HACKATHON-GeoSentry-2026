@@ -6,8 +6,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { loadAll, DAYS, AREA } from './data.js?v=3';
-import { Terrain } from './terrain.js?v=24';
-import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=31';
+import { Terrain } from './terrain.js?v=25';
+import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=32';
 import { UI } from './ui.js?v=20';
 import { World } from './world.js?v=17';
 import { makeGeo } from './world-geo.js';

@@ -26,8 +26,8 @@ export class Satellite {
     const boom = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 4.2), gold); boom.position.set(0, 1.9, -1.4); boom.rotation.x = 0.6; sat.add(boom);
     const dish = new THREE.Mesh(new THREE.CircleGeometry(2.6, 36), new THREE.MeshBasicMaterial({ color: 0xf2d28a, wireframe: true, transparent: true, opacity: 0.7 }));
     dish.position.set(0, 3.6, -2.6); dish.rotation.x = -0.9; sat.add(dish);
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ color: col, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, map: glowTex() }));
-    halo.scale.setScalar(9); sat.add(halo);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ color: col, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false, map: glowTex() }));
+    halo.scale.setScalar(6); sat.add(halo);
     this.sat = sat; this.group.add(sat);
 
     // radar fan: apex at the satellite, base along the scan line on the ground
@@ -42,7 +42,7 @@ export class Satellite {
       fragmentShader: `uniform vec3 uC; uniform float uT, uI; varying float vA, vS;
         void main(){ float rays = 0.55 + 0.45 * sin(vS * 240.0 + uT * 9.0) * sin(vS * 61.0 - uT * 4.0);
           float pulse = 0.6 + 0.4 * fract(vA * 6.0 - uT * 2.5);
-          gl_FragColor = vec4(uC * (0.05 + 0.2 * (1.0 - vA)) * rays * pulse * uI, 1.0); }`,
+          gl_FragColor = vec4(uC * (0.025 + 0.09 * (1.0 - vA)) * rays * pulse * uI, 1.0); }`,
     }));
     this.fan.frustumCulled = false; this.group.add(this.fan);
   }

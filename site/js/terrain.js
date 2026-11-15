@@ -396,7 +396,7 @@ void main() {
     float trail = d < 0.0 ? exp(d / 9.0) : 0.0;
     float rng = dot(vW.xz - uScanO[i], vec2(-uScanD[i].y, uScanD[i].x));
     float ticks = 0.5 + 0.5 * step(0.5, fract(rng * 0.9 + d * 0.3));
-    col += uScanC[i] * uScanI[i] * (line * 2.6 + trail * 0.22 * ticks * (0.4 + diff));
+    col += uScanC[i] * uScanI[i] * (line * 0.85 + trail * 0.08 * ticks * (0.4 + diff));      // kept under the bloom threshold: a soft sweep, not a flare
   }
 
   float dist = length(cameraPosition - vW);
