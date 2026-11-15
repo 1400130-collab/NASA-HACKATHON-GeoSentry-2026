@@ -107,11 +107,10 @@ html[lang="ko"] .hero h1 { font-size: clamp(38px, min(6vw, 10.5vh), 92px); }
 /* the three machine-learning engines stand out from the InSAR solve: red tag, glowing node, full-strength drawing */
 .hero .mlx { color: var(--red); font-weight: 600; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat; animation: mlline 1s var(--ease) 1.4s forwards; }
 @keyframes mlline { to { background-size: 100% 1.5px; } }
-.hero .specs.engines > div:not(.ml) { opacity: .62; }
 .hero .specs.engines:hover > div:not(:hover) { opacity: .45; }
 .hero .specs.engines .ml .eng-kind b { color: #0b0c0d; background: var(--red); padding: 3px 6px 2px; border-radius: 3px; }
-.hero .specs.engines .ml .eng-glyph { opacity: 1; }
-.hero .specs.engines .ml dd { color: var(--ink2); }
+.hero .specs.engines .eng-glyph { opacity: 1; }
+.hero .specs.engines dd { color: var(--ink2); }
 .hero .specs.engines > div.ml::after { background: var(--red); box-shadow: 0 0 0 4px rgba(255, 77, 46, .22); animation: mlpulse 2.4s ease-in-out calc(1.6s + var(--c) * .3s) infinite; }
 @keyframes mlpulse { 50% { box-shadow: 0 0 0 9px rgba(255, 77, 46, 0); } }
 @media (prefers-reduced-motion: reduce) { .hero .mlx { animation: none; background-size: 100% 1.5px; } .hero .specs.engines > div.ml::after { animation: none; } }
