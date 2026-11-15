@@ -52,3 +52,49 @@ body[data-slide="ice"] .topo.on { opacity: .095; }
   .g-solve .d, .g-solve .fit, .g-gru .b.hit, .g-gru .scan, .g-tree .e, .g-tree .n { animation: none; opacity: 1; stroke-dashoffset: 0; }
   .g-gru .scan { opacity: 0; } .g-gru .b.hit { fill: var(--red); }
 }
+
+/* home hero: smaller headline, lede and buttons on one line, the four engines underneath */
+.hero h1 { font-size: clamp(42px, min(7vw, 12vh), 108px); margin-bottom: clamp(14px, 2.4vh, 24px); }
+html[lang="ko"] .hero h1 { font-size: clamp(38px, min(6vw, 10.5vh), 92px); }
+.hero .row > div { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 18px 40px; }
+.hero .lede { font-size: clamp(15px, min(1.2vw, 2.2vh), 18px); line-height: 1.5; max-width: 46ch; margin: 0; }
+.hero .actions { flex: none; }
+.hero .actions .btn { font-size: 15px; padding: 14px 20px; }
+
+/* the four engines sit on one straight slope that falls left to right. Each engine starts where the slope
+   crosses its column, marked by a still node. */
+.hero .eng-wrap { position: relative; margin-top: clamp(22px, 3.6vh, 36px); --step: clamp(10px, 1.7vh, 16px); }
+.hero .eng-slope { position: absolute; left: 0; top: 0; width: 100%; height: calc(4 * var(--step)); overflow: visible; pointer-events: none; }
+.hero .eng-slope path { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.hero .eng-slope .base { stroke: url(#eng-fade); stroke-width: 1; }
+
+.hero .specs.engines { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; margin: 0; padding: 0; border: 0; animation: none; }
+.hero .specs.engines > div { position: relative; padding: calc(var(--step) + 14px) clamp(16px, 2vw, 28px) 0 0; border: 0; margin-top: calc(var(--c, 0) * var(--step));
+  animation: rise 1s var(--ease) calc(.5s + var(--c, 0) * 90ms) both; transition: opacity .3s; }
+.hero .specs.engines > div:nth-child(2) { --c: 1; } .hero .specs.engines > div:nth-child(3) { --c: 2; } .hero .specs.engines > div:nth-child(4) { --c: 3; }
+.hero .specs.engines > div::after { content: ""; position: absolute; left: -2.5px; top: -2.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--ink2); }
+.hero .specs.engines:hover > div:not(:hover) { opacity: .5; }
+
+.hero .specs.engines dt { display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; font-size: clamp(18px, 1.5vw, 22px); font-weight: 600; letter-spacing: -.03em; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hero .specs.engines .eng-kind { flex-basis: 100%; margin: 0 0 9px; font-size: 9.5px; letter-spacing: .1em; color: var(--mute); }
+.hero .specs.engines .eng-kind b { display: inline; margin: 0 8px 0 0; }
+.hero .specs.engines .eng-glyph { order: 2; margin: 0 0 0 auto; width: clamp(54px, 4.6vw, 76px); opacity: .7; transition: opacity .3s; }
+.hero .specs.engines > div:hover .eng-glyph { opacity: 1; }
+.hero .specs.engines dd { margin: 7px 0 0; max-width: 30ch; font: 11px/1.5 var(--mono); color: var(--mute); }
+/* the drawings play left to right */
+.hero .engines > div:nth-child(2) .eng-glyph * { animation-delay: .5s; }
+.hero .engines > div:nth-child(3) .eng-glyph * { animation-delay: 1s; }
+.hero .engines > div:nth-child(4) .eng-glyph * { animation-delay: 1.5s; }
+
+@media (max-width: 1100px) {
+  .hero .eng-slope { display: none; }
+  .hero .specs.engines { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; row-gap: 16px; }
+  .hero .specs.engines > div { margin-top: 0; padding-top: 14px; border-top: 1px solid var(--line); }
+}
+@media (prefers-reduced-motion: reduce) { .hero .specs.engines > div { animation: none; } }
+/* phones: two narrow columns. Keep only the engine's name so labels never run into the next column. */
+@media (max-width: 600px) {
+  .hero .specs.engines { column-gap: 20px; }
+  .hero .specs.engines .eng-kind > span { display: none; }
+  .hero .specs.engines .eng-kind { overflow: hidden; text-overflow: ellipsis; }
+}

@@ -107,9 +107,11 @@ if (fine) $$('.model, .two > div:not(.and)').forEach((c) => {
 
 // ---- buttons lean towards the pointer ------------------------------------------------------------------
 if (fine && !calm) $$('.hero .btn, .closer .arr').forEach((b) => {
-  const host = b.closest('a') || b, k = b.matches('.arr') ? 0.1 : 0.22;
-  host.addEventListener('pointermove', (e) => { const r = b.getBoundingClientRect(); b.style.translate = `${((e.clientX - r.left - r.width / 2) * k).toFixed(1)}px ${((e.clientY - r.top - r.height / 2) * k).toFixed(1)}px`; });
-  host.addEventListener('pointerleave', () => { b.style.translate = ''; });
+  // measure the resting box once on enter: measuring while it moves makes it chase itself and jitter
+  const host = b.closest('a') || b, k = b.matches('.arr') ? 0.06 : 0.08; let r = null;
+  host.addEventListener('pointerenter', () => { b.style.translate = ''; r = b.getBoundingClientRect(); });
+  host.addEventListener('pointermove', (e) => { if (!r) r = b.getBoundingClientRect(); b.style.translate = `${((e.clientX - r.left - r.width / 2) * k).toFixed(1)}px ${((e.clientY - r.top - r.height / 2) * k).toFixed(1)}px`; });
+  host.addEventListener('pointerleave', () => { b.style.translate = ''; r = null; });
 });
 
 // ---- figures written by extra.js run up from zero the first time they are seen ----------------------------

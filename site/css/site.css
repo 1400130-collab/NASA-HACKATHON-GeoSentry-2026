@@ -656,11 +656,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-o
 
 /* home hero, fourth engine: the debris-flow simulation. A flow runs down a slope and reaches a house. */
 .g-flow .s { fill: none; stroke: var(--ink); stroke-opacity: .4; stroke-width: 1.4; stroke-linecap: round; }
-.g-flow .f { fill: none; stroke: var(--red); stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: eng-flow 4.6s cubic-bezier(.5, 0, .3, 1) infinite both; }
+.g-flow .f { fill: none; stroke: var(--red); stroke-width: 2.6; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: eng-flow 4.6s cubic-bezier(.5, 0, .3, 1) infinite both; }
 .g-flow .h { fill: var(--ink); opacity: .55; animation: eng-house 4.6s infinite both; }
 @keyframes eng-flow { 0%, 12% { stroke-dashoffset: 1; opacity: 1; } 58%, 86% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
 @keyframes eng-house { 0%, 56% { fill: var(--ink); opacity: .55; } 63%, 88% { fill: var(--red); opacity: 1; } 100% { fill: var(--ink); opacity: .55; } }
-.hero .specs.engines:has(> div:nth-child(4)) .eng-glyph { width: clamp(92px, 8vw, 132px); }
-.hero .specs.engines:has(> div:nth-child(4)) div { padding-right: clamp(10px, 1.3vw, 20px); padding-left: 14px; }
-.hero .specs.engines:has(> div:nth-child(4)) dd { max-width: 17ch; }
 @media (prefers-reduced-motion: reduce) { .g-flow .f, .g-flow .h { animation: none; stroke-dashoffset: 0; } .g-flow .h { fill: var(--red); opacity: 1; } }
