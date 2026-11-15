@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoSentry · drone</title>
+<meta name="description" content="Fly a drone over the North Gyeongsang burn area while the slopes the model flagged let go. Real terrain, simulated debris flows. Hackathon draft.">
+<meta name="theme-color" content="#0b0c0d">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
+<link rel="stylesheet" href="css/drone.css?v=5">
+<link rel="icon" type="image/svg+xml" href="img/geosentry-logo.svg?v=2">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
+</script>
+</head>
+<body class="gate">
+<canvas id="gl" tabindex="0"></canvas>
+
+<div id="hud">
+  <div id="tl"><a href="map.html?area=region" title="Back to the map">←</a><div><b>GeoSentry</b><span class="lab" id="place">North Gyeongsang</span></div></div>
+  <div id="stats">
+    <div id="stSlides"><b id="nSlides">0</b><span class="lab" data-t="slides">slides</span></div>
+    <div id="stHits"><b id="nHits">0</b><span class="lab" data-t="hits">buildings hit</span></div>
+  </div>
+  <div id="chips"><i id="cAuto" class="on" data-t="auto">storm auto</i><i id="cView" data-t="chase">chase cam</i><i id="cEsc" data-t="esc">esc · pause</i></div>
+  <div id="cross"></div>
+  <div id="tgt"><i></i><span class="lab"><kbd>F</kbd><em id="tgtD" style="font-style:normal"></em></span></div>
+  <div id="act"><i></i><span class="lab" id="actD"></span></div>
+  <div id="toast"><b></b><span class="lab"></span></div>
+  <div id="tele">
+    <div><b id="spd">0</b><span class="lab">km/h</span></div>
+    <div><b id="agl">0</b><span class="lab" data-t="agl">m above ground</span></div>
+    <div><b id="msl">0</b><span class="lab" data-t="msl">m elevation</span></div>
+  </div>
+  <canvas id="compass" width="600" height="60"></canvas>
+  <div id="keys" class="lab">
+    <span><kbd>F</kbd><em data-t="k_f" style="font-style:normal">trigger landslide</em></span>
+    <span><kbd>V</kbd><em data-t="k_v" style="font-style:normal">camera</em></span>
+    <span><kbd>T</kbd><em data-t="k_t" style="font-style:normal">next site</em></span>
+    <span><kbd>N</kbd><em data-t="k_n" style="font-style:normal">weather</em></span>
+    <span><kbd>SHIFT</kbd><em data-t="k_b" style="font-style:normal">sprint</em></span>
+    <span><kbd>ESC</kbd><em data-t="k_p" style="font-style:normal">pause</em></span>
+  </div>
+  <canvas id="radar" width="336" height="336"></canvas>
+  <div id="sim" class="lab" data-t="sim">Simulated debris flows from the GeoSentry runout model. Not real events.</div>
+  <div id="fps" class="lab" hidden></div>
+</div>
+<div id="lost"><b data-t="lost">SIGNAL LOST</b></div>
+
+<div id="gate">
+  <a class="back" href="map.html?area=region" data-t="back">← Back to the map</a>
+  <div class="in">
+    <span class="lab" data-t="kicker">North Gyeongsang · July 2026 storm</span>
+    <h1 data-t="title">Fly the storm</h1>
+    <p data-t="lede">Nothing here is drawn by hand. The AI picked the slopes. A physics solver moved the mud.</p>
+    <div class="facts">
+      <div><b id="fML">…</b><span class="lab" data-t="f1">slopes scored by machine learning</span><small id="fMLs"></small></div>
+      <div><b id="fPH">…</b><span class="lab" data-t="f2">debris flows from a physics solver</span><small id="fPHs"></small></div>
+      <div><b>1:1</b><span class="lab" data-t="f3">real terrain</span><small>Copernicus DEM · Sentinel-2 · OpenStreetMap</small></div>
+    </div>
+    <div class="ctl">
+      <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span data-t="c_move">fly</span></div>
+      <div><kbd>MOUSE</kbd><span data-t="c_look">look</span></div>
+      <div><kbd>SPACE</kbd><kbd>C</kbd><span data-t="c_ud">up / down</span></div>
+      <div><kbd>SHIFT</kbd><span data-t="k_b">sprint</span></div>
+      <div><kbd>F</kbd><span data-t="k_f">trigger landslide</span></div>
+      <div><kbd>V</kbd><span data-t="c_view">first / third person</span></div>
+      <div><kbd>T</kbd><span data-t="k_t">next site</span></div>
+      <div><kbd>N</kbd><span data-t="k_n">weather</span></div>
+      <div><kbd>ESC</kbd><span data-t="k_p">pause</span></div>
+      <div><kbd>M</kbd><span data-t="k_m">mute</span></div>
+    </div>
+    <button id="go" disabled data-t="loading">Loading terrain</button>
+    <div id="bar"><i></i></div>
+  </div>
+</div>
+
+<script type="module" src="js/drone/main.js?v=5"></script>
+</body>
+</html>

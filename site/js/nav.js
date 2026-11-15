@@ -8,6 +8,7 @@ const MENU = [
     ['officer', '09 · What it asks of an officer'], ['keeps-running', '10 · How it keeps running']] },
   { page: 'map.html', title: 'Map', items: [
     [null, 'All of South Korea'], ['?area=region', 'North Gyeongsang, 20 m with NISAR']] },
+  { page: 'drone.html', title: 'Drone flight', items: [] },
   { page: 'method.html', title: 'How it works', items: [
     ['measuring', '01–02 · Measuring'], ['models', '03–04 · Two models'], ['the-list', '05–06 · The list']] },
   { page: 'results.html', title: 'Results', items: [
@@ -99,7 +100,7 @@ function build() {
     // same page: close and scroll smoothly instead of a jump
     if (url.pathname === location.pathname && url.search === location.search && url.hash) {
       const el = document.getElementById(url.hash.slice(1));
-      if (el) { e.preventDefault(); close(false); history.replaceState(null, '', url.hash); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      if (el) { e.preventDefault(); close(false); history.replaceState(null, '', url.hash); if (!window.__goto?.(el)) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     } else close(false);
   });
 }

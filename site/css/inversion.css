@@ -1,5 +1,5 @@
 /* home slide 05: the time-series inversion. Its own colour, and a chart that solves real slopes while you watch. */
-body[data-slide="ice"] { --bg: #bfeaf4; --bg2: rgba(255, 255, 255, .36); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .54); --line: rgba(0, 0, 0, .16); --red: #0b0c0d; }
+body[data-slide="ice"], .sheets [data-slide="ice"] { --bg: #bfeaf4; --bg2: rgba(255, 255, 255, .36); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .54); --line: rgba(0, 0, 0, .16); --red: #0b0c0d; }
 body[data-slide="ice"] .topo.on { opacity: .095; }
 .inv { margin: 0; --inv-b: #1f3fe0; --inv-c: #e23a1c; }
 .inv svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -97,4 +97,30 @@ html[lang="ko"] .hero h1 { font-size: clamp(38px, min(6vw, 10.5vh), 92px); }
   .hero .specs.engines { column-gap: 20px; }
   .hero .specs.engines .eng-kind > span { display: none; }
   .hero .specs.engines .eng-kind { overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* the three machine-learning engines stand out from the InSAR solve: red tag, glowing node, full-strength drawing */
+.hero .mlx { color: var(--red); font-weight: 600; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat; animation: mlline 1s var(--ease) 1.4s forwards; }
+@keyframes mlline { to { background-size: 100% 1.5px; } }
+.hero .specs.engines > div:not(.ml) { opacity: .62; }
+.hero .specs.engines:hover > div:not(:hover) { opacity: .45; }
+.hero .specs.engines .ml .eng-kind b { color: #0b0c0d; background: var(--red); padding: 3px 6px 2px; border-radius: 3px; }
+.hero .specs.engines .ml .eng-glyph { opacity: 1; }
+.hero .specs.engines .ml dd { color: var(--ink2); }
+.hero .specs.engines > div.ml::after { background: var(--red); box-shadow: 0 0 0 4px rgba(255, 77, 46, .22); animation: mlpulse 2.4s ease-in-out calc(1.6s + var(--c) * .3s) infinite; }
+@keyframes mlpulse { 50% { box-shadow: 0 0 0 9px rgba(255, 77, 46, 0); } }
+@media (prefers-reduced-motion: reduce) { .hero .mlx { animation: none; background-size: 100% 1.5px; } .hero .specs.engines > div.ml::after { animation: none; } }
+
+/* slide 01: the red words keep hopping, letter by letter, after the line has risen (home.js wraps the letters) */
+#gap .statement .hot { background: linear-gradient(currentColor, currentColor) 0 92% / 0 .06em no-repeat; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-size .9s var(--ease) .9s; }
+#gap .statement.in .hot { background-size: 100% .06em; }
+#gap .statement .hot .w.free { clip-path: none; }
+#gap .statement .ch { display: inline-block; font-style: normal; transform-origin: 50% 100%; }
+#gap .statement.hop .ch { animation: hop 2.8s cubic-bezier(.3, .7, .4, 1) calc(var(--k) * 42ms) infinite; }
+@keyframes hop {
+  0%, 46%, 100% { transform: none; }
+  10% { transform: translateY(-.26em) rotate(-5deg); }
+  20% { transform: translateY(0) scale(1.08, .88); }
+  28% { transform: translateY(-.07em) rotate(2deg); }
+  36% { transform: none; }
 }

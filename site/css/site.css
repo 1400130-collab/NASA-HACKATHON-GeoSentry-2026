@@ -333,18 +333,18 @@ ul.plain.dash li::before { content: "→"; color: var(--mute); }
 
 /* ---- home page as slides: each band fills the screen and brings its own colours; site.js sets body[data-slide] ---- */
 .hero { --bg: #0b0c0d; --bg2: #121416; --ink: #f3f1ec; --ink2: #b4b1a9; --mute: #77756f; --line: rgba(255, 255, 255, .12); --red: #ff4d2e; }
-body[data-slide="red"] { --bg: #ff4d2e; --bg2: rgba(0, 0, 0, .1); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .55); --line: rgba(0, 0, 0, .18); --red: #fff6ef; }
-body[data-slide="navy"] { --bg: #0a1830; --bg2: #11223f; --ink2: #aab6c8; --mute: #6f7f98; --line: rgba(160, 190, 255, .16); }
-body[data-slide="ember"] { --bg: #1d0805; --bg2: #2a0e09; --ink2: #c9aaa2; --mute: #8d6a62; --line: rgba(255, 140, 110, .16); }
-body[data-slide="amber"] { --bg: #ffb020; --bg2: rgba(255, 255, 255, .24); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .76); --mute: rgba(11, 12, 13, .52); --line: rgba(0, 0, 0, .16); --red: #0b0c0d; }
-body[data-slide="pine"] { --bg: #05211f; --bg2: #0b2f2c; --ink2: #a8c5bf; --mute: #6a8b85; --line: rgba(150, 235, 215, .17); }
-body[data-slide="plum"] { --bg: #1c0d3a; --bg2: #291452; --ink2: #bdb1d8; --mute: #8576a8; --line: rgba(190, 160, 255, .18); }
-body[data-slide="cobalt"] { --bg: #2340f0; --bg2: rgba(0, 0, 0, .16); --ink: #ffffff; --ink2: rgba(255, 255, 255, .84); --mute: rgba(255, 255, 255, .62); --line: rgba(255, 255, 255, .24); --red: #ffd23f; }
-body[data-slide="forest"] { --bg: #0a2611; --bg2: #11351b; --ink2: #b1cab1; --mute: #73916f; --line: rgba(160, 235, 160, .18); }
-body[data-slide="lime"] { --bg: #cdf03a; --bg2: rgba(255, 255, 255, .3); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .5); --line: rgba(0, 0, 0, .18); --red: #0b0c0d; }
-body[data-slide="wine"] { --bg: #300a22; --bg2: #421132; --ink2: #d2b0c1; --mute: #986b81; --line: rgba(255, 150, 200, .18); }
-body[data-slide="cobalt"] .vs .me i { box-shadow: none; }
-body[data-slide="cobalt"] .vs > div:not(.me) i { background: rgba(255, 255, 255, .22); }
+body[data-slide="red"], .sheets [data-slide="red"] { --bg: #ff4d2e; --bg2: rgba(0, 0, 0, .1); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .55); --line: rgba(0, 0, 0, .18); --red: #fff6ef; }
+body[data-slide="navy"], .sheets [data-slide="navy"] { --bg: #0a1830; --bg2: #11223f; --ink2: #aab6c8; --mute: #6f7f98; --line: rgba(160, 190, 255, .16); }
+body[data-slide="ember"], .sheets [data-slide="ember"] { --bg: #1d0805; --bg2: #2a0e09; --ink2: #c9aaa2; --mute: #8d6a62; --line: rgba(255, 140, 110, .16); }
+body[data-slide="amber"], .sheets [data-slide="amber"] { --bg: #ffb020; --bg2: rgba(255, 255, 255, .24); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .76); --mute: rgba(11, 12, 13, .52); --line: rgba(0, 0, 0, .16); --red: #0b0c0d; }
+body[data-slide="pine"], .sheets [data-slide="pine"] { --bg: #05211f; --bg2: #0b2f2c; --ink2: #a8c5bf; --mute: #6a8b85; --line: rgba(150, 235, 215, .17); }
+body[data-slide="plum"], .sheets [data-slide="plum"] { --bg: #1c0d3a; --bg2: #291452; --ink2: #bdb1d8; --mute: #8576a8; --line: rgba(190, 160, 255, .18); }
+body[data-slide="cobalt"], .sheets [data-slide="cobalt"] { --bg: #2340f0; --bg2: rgba(0, 0, 0, .16); --ink: #ffffff; --ink2: rgba(255, 255, 255, .84); --mute: rgba(255, 255, 255, .62); --line: rgba(255, 255, 255, .24); --red: #ffd23f; }
+body[data-slide="forest"], .sheets [data-slide="forest"] { --bg: #0a2611; --bg2: #11351b; --ink2: #b1cab1; --mute: #73916f; --line: rgba(160, 235, 160, .18); }
+body[data-slide="lime"], .sheets [data-slide="lime"] { --bg: #cdf03a; --bg2: rgba(255, 255, 255, .3); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .5); --line: rgba(0, 0, 0, .18); --red: #0b0c0d; }
+body[data-slide="wine"], .sheets [data-slide="wine"] { --bg: #300a22; --bg2: #421132; --ink2: #d2b0c1; --mute: #986b81; --line: rgba(255, 150, 200, .18); }
+body[data-slide="cobalt"] .vs .me i, section[data-slide="cobalt"] .vs .me i { box-shadow: none; }
+body[data-slide="cobalt"] .vs > div:not(.me) i, section[data-slide="cobalt"] .vs > div:not(.me) i { background: rgba(255, 255, 255, .22); }
 .masthead.solid { border-color: transparent; }
 .band .eyebrow { font-size: 13px; margin-bottom: 40px; }
 .band .statement { font-size: clamp(34px, min(6.2vw, 11vh), 96px); max-width: 15em; }
@@ -691,6 +691,34 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-o
   .models.tri .model .lab { margin-bottom: 10px; }
   #machine-learning h2.big { margin-bottom: 18px; }
 }
+
+/* ---- sheets of colour (site.js): every slide lies on its own sheet and carries its own inks, so one colour rides up
+   over the other at a real edge. The edge bows with the speed of the page (--bu, --bd: 0 at rest, about 1 at full speed). ---- */
+.sheets [data-slide="black"] { --bg: #0b0c0d; --bg2: #121416; --ink: #f3f1ec; --ink2: #b4b1a9; --mute: #77756f; --line: rgba(255, 255, 255, .12); --red: #ff4d2e; }
+.sheets .band { color: var(--ink); }
+.ground { position: absolute; inset: 0 0 auto 0; height: 0; z-index: 0; pointer-events: none; }
+.ground ~ main, .ground ~ .foot { position: relative; z-index: 1; }
+.ground i { position: absolute; left: 0; width: 100%; background: var(--bg); }
+.ground i::before, .ground i::after { content: ""; position: absolute; left: -10%; width: 120%; height: 448px; border-radius: 50%; background: inherit; }
+.ground i::before { top: -100px; transform-origin: 50% 100px; transform: scaleY(var(--bu, 0)); }
+.ground i::after { bottom: -100px; transform-origin: 50% calc(100% - 100px); transform: scaleY(var(--bd, 0)); z-index: 1; }
+.sheets .band > .wrap { will-change: transform, opacity; }
+@media (max-width: 900px), (prefers-reduced-motion: reduce) { .ground i::before, .ground i::after { display: none; } }
+
+/* the bar at the top shows exactly the sheets behind it (--fill, from site.js); its inks cross over softly */
+.sheets .masthead::before { background: var(--fill, var(--bg)); }
+.sheets .masthead a, .sheets .masthead button { transition: color .25s, background-color .25s, box-shadow .25s, border-color .25s, scale .2s var(--ease); }
+/* passing through at speed: a slide shows what it has at once instead of unfolding behind the motion */
+html.js.rush .rv { transition-duration: .28s; transition-delay: 0s; }
+html.js.rush .rv.split .w > span { transition-duration: .32s; transition-delay: calc(var(--i) * 5ms); }
+html.js.rush .bars.rv i, html.js.rush .vs.rv i { transition-duration: .35s; transition-delay: 0s; }
+/* winding a slide back happens in one step */
+.reset *, .reset *::before, .reset *::after { transition: none !important; }
+/* a far jump: one sheet in the colour of the slide you are going to covers the screen, then melts into that slide */
+.veil { position: fixed; inset: 0; z-index: 60; pointer-events: none; background: var(--bg); visibility: hidden; }
+.veil i { position: absolute; left: -10%; width: 120%; height: 448px; border-radius: 50%; background: inherit; }
+.veil[data-from="below"] i { top: -100px; transform-origin: 50% 100px; }
+.veil[data-from="above"] i { bottom: -100px; transform-origin: 50% calc(100% - 100px); }
 
 /* hide the browser scrollbar (page still scrolls) */
 html { scrollbar-width: none; }

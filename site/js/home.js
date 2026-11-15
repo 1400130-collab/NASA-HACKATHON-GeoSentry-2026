@@ -81,7 +81,8 @@ async function contours() {
   const url = URL.createObjectURL(await new Promise((r) => cv.toBlob(r)));
   const el = document.createElement('div'); el.className = 'topo'; el.setAttribute('aria-hidden', 'true');
   el.style.setProperty('--topo', `url(${url})`);
-  document.body.prepend(el);
+  const ground = document.querySelector('.ground');                // above the sheets of colour, below the words
+  if (ground) ground.after(el); else document.body.prepend(el);
   requestAnimationFrame(() => el.classList.add('on'));
   if (calm) return;
   let ticking = false;                                              // drifts a little as the page moves: it sits far behind the words
@@ -206,3 +207,23 @@ if (orbit && xloop) {
     whileSeen(orbit, () => { if (raf) return; t0 = performance.now() - 0; lap = -1; raf = requestAnimationFrame(frame); }, () => { cancelAnimationFrame(raf); raf = 0; });
   }
 }
+
+// ---- slide 01: once the line has risen, the red words start hopping letter by letter ----------------------
+if (!calm) $$('#gap .statement').forEach((st) => {
+  const hot = $$('.hot', st);
+  if (!hot.length) return;
+  let k = 0, t = 0;
+  hot.forEach((h) => $$('.w > span', h).forEach((sp) => {
+    [...sp.childNodes].forEach((n) => {
+      if (n.nodeType !== 3) return;
+      const f = document.createDocumentFragment();
+      [...n.textContent].forEach((c) => { const i = document.createElement('i'); i.className = 'ch'; i.style.setProperty('--k', k++); i.textContent = c; f.append(i); });
+      n.replaceWith(f);
+    });
+  }));
+  new IntersectionObserver(([e]) => {
+    clearTimeout(t);
+    if (e.isIntersecting) t = setTimeout(() => { $$('.hot .w', st).forEach((w) => w.classList.add('free')); st.classList.add('hop'); }, 1500);
+    else { st.classList.remove('hop'); $$('.hot .w', st).forEach((w) => w.classList.remove('free')); }
+  }, { threshold: 0.4 }).observe(st);
+});

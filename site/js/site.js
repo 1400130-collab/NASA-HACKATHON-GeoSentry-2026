@@ -345,22 +345,32 @@ addEventListener('scroll', onScroll, { passive: true }); onScroll();
 $$('.sec h2, .sec .step, .sec .bignum, .sec .chart, .sec .bars, .sec .scroll, .sec ul.plain, .pagehead h1, .pagehead .lede, .pagehead .facts, .sec .cards, .sec .chain, .sec .stats, .sec .stack, .sec .two, .sec .tl').forEach((el) => el.classList.add('rv'));
 let pending = [];
 const reveal = () => {                                   // anything at or above the lower edge of the screen shows, so a fast jump never leaves a gap
+  const h = innerHeight;
   pending = pending.filter((el) => {
-    if (el.getBoundingClientRect().top > innerHeight * 0.92) return true;
+    const r = el.getBoundingClientRect();
+    if (r.top > h * 0.92) return true;
     el.classList.add('in');
     (el.matches('[data-count]') ? [el] : [...el.querySelectorAll('[data-count]')]).forEach(countUp);
     return false;
   });
 };
 addEventListener('scroll', reveal, { passive: true }); addEventListener('resize', reveal);
+// a slide winds back (at once, with nothing animating) so that it arrives afresh the next time it comes up
+const rearm = (slide) => {
+  const els = slide.querySelectorAll('.rv.in');
+  if (!els.length) return;
+  slide.classList.add('reset');
+  els.forEach((el) => { el.classList.remove('in'); if (!pending.includes(el)) pending.push(el); });
+  void slide.offsetWidth; slide.classList.remove('reset');
+};
 
 let frameNow = () => {};                                 // set further down: runs everything that follows the scroll, right now
 
 // ---- scrolling ------------------------------------------------------------------------------------------
 // The wheel always scrolls freely and the page glides after it, eased in time (not frames) so it feels the same at
-// 60 Hz and 120 Hz. On the home page, when you stop close to where a slide starts, the page keeps drifting softly
-// onto it, carrying on the motion it already had (within ~half a screen ahead). It never locks: any new scroll takes over at once, from where the
-// page is and not from where the drift was heading. It pulls back if you are within a quarter screen of a slide's edge. Arrow keys, space, page up/down and the dots glide to the next slide.
+// 60 Hz and 120 Hz. On the home page it always comes to rest on a slide: a spring catches it, carrying on the motion it
+// already had. It never locks: any new scroll takes over at once, from where the page is. Arrow keys, space and page
+// up/down go to the next slide; the dots, Home/End and the menu go straight to theirs behind one sweep of colour.
 // Touch screens and reduced-motion users keep the browser's own scrolling; a scroll made some other way (scrollbar,
 // a link) stops the glide and we carry on from there.
 (() => {
@@ -368,71 +378,141 @@ let frameNow = () => {};                                 // set further down: ru
   const slides = $$('section[data-slide]'), deck = slides.length > 0;
   const maxY = () => document.documentElement.scrollHeight - innerHeight;
   const clamp = (y) => Math.min(Math.max(y, 0), maxY());
-  let raf = 0, cur = scrollY, target = scrollY, last = 0, k = 6, idle = 0, dir = 1, auto = false;   // auto: the page is moving itself (drift, keys, dots)
+  let raf = 0, cur = scrollY, target = scrollY, last = 0, k = 6, idle = 0, dir = 1, auto = false;   // auto: the page is moving itself (catch, keys, dots)
+  let vel = 0, lim = 0, zeta = 1, rest = scrollY;          // px/s; the bottom of the page; damping of the catch (1: no bounce); where the page last lay still
+  const root = document.documentElement;
+  let rushing = false;
+  const rush = (on) => { if (on !== rushing) { rushing = on; root.classList.toggle('rush', on); } };   // passing through: slides show their content at once
 
+  // Following the wheel, the page eases after the target. Moving itself, it is a spring: it picks up the speed the
+  // page already has, catches the slide and lands with a small bounce.
   const step = (now) => {
     const dt = Math.min((now - (last || now - 16)) / 1000, 0.05); last = now;
-    cur += (target - cur) * (1 - Math.exp(-k * dt));
-    if (Math.abs(target - cur) < 0.3) cur = target;
+    const was = cur;
+    if (auto) {
+      for (let i = 0; i < 2; i++) { vel += (k * k * (target - cur) - 2 * zeta * k * vel) * dt / 2; cur += vel * dt / 2; }
+      if (cur < 0 || cur > lim) { cur = Math.min(Math.max(cur, 0), lim); vel = 0; }
+      if (Math.abs(target - cur) < 0.4 && Math.abs(vel) < 8) cur = target;
+    } else {
+      cur += (target - cur) * (1 - Math.exp(-k * dt));
+      if (Math.abs(target - cur) < 0.3) cur = target;
+      vel = (cur - was) / dt;
+    }
+    rush(auto ? Math.abs(target - cur) > innerHeight * 1.15 : Math.abs(vel) > 3200);
     scrollTo(0, cur);
     frameNow();                                            // colours, dots and depth move in the same frame as the page
-    if (cur === target) { raf = 0; last = 0; auto = false; } else raf = requestAnimationFrame(step);
+    if (cur === target) { if (auto) rest = target; raf = 0; last = 0; auto = false; vel = 0; rush(false); } else raf = requestAnimationFrame(step);
   };
-  const glide = (y, speed, self = false) => {
-    if (!raf) cur = scrollY;
-    target = clamp(y); k = speed; auto = self;
+  const glide = (y, speed, self = false, damp = 1) => {
+    if (!raf) { cur = scrollY; vel = 0; }
+    lim = maxY(); target = clamp(y); k = speed; auto = self; zeta = damp;
     if (!raf) raf = requestAnimationFrame(step);
   };
+  // The page goes to y by itself. Arriving fast, the spring stiffens just enough to stop on the slide instead of
+  // flying past it and coming back; only an unhurried arrival gets the bounce.
+  const spring = (y, w = 7.5, soft = 0.8) => {
+    if (!raf) { cur = scrollY; vel = 0; }
+    const to = clamp(y), d = Math.abs(to - cur), sp = Math.abs(vel), toward = Math.sign(to - cur) === Math.sign(vel);
+    const stiff = toward ? Math.min(Math.max(w, 0.9 * sp / Math.max(d, 1)), 14) : w;
+    glide(to, stiff, true, sp > 0.45 * stiff * d || d > innerHeight * 1.3 ? 1 : soft);
+  };
 
-  // where slides start, plus the bottom of any slide taller than the screen
+  // where the page can rest: the top of every slide, plus the bottom of any slide taller than the screen
   const marks = () => {
-    const m = maxY(), out = [];
-    slides.forEach((s) => { const a = s.offsetTop, b = a + s.offsetHeight - innerHeight; out.push(Math.min(a, m)); if (b > a + 4) out.push(Math.min(b, m)); });
+    const m = maxY(), out = [], tall = [];
+    slides.forEach((s) => { const a = s.offsetTop, b = a + s.offsetHeight - innerHeight; out.push(Math.min(a, m)); if (b > a + 4) { out.push(Math.min(b, m)); tall.push([Math.min(a, m), Math.min(b, m)]); } });
     out.push(m);
-    return [...new Set(out)].sort((p, q) => p - q);
+    return { M: [...new Set(out)].sort((p, q) => p - q), tall };
   };
-  const settle = () => {
-    const y = target, h = innerHeight, M = marks();
-    const fwd = dir > 0 ? M.find((v) => v > y + 1 && v - y < h * 0.55) : [...M].reverse().find((v) => v < y - 1 && y - v < h * 0.55);
-    const near = M.reduce((a, v) => (Math.abs(v - y) < Math.abs(a - y) ? v : a), M[0]);
-    const back = Math.abs(near - y) > 1 && Math.abs(near - y) < h * 0.25 ? near : null;   // pull back to a close edge
-    const to = fwd ?? back;
-    if (to != null) glide(to, 2.6, true);                  // slow and soft, but still a glide: it keeps the drift going
+  // The page always comes to rest on a slide. From the slide it was resting on, a nudge of a few dozen pixels is enough
+  // to go on to the next; further on, it lands on whichever slide is nearer where the motion would have ended
+  // (ahead: how much further the swipe was still going to carry). Inside a slide taller than the screen it rests anywhere.
+  const settle = (ahead = 0) => {
+    const h = innerHeight, y = clamp(target + Math.min(Math.max(ahead, -h * 0.9), h * 0.9)), { M, tall } = marks();
+    const a = [...M].reverse().find((v) => v <= y + 1), b = M.find((v) => v > y + 1);
+    if (a == null) return false;
+    if (b == null) { spring(a); return true; }
+    if (tall.some(([p, q]) => p === a && q === b)) return false;
+    const need = (m) => (Math.abs(m - rest) < 2 ? Math.min(h * 0.08, 70) : (b - a) * 0.4);
+    spring(dir > 0 ? (y - a > need(a) ? b : a) : (b - y > need(b) ? a : b));
+    return true;
   };
 
+  // A swipe on a trackpad keeps sending the wheel long after the fingers have left, fading out over a second. Waiting
+  // for that to end meant the page crawled to a stop and only then set off again for the slide. So: once the wheel is
+  // plainly dying away, the landing is decided there and then and the rest of that tail is ignored. A push that grows
+  // again, turns round, or comes after a pause is a new swipe and takes over at once.
+  let wAbs = 0, wAt = 0, falls = 0, coast = 0;
   addEventListener('wheel', (e) => {
     if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;  // pinch zoom, sideways scrolling
-    if (document.documentElement.classList.contains('snav-open')) return;   // the site menu is open: the wheel scrolls the menu, not the page
+    if (root.classList.contains('snav-open')) return;      // the site menu is open: the wheel scrolls the menu, not the page
     if (e.target.closest?.('.scroll, textarea, select, input:not([type="range"])')) return;   // the before/after slider is a range input as big as its picture
     e.preventDefault();
+    if (leaping) return;
     const px = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * innerHeight : e.deltaY;
     const pad = e.deltaMode === 0 && (e.wheelDeltaY ? Math.abs(e.wheelDeltaY) === Math.abs(e.deltaY) * 3 : Math.abs(e.deltaY) < 40);
+    const now = performance.now(), abs = Math.abs(px), turned = px && Math.sign(px) !== dir;
+    if (now - wAt > 140 || turned || abs > wAbs * 1.3 + 2) { falls = 0; coast = 0; } else if (abs < wAbs) falls++;
+    wAbs = abs; wAt = now;
+    if (coast && now - coast < 1100) return;
+    coast = 0;
     if (px) dir = Math.sign(px);
+    if (!raf) rest = scrollY;
     // carry on from the target while the wheel keeps going the same way; start from where the page is if it was
     // moving on its own or the wheel has turned round, so the page never keeps going against the hand
     const from = !raf ? scrollY : auto || Math.sign(target - cur) !== dir ? cur : target;
     glide(from + px, pad ? 11 : 5.5);
-    if (deck) { clearTimeout(idle); idle = setTimeout(settle, pad ? 90 : 120); }
+    if (!deck) return;
+    clearTimeout(idle);
+    if (pad && falls >= 3 && abs >= 2 && settle(px * 12)) coast = now;
+    else idle = setTimeout(settle, pad ? 90 : 120);
   }, { passive: false });
 
   const next = (d) => {
-    const y = raf ? target : scrollY, M = marks();
+    const y = raf ? target : scrollY, { M } = marks();
     return d > 0 ? (M.find((v) => v > y + 4) ?? maxY()) : ([...M].reverse().find((v) => v < y - 4) ?? 0);
   };
-  window.__page = (i) => { if (slides[i]) { clearTimeout(idle); glide(slides[i].offsetTop, 3.6, true); } };
+  const hop = (y) => { clearTimeout(idle); coast = 0; spring(y, 6.5, 0.82); };
+
+  // A jump of two slides or more does not drag every colour in between past the eye. One sheet, in the colour of the
+  // slide you are going to, sweeps over the whole screen; the page moves behind it; the sheet melts into that slide.
+  let veil = null, leaping = false;
+  const leap = (y, slide) => {
+    const to = clamp(y), from = raf ? cur : scrollY, d = Math.sign(to - from) || 1;
+    if (Math.abs(to - from) < innerHeight * 1.5) { hop(to); return; }
+    if (leaping) return;
+    leaping = true; clearTimeout(idle); coast = 0;
+    if (!veil) { veil = document.createElement('div'); veil.className = 'veil'; veil.setAttribute('aria-hidden', 'true'); veil.append(document.createElement('i')); document.body.append(veil); }
+    veil.dataset.slide = slide.dataset.slide; veil.dataset.from = d > 0 ? 'below' : 'above';
+    const opt = { duration: 560, easing: 'cubic-bezier(.62, 0, .18, 1)', fill: 'forwards' };
+    const cap = veil.firstChild.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(1)', offset: 0.45 }, { transform: 'scaleY(0)' }], opt);
+    const rise = veil.animate([{ transform: `translateY(calc(${d * 100}% + ${d * 110}px))`, visibility: 'visible' }, { transform: 'none', visibility: 'visible' }], opt);
+    const done = () => { rise.cancel(); cap.cancel(); leaping = false; };
+    rise.finished.then(() => {
+      cancelAnimationFrame(raf); raf = 0; last = 0; auto = false; vel = 0; rush(false);
+      scrollTo(0, to); cur = target = rest = scrollY;
+      frameNow(); rearm(slide); reveal();
+      const melt = veil.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease-out', fill: 'forwards' });
+      return melt.finished.then(() => { melt.cancel(); done(); });
+    }).catch(done);
+  };
+  window.__page = (i) => { if (slides[i]) leap(slides[i].offsetTop, slides[i]); };
+  window.__goto = (el) => { const i = slides.indexOf(el); if (i < 0) return false; window.__page(i); return true; };   // for the site menu
   if (deck) addEventListener('keydown', (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('input, textarea, select, [contenteditable]')) return;
-    if (document.documentElement.classList.contains('snav-open')) return;
+    if (root.classList.contains('snav-open')) return;
     if (e.key === ' ' && e.target.closest?.('a, button:not(.dots button)')) return;      // space presses the focused button
     const d = { ArrowDown: 1, PageDown: 1, ' ': e.shiftKey ? -1 : 1, ArrowUp: -1, PageUp: -1 }[e.key];
-    if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); clearTimeout(idle); glide(e.key === 'Home' ? 0 : maxY(), 3.6, true); return; }
+    if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); if (e.key === 'Home') leap(0, slides[0]); else leap(maxY(), slides[slides.length - 1]); return; }
     if (!d) return;
-    e.preventDefault(); clearTimeout(idle); dir = d;
-    glide(next(d), 3.6, true);
+    e.preventDefault();
+    if (leaping) return;
+    dir = d;
+    hop(next(d));
   });
 
   addEventListener('scroll', () => {
-    if (Math.abs(scrollY - cur) > 2) { cancelAnimationFrame(raf); clearTimeout(idle); raf = 0; last = 0; auto = false; target = cur = scrollY; }
+    if (Math.abs(scrollY - cur) > 2) { cancelAnimationFrame(raf); clearTimeout(idle); raf = 0; last = 0; auto = false; vel = 0; rush(false); target = cur = rest = scrollY; }
   }, { passive: true });
 })();
 
@@ -446,25 +526,60 @@ if (slides.length) {
   document.body.append(dots);
   const bar = document.createElement('div'); bar.className = 'progress'; document.body.append(bar);
   const btns = [...dots.children];
-  // a slide's colours take over when its top edge reaches the middle of the screen; the closing slide (data-enter="early")
-  // has a picture of its own, so the page is already its colour as it comes into view
-  let tops = [], maxS = 1;
+  // Every slide lies on its own sheet of colour, so one colour rides up over the other at a real edge instead of the
+  // whole page fading. The sheets sit behind everything; each slide carries its own inks (html.sheets in the CSS).
+  const ground = document.createElement('div'); ground.className = 'ground'; ground.setAttribute('aria-hidden', 'true');
+  const sheets = slides.map((s) => { const i = document.createElement('i'); i.dataset.slide = s.dataset.slide; ground.append(i); return i; });
+  document.body.prepend(ground); document.documentElement.classList.add('sheets');
+  let tops = [], maxS = 1, inks = [], barH = 68, fill = '';
   const layout = () => {
-    tops = slides.map((s) => s.offsetTop - innerHeight * (s.dataset.enter === 'early' ? 0.9 : 0.5));
+    const y = scrollY;
+    inks = sheets.map((el) => getComputedStyle(el).backgroundColor); barH = head ? head.offsetHeight : 0;
+    const rs = slides.map((s) => s.getBoundingClientRect());
+    tops = rs.map((r) => r.top + y);
+    rs.forEach((r, i) => { sheets[i].style.top = `${(r.top + y).toFixed(2)}px`; sheets[i].style.height = `${(r.height + 1).toFixed(2)}px`; });   // 1 px under the next sheet: no hairline between two
     maxS = Math.max(document.documentElement.scrollHeight - innerHeight, 1);
   };
   btns.forEach((b, i) => { b.onclick = () => (window.__page ? window.__page(i) : scrollTo({ top: slides[i].offsetTop, behavior: 'smooth' })); });
-  let shown = -1;
+  // The bar at the top is filled with exactly what lies behind it: one colour, or two meeting at the edge that is
+  // passing under it, so it never shows as a strip of the wrong colour. Its inks are those of the slide under its
+  // middle; the dots take the slide under the middle of the screen.
+  let shown = -1, under = -1;
   tick.push(() => {
-    const y = scrollY + 1;
-    let cur = 0; tops.forEach((t, i) => { if (t <= y) cur = i; });
+    const y = scrollY + 1, mid = y + innerHeight * 0.5, bar0 = y + barH / 2;
+    let cur = 0, top = 0, cut = 0; tops.forEach((t, i) => { if (t <= mid) cur = i; if (t <= bar0) top = i; if (i && t > y && t < y + barH - 1) cut = i; });
+    if (top !== under) { under = top; document.body.dataset.slide = slides[top].dataset.slide; if (head) head.dataset.slide = slides[top].dataset.slide; }
+    const f = cut ? `linear-gradient(${inks[cut - 1]} ${(tops[cut] - scrollY).toFixed(1)}px, ${inks[cut]} 0)` : inks[top];
+    if (head && f !== fill) { fill = f; head.style.setProperty('--fill', f); }
     if (cur !== shown) {
       shown = cur;
-      document.body.dataset.slide = slides[cur].dataset.slide;
+      dots.dataset.slide = slides[cur].dataset.slide;
       btns.forEach((b, i) => b.setAttribute('aria-current', String(i === cur)));
     }
     bar.style.transform = `scaleX(${(scrollY / maxS).toFixed(4)})`;
   });
+
+  // the edge between two sheets bows out with the speed of the page and springs flat when the page stops
+  if (!calm) {
+    let on = 0, lastY = scrollY, lastT = 0, bow = 0, bv = 0;
+    const frame = (now) => {
+      const dt = Math.min(Math.max((now - (lastT || now - 16)) / 1000, 0.004), 0.05); lastT = now;
+      const y = scrollY, h = innerHeight, v = Math.abs(y - lastY) > h ? 0 : (y - lastY) / dt; lastY = y;   // a jump is not speed
+      const max = Math.min(90, h / 8), want = innerWidth > 900 ? Math.min(Math.max(v * 0.045, -max), max) : 0;
+      bv += ((want - bow) * 170 - bv * 15) * dt; bow += bv * dt;
+      const rest = !want && Math.abs(bow) < 0.4 && Math.abs(bv) < 4;
+      if (rest) bow = bv = 0;
+      // scrolling down, the top edge of the rising sheet leads; scrolling up, the bottom edge of the one coming down
+      const up = (Math.max(bow, 0) / 100).toFixed(3), dn = (Math.max(-bow, 0) / 100).toFixed(3);
+      sheets.forEach((el, i) => {
+        const t = tops[i] - y, b = (tops[i + 1] ?? Infinity) - y;
+        const u = t > -120 && t < h + 120 ? up : '0', d = b > -120 && b < h + 120 ? dn : '0';
+        if (el.dataset.b !== u + d) { el.dataset.b = u + d; el.style.setProperty('--bu', u); el.style.setProperty('--bd', d); }
+      });
+      if (rest) { on = 0; lastT = 0; } else on = requestAnimationFrame(frame);
+    };
+    addEventListener('scroll', () => { if (!on) { lastY = scrollY; on = requestAnimationFrame(frame); } }, { passive: true });
+  }
   // slide positions move whenever the page changes height: late figures, fonts, a language switch, a resize
   addEventListener('resize', layout); addEventListener('load', layout); layout();
   new ResizeObserver(() => { layout(); frameNow(); }).observe(document.body);
@@ -482,20 +597,27 @@ if (heroEl) {
   });
 }
 
-// depth: each slide's content trails the page a little as the slide passes
+// depth: each slide's content trails the page a little as the slide passes. On the full-screen deck it also sinks
+// back and dims as it leaves through the top, so the slide rising under it reads as the nearer one.
 const layers = slides.filter((s) => s.matches('.band')).map((s) => s.firstElementChild);
-if (layers.length && !calm) tick.push(() => {
-  const h = innerHeight;
-  // all the reads, then all the writes: reading a position right after moving the last slide forced a fresh layout each time
-  const rs = layers.map((w) => w.parentElement.getBoundingClientRect());
-  layers.forEach((w, i) => {
-    const r = rs[i];
-    if (r.bottom < -h * 0.2 || r.top > h * 1.2) return;
-    const v = (r.top * -0.07).toFixed(1);
-    if (w.dataset.ty === v) return;                                   // unchanged: leave the style alone
-    w.dataset.ty = v; w.style.transform = `translate3d(0, ${v}px, 0)`;
+if (layers.length && !calm) {
+  const fine = matchMedia('(pointer: fine)').matches, c01 = (v) => Math.min(Math.max(v, 0), 1);
+  const gone = layers.map(() => false);
+  tick.push(() => {
+    const h = innerHeight, deck = fine && innerWidth > 900;
+    // all the reads, then all the writes: reading a position right after moving the last slide forced a fresh layout each time
+    const rs = layers.map((w) => w.parentElement.getBoundingClientRect());
+    layers.forEach((w, i) => {
+      const r = rs[i], out = r.bottom <= 1 || r.top >= h - 1;
+      if (out !== gone[i]) { gone[i] = out; if (out && r.top > 0) rearm(w.parentElement); }   // gone below the screen: it plays again on the way back down. Gone above: it stays as it was left
+      if (r.bottom < -h * 0.2 || r.top > h * 1.2) return;
+      const left = deck ? c01((h - r.bottom) / h) : 0, due = deck ? c01(r.top / h) : 0;   // how far out through the top; how far still below
+      const v = `translate3d(0, ${(r.top * -0.07).toFixed(1)}px, 0) scale(${(1 - left * 0.08 - due * 0.03).toFixed(4)})`, o = (1 - 0.82 * c01((left - 0.05) / 0.5)).toFixed(3);
+      if (w.dataset.ty === v + o) return;                             // unchanged: leave the style alone
+      w.dataset.ty = v + o; w.style.transform = v; w.style.opacity = o;
+    });
   });
-});
+}
 
 let ticking = false;
 const onFrame = () => { ticking = false; tick.forEach((f) => f()); };

@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <meta name="theme-color" content="#0b0c0d">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
-<link rel="stylesheet" href="css/app.css?v=21">
+<link rel="stylesheet" href="css/app.css?v=32">
 <link rel="stylesheet" href="css/inversion.css?v=2">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
@@ -21,14 +21,76 @@
 <div id="labels"></div>
 
 <div id="intro">
+  <canvas id="introTopo" aria-hidden="true"></canvas>
+  <i class="veil" aria-hidden="true"></i>
   <div class="intro-inner">
     <div class="mark"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="56" height="38" alt=""></div>
     <h1>GeoSentry</h1>
-    <p data-i18n="tagline">Which slopes to check before the next rainy season</p>
-    <div class="bar"><i id="introBar"></i></div>
-    <small id="introMsg">Loading terrain…</small>
+    <p id="introTag" data-i18n="tagline">Which slopes to check before the next rainy season</p>
+  </div>
+  <div class="intro-foot">
+    <small><i></i><span id="introMsg">Loading terrain</span></small>
   </div>
 </div>
+<script>
+// The loading screen: a contour map lit by a scan line. The sweep is one CSS animation on the compositor, so it keeps moving while
+// the app module blocks the main thread building the map; when the app is ready a class sends the veil off the edge, with no position read
+// from the main thread (that value is stale after a long block and made the line jump back).
+(() => {
+  const el = document.getElementById('intro'), cv = document.getElementById('introTopo'), msg = document.getElementById('introMsg');
+  let lang = 'en';
+  try { lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('sw_lang') || 'en'; } catch { /* private mode */ }
+  const ko = lang === 'ko' ? 1 : 0;
+  const L = { load: ['Loading terrain', '지형 불러오는 중'], build: ['Building the map', '지도 구성 중'], ready: ['Ready', '준비 완료'] };
+  msg.textContent = L.load[ko];
+  if (ko) document.getElementById('introTag').textContent = '다음 장마 전에 먼저 점검할 사면';
+
+  const hills = Array.from({ length: 26 }, () => ({ x: Math.random() * 1.2 - .1, y: Math.random() * 1.2 - .1, r: .07 + Math.random() * .17, a: .3 + Math.random() * .6 }));
+  const draw = () => {
+    const w = innerWidth, h = innerHeight, m = Math.max(w, h), d = Math.min(devicePixelRatio || 1, 2), s = 10, nx = Math.ceil(w / s) + 1, ny = Math.ceil(h / s) + 1;
+    if (!w || !h) return;
+    cv.width = w * d; cv.height = h * d;
+    const g = cv.getContext('2d'); g.scale(d, d); g.lineJoin = g.lineCap = 'round';
+    const F = new Float32Array(nx * ny);
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const x = i * s, y = j * s; let v = .12 * Math.sin(x / m * 7 + 1) * Math.cos(y / m * 5);
+      for (const q of hills) { const dx = (x - q.x * w) / m, dy = (y - q.y * h) / m; v += q.a * Math.exp(-(dx * dx + dy * dy) / (q.r * q.r)); }
+      F[j * nx + i] = v;
+    }
+    const N = 18;
+    for (let k = 1; k <= N; k++) {
+      const l = k / N * 1.25, idx = k % 5 === 0;
+      g.beginPath();
+      for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+        const a = F[j * nx + i], b = F[j * nx + i + 1], c = F[(j + 1) * nx + i + 1], e = F[(j + 1) * nx + i];
+        const id = (a > l) << 3 | (b > l) << 2 | (c > l) << 1 | (e > l);
+        if (!id || id === 15) continue;
+        const x = i * s, y = j * s;
+        const T = [x + s * (l - a) / (b - a), y], R = [x + s, y + s * (l - b) / (c - b)], B = [x + s * (l - e) / (c - e), y + s], Lf = [x, y + s * (l - a) / (e - a)];
+        const seg = (p, q) => { g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); };
+        switch (id) {
+          case 1: case 14: seg(Lf, B); break;
+          case 2: case 13: seg(B, R); break;
+          case 3: case 12: seg(Lf, R); break;
+          case 4: case 11: seg(T, R); break;
+          case 6: case 9: seg(T, B); break;
+          case 7: case 8: seg(T, Lf); break;
+          case 5: seg(T, Lf); seg(B, R); break;
+          case 10: seg(T, R); seg(Lf, B); break;
+        }
+      }
+      g.strokeStyle = idx ? 'rgba(243,241,236,.4)' : 'rgba(243,241,236,.18)'; g.lineWidth = idx ? 1.2 : 1; g.stroke();
+    }
+  };
+  draw();
+  let rz; addEventListener('resize', () => { if (el.classList.contains('done')) return; clearTimeout(rz); rz = setTimeout(draw, 120); });
+
+  window.__intro = (k) => {
+    if (L[k]) msg.textContent = L[k][ko];
+    if (k === 'ready') el.classList.add('fin');
+  };
+})();
+</script>
 
 <header id="top">
   <a class="brand" href="index.html" title="GeoSentry home"><img class="geosentry-logo" src="img/geosentry-logo.svg?v=2" width="56" height="38" alt="">GeoSentry</a>
@@ -37,6 +99,7 @@
     <a id="btnHome" href="index.html" data-i18n="home">About the project</a>
     <button id="btnBoard" data-i18n="lb">Leaderboard</button>
     <a id="btnSheet" href="sheet.html" target="_blank" data-i18n="sheet">Inspection sheet</a>
+    <a id="btnDrone" href="drone.html" data-i18n="drone">Fly the drone</a>
     <button id="btnStory"><svg viewBox="0 0 16 16" width="9" height="9" aria-hidden="true"><path d="M3 2l11 6-11 6z" fill="currentColor"/></svg><span data-i18n="story">Storm replay</span></button>
     <button id="btnAI" class="primary" data-i18n="ai">How the AI works</button>
     <button id="btnLang" title="Language">KO</button>
@@ -45,15 +108,15 @@
 
 <aside id="left">
   <div id="areaSel"></div>
-  <h3 data-i18n="layers">What to show</h3>
+  <h3 class="hd"><span data-i18n="layers">What to show</span><em id="nLayers"></em></h3>
   <div id="modes" role="radiogroup"></div>
   <div id="imgSel" hidden>
     <h4 data-i18n="imgdate">Photo date</h4>
     <div class="seg wrap" id="imgs"></div>
   </div>
   <div id="legend"></div>
-  <label class="switch" id="bldSwitch" data-tip="bld_tip"><span><i class="bdot"></i><span data-i18n="t_bld"></span></span><input type="checkbox" data-k="buildings" checked><b></b></label>
-  <label class="switch" id="debrisSwitch" hidden><span><i class="bdot" style="background:#ff8a2a;box-shadow:0 0 8px #ff8a2a"></i><span data-i18n="t_debris"></span></span><input type="checkbox" data-k="debris"><b></b></label>
+  <label class="switch" id="bldSwitch" data-x="buildings"><span><i class="bdot"></i><span data-i18n="t_bld"></span></span><input type="checkbox" data-k="buildings" checked><b></b></label>
+  <label class="switch" id="debrisSwitch" data-x="debris" hidden><span><i class="bdot" style="background:#ff8a2a;box-shadow:0 0 8px #ff8a2a"></i><span data-i18n="t_debris"></span></span><input type="checkbox" data-k="debris"><b></b></label>
   <details id="adv">
     <summary data-i18n="more">More layers &amp; options</summary>
     <div id="modesAdv" role="radiogroup"></div>
@@ -67,9 +130,11 @@
     <label class="slider"><span data-i18n="opacity">Colour strength</span><input id="opac" type="range" min="0" max="1" step="0.02" value="0.92"><output id="opacOut">92%</output></label>
     <p class="src" data-i18n="world_src"></p>
   </details>
+  <dl id="spec"></dl>
 </aside>
 
 <aside id="right">
+  <button id="stack" type="button"></button>
   <div id="tabs">
     <button data-tab="list" class="on" data-i18n="tabList">Check first</button>
     <button data-tab="detail" data-i18n="tabDetail">Selected slope</button>
@@ -91,6 +156,7 @@
 <div id="caption" hidden><div class="cap-step"></div><div class="cap-text"></div><div class="cap-src"></div><button id="capSkip">Skip</button></div>
 <div id="hover" hidden></div>
 <div id="tip" hidden></div>
+<div id="xp" hidden></div>
 <p id="hint" data-i18n="hint"></p>
 
 <div id="modal" hidden>
@@ -100,7 +166,7 @@
   </div>
 </div>
 
-<script type="module" src="js/main.js?v=68"></script>
+<script type="module" src="js/main.js?v=74"></script>
 <script src="js/nav.js?v=7" defer></script>
 </body>
 </html>

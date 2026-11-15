@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
-<link rel="stylesheet" href="css/site.css?v=48">
-<link rel="stylesheet" href="css/inversion.css?v=12">
+<link rel="stylesheet" href="css/site.css?v=51">
+<link rel="stylesheet" href="css/inversion.css?v=14">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
 </script>
@@ -42,8 +42,8 @@
       <h1 lang="ko"><span class="w" style="--i:0"><span>이</span></span> <span class="w" style="--i:1"><span>사면부터</span></span> <span class="w" style="--i:2"><span>점검하세요.</span></span></h1>
       <div class="row">
         <div>
-          <p class="lede" lang="en"><b><span data-n="check">…</span> hillsides</b> to inspect before the rainy season. Picked by three machine-learning models and a radar satellite that sees the ground move by the centimetre.</p>
-          <p class="lede" lang="ko">장마 전에 점검할 <b>사면 <span data-n="check">…</span>곳</b>. 머신러닝 모델 세 개와, 지표의 움직임을 센티미터 단위로 재는 레이더 위성이 골랐습니다.</p>
+          <p class="lede" lang="en"><b><span data-n="check">…</span> hillsides</b> to inspect before the rainy season. Picked by <span class="mlx">three machine-learning models</span> and a radar satellite that sees the ground move by the centimetre.</p>
+          <p class="lede" lang="ko">장마 전에 점검할 <b>사면 <span data-n="check">…</span>곳</b>. <span class="mlx">머신러닝 모델 세 개</span>와, 지표의 움직임을 센티미터 단위로 재는 레이더 위성이 골랐습니다.</p>
           <div class="actions">
             <a class="btn" href="map.html" data-lang-href="map.html"><span lang="en">Open the map</span><span lang="ko">지도 열기</span><span class="arr">→</span></a>
             <a class="btn line" href="sheet.html" data-lang-href="sheet.html"><span lang="en">Print inspection sheets</span><span lang="ko">점검표 인쇄</span></a>
@@ -56,13 +56,13 @@
           <div><dt><span class="eng-kind"><b><span lang="en">InSAR inversion</span><span lang="ko">InSAR 역산</span></b><span lang="en">Least-squares fit</span><span lang="ko">최소제곱 풀이</span></span>
             <svg class="eng-glyph g-solve" viewBox="0 0 112 40" aria-hidden="true"><circle class="d" style="--i:0" cx="6" cy="31" r="2.6"/><circle class="d" style="--i:1" cx="17" cy="27" r="2.6"/><circle class="d" style="--i:2" cx="28" cy="30" r="2.6"/><circle class="d" style="--i:3" cx="40" cy="23" r="2.6"/><circle class="d" style="--i:4" cx="51" cy="25" r="2.6"/><circle class="d" style="--i:5" cx="62" cy="17" r="2.6"/><circle class="d" style="--i:6" cx="73" cy="19" r="2.6"/><circle class="d" style="--i:7" cx="84" cy="11" r="2.6"/><circle class="d" style="--i:8" cx="95" cy="12" r="2.6"/><circle class="d" style="--i:9" cx="106" cy="6" r="2.6"/><path class="fit" pathLength="1" d="M3 32L109 6"/></svg>
             <span data-n="nObs" data-count>…</span></dt><dd><span lang="en">radar readings → velocity of <span data-n="vSolved">…</span> slopes</span><span lang="ko">개 레이더 측정값 → 사면 <span data-n="vSolved">…</span>곳의 속도</span></dd></div>
-          <div><dt><span class="eng-kind"><b><span lang="en">ML model 1</span><span lang="ko">ML 모델 1</span></b><span lang="en">Neural network</span><span lang="ko">신경망</span></span>
+          <div class="ml"><dt><span class="eng-kind"><b><span lang="en">ML model 1</span><span lang="ko">ML 모델 1</span></b><span lang="en">Neural network</span><span lang="ko">신경망</span></span>
             <svg class="eng-glyph g-gru" viewBox="0 0 112 40" aria-hidden="true"><rect class="b" style="--i:0" x="4" y="28" width="5" height="10" rx="1.5"/><rect class="b" style="--i:1" x="13" y="22" width="5" height="16" rx="1.5"/><rect class="b" style="--i:2" x="22" y="30" width="5" height="8" rx="1.5"/><rect class="b" style="--i:3" x="31" y="24" width="5" height="14" rx="1.5"/><rect class="b" style="--i:4" x="40" y="27" width="5" height="11" rx="1.5"/><rect class="b" style="--i:5" x="49" y="20" width="5" height="18" rx="1.5"/><rect class="b" style="--i:6" x="58" y="29" width="5" height="9" rx="1.5"/><rect class="b" style="--i:7" x="67" y="25" width="5" height="13" rx="1.5"/><rect class="b hit" style="--i:8" x="76" y="16" width="5" height="22" rx="1.5"/><rect class="b hit" style="--i:9" x="85" y="10" width="5" height="28" rx="1.5"/><rect class="b hit" style="--i:10" x="94" y="5" width="5" height="33" rx="1.5"/><rect class="b hit" style="--i:11" x="103" y="1" width="5" height="37" rx="1.5"/><rect class="scan" x="0" y="0" width="14" height="40" rx="3"/></svg>
             <span><span data-n="det50" data-count>…</span> cm</span></dt><dd><span lang="en">of ground movement a GRU detects from orbit</span><span lang="ko">지표 이동을 GRU가 궤도에서 탐지</span></dd></div>
-          <div><dt><span class="eng-kind"><b><span lang="en">ML model 2</span><span lang="ko">ML 모델 2</span></b><span lang="en">Boosted trees</span><span lang="ko">부스팅 트리</span></span>
+          <div class="ml"><dt><span class="eng-kind"><b><span lang="en">ML model 2</span><span lang="ko">ML 모델 2</span></b><span lang="en">Boosted trees</span><span lang="ko">부스팅 트리</span></span>
             <svg class="eng-glyph g-tree" viewBox="0 0 112 40" aria-hidden="true"><path class="e" style="--i:0" pathLength="1" d="M56 5L28 20"/><path class="e" style="--i:0" pathLength="1" d="M56 5L84 20"/><path class="e" style="--i:1" pathLength="1" d="M28 20L14 35"/><path class="e" style="--i:1" pathLength="1" d="M28 20L42 35"/><path class="e" style="--i:1" pathLength="1" d="M84 20L70 35"/><path class="e" style="--i:1" pathLength="1" d="M84 20L98 35"/><circle class="n" style="--i:0" cx="56" cy="5" r="3.2"/><circle class="n" style="--i:1" cx="28" cy="20" r="3.2"/><circle class="n" style="--i:1" cx="84" cy="20" r="3.2"/><circle class="n" style="--i:2" cx="14" cy="35" r="3.2"/><circle class="n hit" style="--i:2" cx="70" cy="35" r="3.2"/><circle class="n" style="--i:2" cx="42" cy="35" r="3.2"/><circle class="n" style="--i:2" cx="98" cy="35" r="3.2"/></svg>
             <span data-n="units" data-count>…</span></dt><dd><span lang="en">hillsides ranked across all 17 provinces</span><span lang="ko">곳 사면 순위 · 전국 17개 시·도</span></dd></div>
-          <div><dt><span class="eng-kind"><b><span lang="en">ML model 3</span><span lang="ko">ML 모델 3</span></b><span lang="en">GPU physics emulator</span><span lang="ko">GPU 물리 에뮬레이터</span></span>
+          <div class="ml"><dt><span class="eng-kind"><b><span lang="en">ML model 3</span><span lang="ko">ML 모델 3</span></b><span lang="en">GPU physics emulator</span><span lang="ko">GPU 물리 에뮬레이터</span></span>
             <svg class="eng-glyph g-flow" viewBox="0 0 112 40" aria-hidden="true"><path class="s" d="M4 5C30 7 44 21 62 29S96 35 109 35"/><path class="f" pathLength="1" d="M9 6C31 9 44 21 62 29S82 34 90 35"/><path class="h" d="M91 35v-8l6-5 6 5v8z"/></svg>
             <span data-n="roSim" data-count>…</span></dt><dd><span lang="en">debris flows simulated on the GPU to learn runout</span><span lang="ko">건의 토석류 GPU 모의로 도달 거리 학습</span></dd></div>
         </dl>
@@ -349,10 +349,10 @@
     <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
   </nav>
 </div></footer>
-<script type="module" src="js/site.js?v=48"></script>
+<script type="module" src="js/site.js?v=52"></script>
 <script type="module" src="js/extra.js?v=3"></script>
-<script type="module" src="js/home.js?v=4"></script>
+<script type="module" src="js/home.js?v=6"></script>
 <script type="module" src="js/inversion.js?v=4"></script>
-<script src="js/nav.js?v=7" defer></script>
+<script src="js/nav.js?v=8" defer></script>
 </body>
 </html>

@@ -8,7 +8,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { loadAll, DAYS, AREA } from './data.js?v=3';
 import { Terrain } from './terrain.js?v=25';
 import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=32';
-import { UI } from './ui.js?v=20';
+import { UI } from './ui.js?v=24';
 import { World } from './world.js?v=17';
 import { makeGeo } from './world-geo.js';
 
@@ -88,8 +88,9 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 const app = { state: { mode: 'level', track: 0, img: null, tc: true, day: DAYS - 1, playing: false, sel: -1, hover: -1, county: 0, prov: 0, clouds: false, story: null, rain: 120 } };
-const bar = document.getElementById('introBar'), msg = document.getElementById('introMsg');
-const D = app.D = await loadAll((f, k) => { bar.style.width = `${f * 82}%`; msg.textContent = `Loaded ${k}`; });
+const intro = window.__intro || (() => {});                     // the loading screen's progress hook (map.html)
+const D = app.D = await loadAll(() => {});
+intro('build');
 if (D.korea) {                                                  // city districts arrive as "Buk-gu" or "Suwonsijangangu": name them after their city
   const city = new Map(D.vectors.towns.map((t) => [t.ko, t.en]));
   for (const c of D.meta.counties) {
@@ -433,7 +434,7 @@ canvas.addEventListener('pointerup', () => { down = null; });
 ui = app.ui = new UI(app);
 ui.tab('list'); app.setMode('level'); app.setTrack(0); ui.image(app.state.img);
 terrain.setTime(app.state.day); rain.setDay(app.state.day); app.relabel(); ui.time(app.state.day);
-bar.style.width = '100%'; msg.textContent = 'Ready';
+intro('ready');
 app.home = home; window.__app = app; app.gfx = { renderer, composer, bloom, scene, camera, controls, resize };      // handles for profiling in the console
 requestAnimationFrame(tick);
 await sleep(500);

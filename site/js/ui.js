@@ -1,4 +1,4 @@
-import { STR, reason, compass } from './i18n.js?v=15';
+import { STR, reason, compass } from './i18n.js?v=18';
 import { addScores, checkOrder } from './score.js';
 import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js?v=24';
 import { DAY0, DAYS, dayOf, AREA } from './data.js?v=3';
@@ -10,6 +10,8 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const S4 = '#c98500';
 const MODES = ['level', 'suscept', 'move', 'speed', 'burn', 'img'], ADV = ['coh', 'ifg'], AI_MODES = ['level', 'suscept'];
 const LV_ICON = ['?', '·', '!', '!!'];
+// what stands behind each layer: the index, a trained model, the solver, or a data source
+const TAG = { level: 'INDEX', suscept: 'ML 1', move: 'InSAR', speed: 'GLS', burn: 'dNBR', img: 'S2', past: 'LOG', rain: 'ERA5', coh: 'γ', ifg: 'φ' };
 
 export class UI {
   constructor(app) {
@@ -42,8 +44,9 @@ export class UI {
 
   build() {
     const a = this.app;
-    const modeBtn = (m) => `<button class="mode" data-m="${m}" role="radio"><i></i><b data-i18n="m_${m}"></b></button>`;
-    $('#modes').innerHTML = (this.D.past ? [...MODES, 'past'] : this.D.col.rec48 ? [...MODES, 'rain'] : MODES).map(modeBtn).join(''); $('#modesAdv').innerHTML = ADV.map(modeBtn).join('');
+    const modeBtn = (m) => `<button class="mode" data-m="${m}" data-x="${m}" role="radio"><i></i><b data-i18n="m_${m}"></b><em>${TAG[m]}</em></button>`;
+    const main = this.D.past ? [...MODES, 'past'] : this.D.col.rec48 ? [...MODES, 'rain'] : MODES;
+    $('#modes').innerHTML = main.map(modeBtn).join(''); $('#nLayers').textContent = String(main.length).padStart(2, '0'); $('#modesAdv').innerHTML = ADV.map(modeBtn).join('');
     $('#left').addEventListener('click', (e) => { const b = e.target.closest('.mode'), p = e.target.closest('[data-past]'); if (b) a.setMode(b.dataset.m); else if (p) a.flyPast(+p.dataset.past); });
     $('#tracks').innerHTML = this.D.tracks.map((t, i) => `<button data-t="${i}"><span class="dot" style="background:${TRACK_COLORS[i]}"></span>${t.id} ${t.dir === 'ascending' ? '↑' : '↓'}</button>`).join('');
     $('#tracks').onclick = (e) => { const b = e.target.closest('button'); if (b) a.setTrack(+b.dataset.t); };
@@ -54,17 +57,33 @@ export class UI {
       $('#tcSel').onclick = (e) => { const b = e.target.closest('button'); if (b) a.setTrueColour(b.dataset.tc === '1'); };
     }
     const ex = $('#exag'); ex.max = this.D.view.exagMax; ex.value = this.D.view.exag; $('#exagOut').textContent = '×' + (+ex.value).toFixed(1);
-    $('#areaSel').innerHTML = `<a class="${AREA === 'korea' ? 'on' : ''}" href="map.html" data-i18n="area_kr_s" data-tip="area_kr"></a><a class="${AREA === 'region' ? 'on' : ''}" href="map.html?area=region" data-i18n="area_rg_s" data-tip="area_rg"></a>`;
+    $('#areaSel').innerHTML = `<a class="${AREA === 'korea' ? 'on' : ''}" href="map.html" data-i18n="area_kr_s" data-x="area_kr"></a><a class="${AREA === 'region' ? 'on' : ''}" href="map.html?area=region" data-i18n="area_rg_s" data-x="area_rg"></a>`;
     const togs = [['env', 1], ['trees', 1], ['borders', 1], ['roads', 1], ['labels', 1], ['edges', 1], ['scars', 0]];      // env, trees: the real-world layers (js/world.js)
     $('#debrisSwitch').hidden = !this.D.runout;
     $('#toggles').innerHTML = togs.map(([k, on]) => `<label class="tog"><input type="checkbox" data-k="${k}" ${on ? 'checked' : ''}><span data-i18n="t_${k}"></span></label>`).join('');
     $('#toggles').onchange = $('#debrisSwitch').onchange = $('#bldSwitch').onchange = (e) => a.setToggle(e.target.dataset.k, e.target.checked);
     $('#exag').oninput = (e) => { a.setExag(+e.target.value); $('#exagOut').textContent = '×' + (+e.target.value).toFixed(1); };
     $('#opac').oninput = (e) => { a.terrain.uniforms.uOverlay.value = +e.target.value; $('#opacOut').textContent = Math.round(e.target.value * 100) + '%'; };
+    // hover cards: what each control on the left rail is
+    const xp = $('#xp'), lf = $('#left'); let xt = 0, xk = null;
+    const xoff = () => { clearTimeout(xt); xk = null; xp.hidden = true; };
+    lf.addEventListener('mouseover', (e) => {
+      const el = e.target.closest('[data-x]'), onText = el && (e.target !== el || !el.children.length);      // only over the words, not the empty part of a row
+      if (!onText) return xoff();
+      if (xk === el.dataset.x) return;
+      clearTimeout(xt); xk = el.dataset.x; xp.hidden = true;
+      xt = setTimeout(() => {                                   // shown only after the pointer has rested on it
+        const [tag, head, body] = this.explain(el.dataset.x), r = el.getBoundingClientRect();
+        xp.className = tag === 'PHYSICS' || tag === 'GLS' || tag === 'InSAR' ? 'ph' : '';
+        xp.innerHTML = `<i>${esc(tag)}</i><b>${esc(head)}</b><p>${esc(body)}</p>`; xp.hidden = false;
+        xp.style.top = Math.max(8, Math.min($('#time').getBoundingClientRect().top - xp.offsetHeight - 8, r.top - 8)) + 'px';
+      }, 650);
+    });
+    lf.addEventListener('mouseleave', xoff); lf.addEventListener('pointerdown', xoff); lf.addEventListener('wheel', xoff, { passive: true });
     $('#tabs').onclick = (e) => { const b = e.target.closest('button'); if (b) this.tab(b.dataset.tab); };
     $('#btnLang').onclick = () => this.setLang(this.lang === 'en' ? 'ko' : 'en');
     const bye = () => this.hintOff();
-    $('#btnAI').onclick = () => this.ai();
+    $('#btnAI').onclick = $('#stack').onclick = () => this.ai();
     $('#btnBoard').onclick = () => { bye(); this.board(); };
     $('#btnStory').onclick = () => { bye(); a.story(); };
     $('#play').onclick = () => a.togglePlay();
@@ -83,14 +102,52 @@ export class UI {
     try { localStorage.setItem('sw_lang', l); } catch { /* private mode */ }
     document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = this.t(el.dataset.i18n); });
     document.querySelectorAll('[data-tip]').forEach((el) => { el.title = this.t(el.dataset.tip); });
-    document.querySelectorAll('.mode').forEach((el) => { el.title = this.t(`m_${el.dataset.m}_s`); });
     $('#btnLang').textContent = l === 'en' ? 'KO' : 'EN';
     $('#btnSheet').href = `sheet.html?lang=${l}&county=${this.app.state.county || ''}${AREA === 'region' ? '&area=region' : ''}`;
     this.imgButtons(); this.image(this.app.state.img);
     $('#capSkip').textContent = this.t('skip');
-    this.legend(); this.list(); this.detail(); this.numbers(); this.timeline(); this.app.relabel?.(l); this.time(this.app.state.day);
+    this.spec(); this.stack(); this.legend(); this.list(); this.detail(); this.numbers(); this.timeline(); this.app.relabel?.(l); this.time(this.app.state.day);
   }
   hintOff() { $('#hint').classList.add('gone'); }
+  // tag, name and one or two sentences for a control on the left rail. Figures come from the meta file.
+  explain(k) {
+    const m = this.D.meta, t = (key, v) => this.t(key, v), T = Object.values(m.tracks), n = (v) => v.toLocaleString();
+    if (k.startsWith('lv')) return [['—', '0–49', '50–79', '80–100'][+k[2]], t(k), t(k + '_d')];
+    if (k.startsWith('area')) return [k === 'area_kr' ? '90 m' : '20 m', t(k), t('x_' + k)];
+    if (k === 'buildings') return ['OSM', t('t_bld'), t('x_bld', { n: n(m.levels.buildings_mapped) })];
+    if (k === 'debris') {
+      const sim = m.reach?.simulator, cal = m.runout?.calibration;
+      return ['PHYSICS', t('t_debris'), t('x_debris', { d: m.runout?.release?.depth_m ?? 1.5, mu: sim?.mu ?? cal?.mu_far, xi: sim?.xi ?? cal?.xi_far, n: n(m.reach?.simulated_slopes ?? m.runout?.simulated_slopes ?? 0) })];
+    }
+    const noise = T.flatMap((x) => x.noise_pair);
+    return [TAG[k], t('m_' + k), t('x_' + k, { f: m.suscept.features.length, s: (noise.reduce((a, b) => a + b, 0) / noise.length).toFixed(1),
+      p: T.reduce((a, x) => a + x.dates.length - 1, 0), z: m.velocity?.z_detect ?? 4, c: (m.radar.wavelength_m * 50).toFixed(1) })];
+  }
+  // the data behind the map, as a spec sheet at the foot of the left rail
+  spec() {
+    const m = this.D.meta, g = m.grid, V = m.velocity, n = (v) => v.toLocaleString();
+    const rows = [['GRID', `H3 r${g.h3 ?? 9} · ${g.res_m?.[0] ?? 20} m`], ['CRS', `EPSG:${g.epsg}`], ['UNITS', n(this.D.n)],
+      ['RADAR', `NISAR L-band · λ ${(m.radar.wavelength_m * 100).toFixed(1)} cm`], V && ['SOLVE', `${n(V.observations)} obs`],
+      ['BUILD', m.generated.slice(0, 16).replace('T', ' ') + 'Z']].filter(Boolean);
+    $('#spec').innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  }
+  // the trained models and the physics behind them, always in view above the tabs. Same figures as the AI sheet.
+  stack() {
+    const { m, ship, a } = this.nums(), t = (k, v) => this.t(k, v), V = m.velocity, ko = this.lang === 'ko';
+    const x = (v) => (Math.abs(v - Math.round(v)) < 0.15 ? Math.round(v) : v.toFixed(1));
+    const det = a.results.detector.well_oriented[3], mf = a.results.matched.well_oriented[3], sims = m.runout?.simulated_slopes;
+    const x1 = t('ai_x', { x: x(ship.capture_top5 / 0.05) }), x2 = t('ai_x', { x: x(det / mf) });
+    const cells = [
+      ['ML 1', x1, t('eg1'), `${t('ai_n1')} · ${t('ai_t1')} · ${x1} ${t('ai_s1')}`],
+      ['ML 2', x2, t('eg2'), `${t('ai_n2')} · ${t('ai_t2')} · ${x2} ${t('ai_s2')}`],
+      m.reach ? ['ML 3', m.reach.far.r2_heldout.toFixed(2), t('eg3'), `${t('ai_n3')} · R² ${m.reach.far.r2_heldout.toFixed(2)} ${t('ai_s3')}`]
+        : sims ? ['PHYSICS', sims.toLocaleString(), t('eg5'), t('tr_fl')] : null,
+      V ? ['PHYSICS', ko ? Math.round(V.observations / 1e4).toLocaleString() + '만' : (V.observations / 1e6).toFixed(2) + 'M', t('eg4'), `${t('tr_sp')} · ${V.observations.toLocaleString()} → ${V.unknowns.toLocaleString()}`] : null,
+    ].filter(Boolean);
+    const el = $('#stack'); el.title = t('stack_tip');
+    el.innerHTML = `<span class="sh"><b>${t('stack')}</b><em>${cells.filter((c) => c[0] !== 'PHYSICS').length} ML + ${ko ? '물리' : 'physics'}</em></span>
+      <span class="sc">${cells.map(([k, v, c, tip], i) => `<span class="cell${k === 'PHYSICS' ? ' ph' : ''}" style="--i:${i}" title="${esc(tip)}"><i>${k}</i><b>${v}</b><small>${c}</small></span>`).join('')}</span>`;
+  }
   tab(name) {
     this.curTab = name;
     document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
@@ -141,7 +198,8 @@ export class UI {
         + `<div class="note">${t('past_note')}</div><a class="more-link" href="history.html?lang=${this.lang}">${t('past_more')} <span>→</span></a>`;
     } else if (m === 'level') {
       const cnt = [L.not_measurable, L.no_signal, L.watch, L.check_first];
-      h += [3, 2, 1, 0].map((l) => `<div class="row" title="${esc(t('lv' + l + '_d'))}"><i class="sw ${l === 0 ? 'hatch' : ''}" style="${l ? `background:${LEVEL_COLORS[l]}` : ''}">${l >= 2 ? LV_ICON[l] : ''}</i><b>${t('lv' + l)}${l >= 2 ? `<em>${l === 3 ? '80–100' : '50–79'}</em>` : ''}<small>${t('lv' + l + '_s')}</small></b><span>${cnt[l].toLocaleString()}</span></div>`).join('');
+      h += `<div class="dist">${[3, 2, 1, 0].map((l) => `<i style="flex-grow:${cnt[l]};background:${l ? LEVEL_COLORS[l] : '#7a7a76'}" title="${esc(t('lv' + l))} ${(cnt[l] / this.D.n * 100).toFixed(1)}%"></i>`).join('')}</div>`;
+      h += [3, 2, 1, 0].map((l) => `<div class="row" data-x="lv${l}"><i class="sw ${l === 0 ? 'hatch' : ''}" style="${l ? `background:${LEVEL_COLORS[l]}` : ''}">${l >= 2 ? LV_ICON[l] : ''}</i><b>${t('lv' + l)}${l >= 2 ? `<em>${l === 3 ? '80–100' : '50–79'}</em>` : ''}<small>${t('lv' + l + '_s')}</small></b><span>${cnt[l].toLocaleString()}</span></div>`).join('');
     } else if (m === 'suscept') h += `<div class="ramp" style="background:${grad('suscept')}"></div><div class="ticks"><span>${t('low')}</span><span>${t('high')}</span></div>`;
     else if (m === 'move') h += `<div class="ramp" style="background:${grad('move')}"></div><div class="ticks"><span>−3 ${t('away')}</span><span>0</span><span>+3 ${t('toward')}</span></div><div class="note">${t('hatch')}. ${t('sign')}</div>`;
     else if (m === 'speed') h += `<div class="ramp" style="background:${grad('move')}"></div><div class="ticks"><span>−30 ${t('sp_up')}</span><span>0</span><span>+30 ${t('sp_dn')}</span></div><div class="note">${t('sp_note')}</div>`;
@@ -165,14 +223,21 @@ export class UI {
     const provSel = K ? `<select id="prov"><option value="0">${this.t('prov_all')}</option>${this.D.meta.provinces.map((p) => `<option value="${p.id}" ${st.prov === p.id ? 'selected' : ''}>${nm(p)} (${(L.check_first_by_province[p.en] || 0).toLocaleString()})</option>`).join('')}</select>` : '';
     const pv = K && st.prov ? this.D.meta.provinces.find((p) => p.id === st.prov) : null;
     const scope = st.county ? esc(this.county(st.county, K)) : pv ? nm(pv) : this.t(K ? 'area_kr' : 'area_rg');
+    let tot = this.D.n;                                         // slopes in the current scope, flagged or not
+    if (st.county || (K && st.prov)) { tot = 0; for (let u = 0; u < this.D.n; u++) if ((!st.county || C.county[u] === st.county) && (!K || !st.prov || C.prov[u] === st.prov)) tot++; }
+    const sl = rows.map((u) => C.slope[u]).sort((a, b) => a - b), bins = new Array(20).fill(0);
+    rows.forEach((u) => { bins[Math.min(19, Math.max(0, Math.floor(C.danger[u] - 80)))]++; });
+    const bmx = Math.max(...bins, 1);
     let h = `<div class="lhero"><b>${rows.length.toLocaleString()}</b><span>${this.t(st.mode === 'rain' ? 'rf_big' : 'l_big')}<small>${scope}</small></span></div>
+      <div class="lstat"><span><b>${tot.toLocaleString()}</b>${this.t('ls_n')}</span><span><b>${tot ? (rows.length / tot * 100).toFixed(1) : 0}%</b>${this.t('ls_f')}</span><span><b>${sl.length ? sl[sl.length >> 1].toFixed(0) + '°' : '—'}</b>${this.t('ls_s')}</span></div>
+      <div class="lhist" title="${esc(this.t('lh_dist'))}"><svg viewBox="0 0 200 28" preserveAspectRatio="none" aria-hidden="true">${bins.map((n, i) => { const bh = n ? Math.max(1.5, n / bmx * 28) : 0; return `<rect x="${i * 10 + 0.5}" y="${(28 - bh).toFixed(1)}" width="9" height="${bh.toFixed(1)}" opacity="${(0.4 + 0.6 * i / 19).toFixed(2)}"/>`; }).join('')}</svg><div class="hx"><span>80</span><span>${this.t('sc_dz')}</span><span>100</span></div></div>
       <div class="lfilt">${provSel}<select id="county"><option value="0">${this.t('all')}</option>${cs.map((c) => `<option value="${c.id}" ${st.county === c.id ? 'selected' : ''}>${nm(c)}${K ? ` (${L.check_first_by_county[String(c.id)]})` : ''}</option>`).join('')}</select></div>
-      <div class="lcols"><span>${this.t('l_order')}</span><span>${this.t('sc_dz_s')}</span></div>`;
+      <div class="lcols"><span>${this.t('l_order')}</span><span class="ang">${this.t('slope')}</span><span>${this.t('sc_dz_s')}</span></div>`;
     const pvOf = new Map((this.D.meta.provinces || []).map((p) => [p.id, p]));
     h += rows.slice(0, this.shown).map((u, i) => {
       const r = C.r1[u] >= 0 ? reason(this.D.meta.features[C.r1[u]], C.v1[u], this.lang) : '', p = K && !st.prov ? pvOf.get(C.prov[u]) : null;
       const sub = [p ? nm(p) : '', this.below(u)].filter(Boolean).join(' · '), mv = C.moving[u] ? ` <span class="chip mv">${this.t('moving')}</span>` : '';
-      return `<div class="item ${u === st.sel ? 'sel' : ''}" data-u="${u}" title="${esc(r)}"><span class="rk">${i + 1}</span><div><b>${esc(this.county(C.county[u]))}${mv}</b><small>${sub}</small></div><b class="sr">${this.dz(u)}</b></div>`;
+      return `<div class="item ${u === st.sel ? 'sel' : ''}" data-u="${u}" style="--h:${Math.max(0, Math.min(100, (C.hz[u] - 95) * 20)).toFixed(0)}%;--e:${C.ex[u].toFixed(0)}%" title="${esc(r)}"><span class="rk">${String(i + 1).padStart(3, '0')}</span><div><b>${esc(this.county(C.county[u]))}${mv}</b><small>${sub}</small></div><span class="ang">${C.slope[u].toFixed(0)}°</span><b class="sr">${this.dz(u)}</b></div>`;
     }).join('');
     if (rows.length > this.shown) h += `<button class="more">${this.t('showMore')}</button>`;
     const el = $('#tab-list'); el.innerHTML = h; this.countUp($('.lhero b', el), rows.length);
@@ -218,6 +283,11 @@ export class UI {
     const dzc = lv === 3 ? t('dz_c3', { r: this.rank.get(u).toLocaleString(), n: this.order.length.toLocaleString() }) : t('dz_c' + lv);
     const rkc = C.moving[u] ? t('sc_risk_m') : t('sc_risk_c', { p: Math.min(99, Math.round(pct * 100)) });
     const ppc = t((nb > 0 ? (rd ? 'sc_ppl_br' : 'sc_ppl_b') : (rd ? 'sc_ppl_r' : 'sc_ppl_0')) + sfx, { n: nb, r: rr }), tb = sim && Number.isFinite(C.rf_tbld[u]);
+    const tr = [['ML 1', t('ai_n1'), 'P' + (pct * 100).toFixed(1), pct * 100]], dt = C.det ? C.det[u] : NaN, hasV = !!C.vd && Number.isFinite(vd) && vs > 0;
+    tr.push(['ML 2', t('ai_n2'), Number.isFinite(dt) ? dt.toFixed(2) : t('tr_na'), Number.isFinite(dt) ? dt * 100 : -1]);
+    if (C.reach) tr.push(['ML 3', t('ai_n3'), `${r10(C.reach[u])} m${C.reach_src[u] === 2 ? ' · ' + t('tr_sim') : ''}`, C.reach[u] / 4.5]);
+    if (C.vd) tr.push(['PHYSICS', t('tr_sp'), hasV ? `${sgn(vd)} ± ${vs.toFixed(0)} ${t('tr_mo')}` : t('tr_na'), hasV ? Math.abs(vd / vs) / (D.meta.velocity?.z_detect || 4) * 100 : -1]);      // bar full = the detection threshold
+    if (sim) tr.push(['PHYSICS', t('tr_fl'), `${r10(C.rf_len[u])} m · ${Math.round(C.rf_vmax[u])} m/s`, C.rf_len[u] / 4.5]);
     const part = (name, v, cap) => `<div class="gauge"><span>${name}</span><b>${v}<small>/100</small></b><i><em style="width:${v}%"></em></i><p>${esc(cap)}</p></div>`;
     el.innerHTML = `
       <div class="dhead"><div><span class="badge l${lv}"><span>${LV_ICON[lv]}</span>${t('lv' + lv)}</span><h2>${esc(this.county(C.county[u], D.korea))} #${u}</h2></div>
@@ -225,6 +295,7 @@ export class UI {
       <div class="dz l${lv}"><span>${t('sc_dz')}</span><div class="num"><b>${dz}<small>/100</small></b><em>${dzc}</em></div>
         <div class="scale"><i></i><i></i><i></i><u style="left:${dz}%"></u></div><div class="ticks"><span>0</span><span style="left:50%">50</span><span style="left:80%">80</span><span>100</span></div></div>
       <div class="gauges">${part(t('sc_hz'), Math.round(C.hz[u]), rkc)}${part(t('sc_ex'), C.ex[u], ppc)}</div>
+      <div class="trace"><h4>${t('trace_h')}</h4>${tr.map(([k, name, v, b]) => `<div class="tr${k === 'PHYSICS' ? ' ph' : ''}${b < 0 ? ' na' : ''}"><i>${k}</i><span>${name}</span><b>${v}</b><u><s style="width:${Math.max(0, Math.min(100, b)).toFixed(0)}%"></s></u></div>`).join('')}</div>
       <div class="odds"><b>${t('od_t')}</b><p>${od.one ? t('od_p', { n: od.one, f: od.fails, m: od.n, avg: od.avg }) : t('od_0', { m: od.n, avg: od.avg })}${C.moving[u] ? ' ' + t('od_m') : ''}</p><small>${t('od_n', { k: od.k })}</small></div>
       <div class="scnote">${t('sc_note')}</div>
       <div class="kv ${C.rec48 || ml ? '' : 'two'}"><div><b>${C.slope[u].toFixed(0)}°</b><span>${t('slope')} · ${t('faces')} ${compass(C.aspect[u], this.lang)}</span></div>
@@ -480,7 +551,7 @@ export class UI {
   hoverTip(u, x, y) {
     const el = $('#hover'); if (u < 0) { el.hidden = true; return; }
     const C = this.D.col, lv = C.level[u];
-    const col = lv ? LEVEL_COLORS[lv] : '#c3c2b7', sub = [`${C.slope[u].toFixed(0)}°`, this.below(u), C.moving[u] ? this.t('moving') : ''].filter(Boolean).join(' · ');
+    const col = lv ? LEVEL_COLORS[lv] : '#c3c2b7', sub = [`${C.slope[u].toFixed(0)}°`, `ML1 P${Math.round(C.pct[u] * 100)}`, this.below(u), C.moving[u] ? this.t('moving') : ''].filter(Boolean).join(' · ');
     el.innerHTML = `<b class="hz" style="color:${col}">${this.dz(u)}</b><div><b style="color:${col}">${this.t('lv' + lv)}</b> · ${esc(this.county(C.county[u], this.D.korea))}<small>${sub}</small></div>`;
     el.hidden = false;                                          // kept off the side panel and the bottom edge
     const w = el.offsetWidth, h = el.offsetHeight, x1 = innerWidth - (innerWidth > 820 ? $('#right').offsetWidth : 0) - 8, y1 = innerHeight - 8;
