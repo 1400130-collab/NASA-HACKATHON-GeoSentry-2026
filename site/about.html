@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <link rel="stylesheet" href="css/site.css?v=40">
+<link rel="stylesheet" href="css/pages.css?v=1">
 </head>
 <body data-meta="data/korea/meta.json">
 <header class="masthead solid"><div class="wrap">
@@ -25,199 +26,221 @@
   </nav>
   <button class="langbtn" type="button">KO</button>
 </div></header>
-<main class="wrap">
-  <section id="top" class="pagehead">
+<main>
+  <section id="top" class="band lead" data-slide="black"><div class="wrap">
     <p class="eyebrow"><span class="live"></span><span lang="en">NASA Space Apps Challenge 2026 · Seoul</span><span lang="ko">NASA Space Apps Challenge 2026 · 서울</span></p>
     <h1 lang="en">Measure the slope before the rain does.</h1>
     <h1 lang="ko">비가 오기 전에, 사면을 먼저 측정합니다.</h1>
     <p class="lede" lang="en">SLOPEWATCH turns NISAR radar into a ranked list of hillsides for local governments to inspect before the rainy season. It is a prototype built by a high school team in Seoul, and it is still a draft.</p>
     <p class="lede" lang="ko">SLOPEWATCH는 NISAR 레이더 자료로 장마 전에 지자체가 먼저 점검할 사면의 순위를 만듭니다. 서울의 고등학생 팀이 만든 시제품이며, 아직 초안입니다.</p>
-    <dl class="facts">
-      <div><dt><span lang="en">Event</span><span lang="ko">대회</span></dt><dd><span lang="en">Space Apps Seoul</span><span lang="ko">Space Apps 서울</span><small lang="en">14–15 November 2026</small><small lang="ko">2026년 11월 14–15일</small></dd></div>
-      <div><dt><span lang="en">Challenge</span><span lang="ko">과제</span></dt><dd>Dancing with the Stars: SARs<small lang="en">NISAR surface change</small><small lang="ko">NISAR 지표 변화</small></dd></div>
-      <div><dt><span lang="en">Coverage</span><span lang="ko">범위</span></dt><dd><span lang="en">All of South Korea</span><span lang="ko">대한민국 전역</span><small lang="en">radar over North Gyeongsang</small><small lang="ko">레이더는 경북</small></dd></div>
-      <div><dt><span lang="en">Status</span><span lang="ko">상태</span></dt><dd><span lang="en">Working prototype</span><span lang="ko">작동하는 시제품</span><small lang="en">Not a warning system</small><small lang="ko">경보 시스템 아님</small></dd></div>
-    </dl>
-  </section>
+    <div class="under">
+      <dl class="facts">
+        <div><dt><span lang="en">Event</span><span lang="ko">대회</span></dt><dd><span lang="en">Space Apps Seoul</span><span lang="ko">Space Apps 서울</span><small lang="en">14–15 November 2026</small><small lang="ko">2026년 11월 14–15일</small></dd></div>
+        <div><dt><span lang="en">Challenge</span><span lang="ko">과제</span></dt><dd>Dancing with the Stars: SARs<small lang="en">NISAR surface change</small><small lang="ko">NISAR 지표 변화</small></dd></div>
+        <div><dt><span lang="en">Coverage</span><span lang="ko">범위</span></dt><dd><span lang="en">All of South Korea</span><span lang="ko">대한민국 전역</span><small lang="en">radar over North Gyeongsang</small><small lang="ko">레이더는 경북</small></dd></div>
+        <div><dt><span lang="en">Status</span><span lang="ko">상태</span></dt><dd><span lang="en">Working prototype</span><span lang="ko">작동하는 시제품</span><small lang="en">Not a warning system</small><small lang="ko">경보 시스템 아님</small></dd></div>
+      </dl>
+    </div>
+  </div></section>
 
-  <section id="mission" class="sec">
-    <div class="side"><b>01</b><span lang="en">Mission</span><span lang="ko">목표</span></div>
-    <div>
-      <h2 lang="en">The warning tells you when to run. We show which slopes to fix first.</h2>
-      <h2 lang="ko">경보는 언제 대피할지 알려줍니다. 저희는 어느 사면부터 손볼지 보여줍니다.</h2>
-      <p lang="en">Korea's landslide warnings are built on rainfall and a fixed hazard map. That tells a region when conditions are dangerous. It does not tell an officer whether a particular hillside is already creeping downhill. NISAR, the radar satellite launched by NASA and ISRO, can measure that movement from orbit every 12 days.</p>
-      <p lang="ko">국내 산사태 경보는 강우량과 고정된 위험지도를 바탕으로 합니다. 지역 전체가 언제 위험한지는 알려주지만, 특정 사면이 이미 조금씩 내려앉고 있는지는 알려주지 않습니다. NASA와 ISRO가 발사한 레이더 위성 NISAR는 12일마다 궤도에서 이 움직임을 잴 수 있습니다.</p>
-      <div class="cards three">
-        <div><b class="k" lang="en">Problem</b><b class="k" lang="ko">문제</b><p lang="en">Officers pick slopes to inspect from rainfall and maps. None of it measures movement.</p><p lang="ko">담당자는 강우와 지도로 점검할 사면을 고릅니다. 움직임을 재는 자료는 없습니다.</p></div>
-        <div><b class="k" lang="en">What we add</b><b class="k" lang="ko">더하는 것</b><p lang="en">Measured ground movement and a learned susceptibility score for every slope, with the reasons behind each.</p><p lang="ko">사면마다 측정한 지표 이동과 학습한 취약도 점수, 그리고 그 근거.</p></div>
-        <div><b class="k" lang="en">Output</b><b class="k" lang="ko">결과물</b><p lang="en">An interactive map and a printable Korean inspection sheet a district officer can take into the field.</p><p lang="ko">인터랙티브 지도와, 담당자가 현장에 들고 갈 수 있는 한국어 점검표.</p></div>
+  <section id="mission" class="band" data-slide="red"><div class="wrap">
+    <p class="eyebrow rv"><b>01</b><span lang="en">Mission</span><span lang="ko">목표</span></p>
+    <p class="statement rv" lang="en">The warning tells you when to run. <span class="hot">We show which slopes to fix first.</span></p>
+    <p class="statement rv" lang="ko">경보는 언제 대피할지 알려줍니다. <span class="hot">저희는 어느 사면부터 손볼지 보여줍니다.</span></p>
+    <p class="after rv" lang="en">Korea's landslide warnings are built on rainfall and a fixed hazard map. They do not tell an officer whether a particular hillside is already creeping downhill. NISAR can measure that from orbit every 12 days.</p>
+    <p class="after rv" lang="ko">국내 산사태 경보는 강우량과 고정된 위험지도를 바탕으로 합니다. 특정 사면이 이미 조금씩 내려앉고 있는지는 알려주지 않습니다. NISAR는 12일마다 궤도에서 이 움직임을 잴 수 있습니다.</p>
+  </div></section>
+
+  <section id="what-we-add" class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>01</b><span lang="en">What we add</span><span lang="ko">더하는 것</span></p>
+    <h2 class="big wide rv" lang="en">One measurement the system doesn't have. <span class="dim">On paper an officer can carry.</span></h2>
+    <h2 class="big wide rv" lang="ko">지금 체계에 없는 측정값 하나. <span class="dim">담당자가 들고 갈 수 있는 종이로.</span></h2>
+    <div class="models three">
+      <article class="model sm rv">
+        <p class="kind"><b>01</b><span lang="en">Problem</span><span lang="ko">문제</span></p>
+        <h3 lang="en">Nothing measures movement</h3><h3 lang="ko">움직임을 재는 자료가 없다</h3>
+        <p lang="en">Officers pick slopes to inspect from rainfall and maps. None of it measures movement.</p><p lang="ko">담당자는 강우와 지도로 점검할 사면을 고릅니다. 움직임을 재는 자료는 없습니다.</p>
+      </article>
+      <article class="model sm rv" style="--d:.08s">
+        <p class="kind"><b>02</b><span lang="en">What we add</span><span lang="ko">더하는 것</span></p>
+        <h3 lang="en">Movement and a score, per slope</h3><h3 lang="ko">사면마다 이동과 점수</h3>
+        <p lang="en">Measured ground movement and a learned susceptibility score for every slope, with the reasons behind each.</p><p lang="ko">사면마다 측정한 지표 이동과 학습한 취약도 점수, 그리고 그 근거.</p>
+      </article>
+      <article class="model sm rv" style="--d:.16s">
+        <p class="kind"><b>03</b><span lang="en">Output</span><span lang="ko">결과물</span></p>
+        <h3 lang="en">A map and a printed sheet</h3><h3 lang="ko">지도와 인쇄용 점검표</h3>
+        <p lang="en">An interactive map and a printable Korean inspection sheet a district officer can take into the field.</p><p lang="ko">인터랙티브 지도와, 담당자가 현장에 들고 갈 수 있는 한국어 점검표.</p>
+      </article>
+    </div>
+  </div></section>
+
+  <section id="in-numbers" class="band" data-slide="pine"><div class="wrap">
+    <p class="eyebrow rv"><b>02</b><span lang="en">In numbers</span><span lang="ko">숫자로 보기</span></p>
+    <h2 class="big rv" lang="en">Every hillside, ranked one by one.</h2><h2 class="big rv" lang="ko">전국의 사면을 하나씩.</h2>
+    <div class="stats rv">
+      <div class="stat"><b data-n="units" data-count>…</b><span lang="en">slopes ranked nationwide</span><span lang="ko">전국에서 순위를 매긴 사면</span></div>
+      <div class="stat"><b data-n="ntracks" data-count>…</b><span lang="en">NISAR orbit tracks</span><span lang="ko">NISAR 궤도</span></div>
+      <div class="stat"><b data-n="npairs" data-count>…</b><span lang="en">radar pairs processed</span><span lang="ko">처리한 레이더 쌍</span></div>
+      <div class="stat"><b class="hot"><span data-n="wave">…</span><small>cm</small></b><span lang="en">L-band wavelength, reaches through tree canopy</span><span lang="ko">나무 아래까지 닿는 L밴드 파장</span></div>
+    </div>
+    <p class="tech rv">All figures are read from the pipeline output of <span data-n="built">…</span>. None are typed in by hand.</p>
+  </div></section>
+
+  <section id="why-here" class="band" data-slide="ember"><div class="wrap">
+    <p class="eyebrow rv"><b>03</b><span lang="en">Why here</span><span lang="ko">왜 이곳인가</span></p>
+    <h2 class="big rv" lang="en">Burned hills, then a storm.</h2><h2 class="big rv" lang="ko">산불이 지나간 산, 그리고 폭우.</h2>
+    <p class="after rv" lang="en">Fire kills the roots and ground cover that hold soil in place, so burned slopes stay fragile for years. On 18 and 19 July 2026 a storm hit Uiseong and Andong, inside the area burned in March 2025. That gave us a real event to test against.</p>
+    <p class="after rv" lang="ko">불은 흙을 붙잡던 뿌리와 지표 식생을 없애기 때문에, 탄 사면은 몇 년 동안 약한 상태로 남습니다. 2026년 7월 18–19일, 2025년 3월 산불 피해 지역 안의 의성과 안동에 폭우가 내렸습니다. 덕분에 실제 사건으로 검증해 볼 수 있었습니다.</p>
+    <ol class="tl rv">
+      <li><time lang="en">Mar 2025</time><time lang="ko">2025년 3월</time><p lang="en">Wildfires burn North Gyeongsang hillsides</p><p lang="ko">경북 산지에 대형 산불</p></li>
+      <li><time lang="en">Jun 2026</time><time lang="ko">2026년 6월</time><p lang="en">NISAR radar record over the region begins</p><p lang="ko">이 지역 NISAR 관측 시작</p></li>
+      <li class="hot"><time lang="en">18–19 Jul 2026</time><time lang="ko">2026년 7월 18–19일</time><p lang="en">Storm in Uiseong and Andong</p><p lang="ko">의성·안동 집중호우</p></li>
+      <li><time lang="en">Nov 2026</time><time lang="ko">2026년 11월</time><p lang="en">Expert call, pipeline, map</p><p lang="ko">전문가 자문, 파이프라인, 지도</p></li>
+      <li><time lang="en">Next season</time><time lang="ko">다음 장마</time><p lang="en">The slopes worth fixing first</p><p lang="ko">먼저 손볼 사면</p></li>
+    </ol>
+  </div></section>
+
+  <section id="who-we-asked" class="band" data-slide="navy"><div class="wrap">
+    <p class="eyebrow rv"><b>04</b><span lang="en">Who we asked</span><span lang="ko">자문</span></p>
+    <h2 class="big rv" lang="en">A phone call that changed the project.</h2><h2 class="big rv" lang="ko">프로젝트의 방향을 바꾼 전화 한 통.</h2>
+    <p class="after rv" lang="en">On 13 November 2026 we spoke with a landslide researcher at a national research institute in Korea. It showed us how a warning actually travels, and where a slope measurement would fit.</p>
+    <p class="after rv" lang="ko">2026년 11월 13일, 국내 국립 연구기관의 산사태 연구자 한 분과 이야기했습니다. 경보가 실제로 어떻게 전달되는지, 그리고 사면 측정값이 어디에 들어갈 수 있는지 알게 되었습니다.</p>
+    <ol class="chain rv">
+      <li><i>1</i><b lang="en">Forecast</b><b lang="ko">예보</b><p lang="en">National level. Soil water content combined with a terrain and geology hazard map.</p><p lang="ko">국가 단위. 토양 함수량과 지형·지질 위험지도를 결합.</p></li>
+      <li class="hot"><i>2</i><b lang="en">Local check</b><b lang="ko">지역 확인</b><p lang="en">A district officer checks local rain and which mountain areas are most vulnerable.</p><p lang="ko">지자체 담당자가 지역 강우와 특히 취약한 산지를 확인.</p><span class="here" lang="en">SLOPEWATCH fits here</span><span class="here" lang="ko">SLOPEWATCH가 들어갈 자리</span></li>
+      <li><i>3</i><b lang="en">Situation meeting</b><b lang="ko">상황판단회의</b><p lang="en">Decides whether people should evacuate.</p><p lang="ko">대피 여부 결정.</p></li>
+      <li><i>4</i><b lang="en">Action</b><b lang="ko">조치</b><p lang="en">The local government recommends or orders evacuation.</p><p lang="ko">지자체가 대피 권고 또는 명령.</p></li>
+    </ol>
+    <p class="tech rv" lang="en">By phone. They asked not to be named and were speaking from memory, so this is our summary and not the institute's official position.</p>
+    <p class="tech rv" lang="ko">전화 통화. 이름은 밝히지 말아 달라고 하셨고 기억에 의존해 말씀하신 것이라, 저희가 정리한 요약이며 기관의 공식 입장이 아닙니다.</p>
+  </div></section>
+
+  <section id="what-it-changed" class="band" data-slide="amber"><div class="wrap">
+    <p class="eyebrow rv"><b>04</b><span lang="en">What it changed</span><span lang="ko">달라진 것</span></p>
+    <h2 class="big rv" lang="en">It told us who this is for.</h2><h2 class="big rv" lang="ko">누구를 위한 것인지 알게 됐습니다.</h2>
+    <div class="models">
+      <article class="model sm rv">
+        <p class="kind"><b>01</b><span lang="en">Who the user is</span><span lang="ko">사용자는 누구인가</span></p>
+        <h3 lang="en">The officer at the local government</h3><h3 lang="ko">지자체 담당자</h3>
+        <p lang="en">Not the research institute. The inspection sheet is written for them.</p><p lang="ko">연구기관이 아닙니다. 점검표는 이분들을 위해 만들었습니다.</p>
+      </article>
+      <article class="model sm rv" style="--d:.1s">
+        <p class="kind"><b>02</b><span lang="en">How we describe it</span><span lang="ko">어떻게 설명하는가</span></p>
+        <h3 lang="en">Adding a measurement the system does not use today</h3><h3 lang="ko">지금 쓰지 않는 측정값을 하나 더한다</h3>
+        <p lang="en">Not as catching what the system misses.</p><p lang="ko">"체계가 놓친 것을 잡아낸다"가 아닙니다.</p>
+      </article>
+    </div>
+    <p class="note rv" lang="en">We have not yet spoken to a district officer. That conversation is the next thing on our list.</p>
+    <p class="note rv" lang="ko">아직 지자체 담당자와는 이야기하지 못했습니다. 가장 먼저 해야 할 일입니다.</p>
+  </div></section>
+
+  <section id="principles" class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>05</b><span lang="en">Principles</span><span lang="ko">원칙</span></p>
+    <h2 class="mid wide rv" lang="en">What we hold ourselves to.</h2><h2 class="mid wide rv" lang="ko">저희가 지키는 원칙.</h2>
+    <div class="models three">
+      <article class="model sm rv"><p class="kind"><b>01</b></p><h3 lang="en">Prevention, not prediction</h3><h3 lang="ko">예측이 아니라 예방</h3><p lang="en">We rank slopes to inspect and reinforce before the rainy season. We never claim to know the day a slope will fail.</p><p lang="ko">장마 전에 점검하고 보강할 사면의 순위를 매깁니다. 사면이 무너질 날짜를 안다고 주장하지 않습니다.</p></article>
+      <article class="model sm rv" style="--d:.06s"><p class="kind"><b>02</b></p><h3 lang="en">One danger index, 0 to 100</h3><h3 lang="ko">위험 지수 하나, 0–100</h3><p lang="en">Higher is worse. 80 and up is check first, 50–79 is watch. It is an inspection priority, not a % chance.</p><p lang="ko">숫자가 높을수록 위험합니다. 80 이상은 우선 점검, 50–79는 주시입니다. 점검 우선순위이며 확률(%)이 아닙니다.</p></article>
+      <article class="model sm rv" style="--d:.12s"><p class="kind"><b>03</b></p><h3 lang="en">Say when we cannot see</h3><h3 lang="ko">못 보는 곳은 못 본다고</h3><p lang="en">Radar sees some slopes badly. Those are marked not measurable instead of being shown as safe.</p><p lang="ko">레이더가 잘 보지 못하는 사면이 있습니다. 그런 곳은 안전하다고 표시하지 않고 측정 불가로 표시합니다.</p></article>
+      <article class="model sm rv"><p class="kind"><b>04</b></p><h3 lang="en">Show the reasons</h3><h3 lang="ko">근거를 보여준다</h3><p lang="en">Each ranked slope lists what pushed it up: steepness, burn damage, movement, what sits below.</p><p lang="ko">순위가 높은 사면마다 이유를 함께 보여줍니다: 경사, 산불 피해, 이동, 아래에 있는 것.</p></article>
+      <article class="model sm rv" style="--d:.06s"><p class="kind"><b>05</b></p><h3 lang="en">Test against reality</h3><h3 lang="ko">실제 사건으로 검증</h3><p lang="en">Results are checked against the July 2026 storm, and the weak results are published next to the good ones.</p><p lang="ko">2026년 7월 폭우로 검증하고, 좋은 결과와 약한 결과를 함께 공개합니다.</p></article>
+      <article class="model sm rv" style="--d:.12s"><p class="kind"><b>06</b></p><h3 lang="en">Open data only</h3><h3 lang="ko">공개 자료만</h3><p lang="en">Everything comes from free, public sources, so anyone can rerun the pipeline.</p><p lang="ko">모든 자료는 무료 공개 자료라 누구나 파이프라인을 다시 돌릴 수 있습니다.</p></article>
+    </div>
+  </div></section>
+
+  <section id="team" class="band" data-slide="pine"><div class="wrap">
+    <p class="eyebrow rv"><b>06</b><span lang="en">Team</span><span lang="ko">팀</span></p>
+    <p class="statement rv" lang="en">High school students in Seoul. <span class="dim">The fires and the storm happened close to home.</span></p>
+    <p class="statement rv" lang="ko">서울의 고등학생 팀. <span class="dim">산불과 폭우는 가까운 곳에서 일어났습니다.</span></p>
+    <p class="after rv" lang="en">We entered the Seoul local event on 14 and 15 November 2026 under the challenge <i>Dancing with the Stars: SARs</i>, which is about using NISAR to see how the Earth's surface changes. We picked landslides because the 2025 fires and the 2026 storm happened close to home.</p>
+    <p class="after rv" lang="ko">2026년 11월 14–15일 서울 대회에 <i>Dancing with the Stars: SARs</i> 과제로 참가했습니다. NISAR로 지표 변화를 살펴보는 과제입니다. 2025년 산불과 2026년 폭우가 가까운 곳에서 일어났기 때문에 산사태를 주제로 골랐습니다.</p>
+    <!-- Team members go here, for example:
+    <div class="models three">
+      <article class="model sm"><h3>Name</h3><p>Role · what they built</p></article>
+    </div> -->
+  </div></section>
+
+  <section id="data" class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>07</b><span lang="en">Data</span><span lang="ko">자료</span></p>
+    <h2 class="big rv" lang="en">All of it is open data.</h2><h2 class="big rv" lang="ko">모두 공개 자료입니다.</h2>
+    <p class="after rv" lang="en">Viewers of this site download none of it. They get the results only.</p>
+    <p class="after rv" lang="ko">사이트 방문자는 원자료를 받지 않고 결과만 봅니다.</p>
+    <div class="scroll rv" style="margin-top:clamp(20px,4vh,36px)"><table class="tbl">
+      <thead><tr><th><span lang="en">Source</span><span lang="ko">출처</span></th><th><span lang="en">Used for</span><span lang="ko">용도</span></th><th><span lang="en">Licence</span><span lang="ko">라이선스</span></th></tr></thead>
+      <tbody>
+        <tr><td><b>NISAR L-band interferograms (GUNW)</b><br><span class="small">NASA / ISRO, NASA Earthdata</span></td><td><span lang="en">Ground movement, how well the radar sees each slope</span><span lang="ko">지표 이동, 사면별 레이더 관측 품질</span></td><td class="mono small">NASA open data</td></tr>
+        <tr><td><b>Sentinel-2 L2A</b><br><span class="small">Copernicus, via Microsoft Planetary Computer</span></td><td><span lang="en">Fire damage, vegetation, the July 2026 scars</span><span lang="ko">산불 피해, 식생, 2026년 7월 붕괴 흔적</span></td><td class="mono small">Copernicus free &amp; open</td></tr>
+        <tr><td><b>Copernicus DEM GLO-30</b><br><span class="small">ESA / Airbus</span></td><td><span lang="en">Terrain: slope, facing, where water gathers</span><span lang="ko">지형: 경사, 방향, 물이 모이는 곳</span></td><td class="mono small">Copernicus DEM licence</td></tr>
+        <tr><td><b>ERA5 rainfall</b><br><span class="small">ECMWF, via Open-Meteo</span></td><td><span lang="en">Daily rain before and during the storm</span><span lang="ko">폭우 전과 폭우 중 일 강수량</span></td><td class="mono small">CC BY 4.0</td></tr>
+        <tr><td><b>ESA WorldCover 2021</b></td><td><span lang="en">Land cover</span><span lang="ko">토지 피복</span></td><td class="mono small">CC BY 4.0</td></tr>
+        <tr><td><b>Global Forest Change v1.13</b><br><span class="small">Hansen et al.</span></td><td><span lang="en">Tree cover and past tree loss</span><span lang="ko">수목 피복과 과거 수목 손실</span></td><td class="mono small">CC BY 4.0</td></tr>
+        <tr><td><b>OpenStreetMap</b><br><span class="small">OpenStreetMap contributors</span></td><td><span lang="en">Buildings and main roads below each slope</span><span lang="ko">사면 아래 건물과 주요 도로</span></td><td class="mono small">ODbL</td></tr>
+        <tr><td><b>KOSTAT 2018 boundaries</b><br><span class="small">Statistics Korea, via southkorea-maps</span></td><td><span lang="en">City and county borders</span><span lang="ko">시·군 경계</span></td><td class="mono small">CC BY 4.0</td></tr>
+      </tbody>
+    </table></div>
+    <p class="tech rv">Contains modified Copernicus Sentinel data (2025–2026) · © OpenStreetMap contributors · Hansen/UMD/Google/USGS/NASA</p>
+  </div></section>
+
+  <section id="tools" class="band" data-slide="navy"><div class="wrap">
+    <p class="eyebrow rv"><b>08</b><span lang="en">How it was built</span><span lang="ko">만든 방법</span></p>
+    <h2 class="big rv" lang="en">Small models, static files.</h2><h2 class="big rv" lang="ko">작은 모델, 정적 파일.</h2>
+    <ul class="stack rv">
+      <li><b>Python · NumPy</b><span lang="en">Radar processing and features</span><span lang="ko">레이더 처리와 특징 추출</span></li>
+      <li><b>LightGBM</b><span lang="en">Slope susceptibility model</span><span lang="ko">사면 취약도 모델</span></li>
+      <li><b>PyTorch</b><span lang="en">GRU movement detector</span><span lang="ko">GRU 이동 탐지기</span></li>
+      <li><b>H3</b><span lang="en">Hexagonal slope units</span><span lang="ko">육각형 사면 단위</span></li>
+      <li><b>three.js</b><span lang="en">3D terrain map</span><span lang="ko">3D 지형 지도</span></li>
+      <li><b>Static HTML</b><span lang="en">No server, runs anywhere</span><span lang="ko">서버 없이 어디서나</span></li>
+    </ul>
+    <div class="aiuse rv">
+      <h3 lang="en">How we used AI</h3><h3 lang="ko">AI 사용 내역</h3>
+      <div>
+        <p lang="en">We used AI coding assistants to help write the code and to draft the Korean text. The two models on the <a href="method.html">method page</a> are our own: small models trained only on satellite data of this region. No number on this site is written by hand or by an AI. Each one is read from the pipeline's output file when the page loads.</p>
+        <p>Specifically: the radar label check and uncertainty scripts in <code>analysis/</code>, sections 08–10 of the home page, sections 07–08 of the results page, the README and the demo script were drafted with Claude Code (Anthropic), then reviewed and run by the team.</p>
+        <p lang="ko">코드 작성과 한국어 문안 초안에는 AI 코딩 도구의 도움을 받았습니다. <a href="method.html">방법</a> 페이지의 두 모델은 저희가 직접 만든 것으로, 이 지역의 위성 자료만으로 학습한 작은 모델입니다. 이 사이트의 숫자는 사람이나 AI가 직접 쓴 것이 아니라, 페이지를 열 때 파이프라인 결과 파일에서 읽어 옵니다.</p>
       </div>
     </div>
-  </section>
+  </div></section>
 
-  <section id="in-numbers" class="sec">
-    <div class="side"><b>02</b><span lang="en">In numbers</span><span lang="ko">숫자로 보기</span></div>
-    <div>
-      <h2 lang="en">Every hillside, ranked one by one</h2><h2 lang="ko">전국의 사면을 하나씩</h2>
-      <div class="stats">
-        <div class="stat"><b data-n="units" data-count>…</b><span lang="en">slopes ranked nationwide</span><span lang="ko">전국에서 순위를 매긴 사면</span></div>
-        <div class="stat"><b data-n="ntracks" data-count>…</b><span lang="en">NISAR orbit tracks</span><span lang="ko">NISAR 궤도</span></div>
-        <div class="stat"><b data-n="npairs" data-count>…</b><span lang="en">radar pairs processed</span><span lang="ko">처리한 레이더 쌍</span></div>
-        <div class="stat"><b class="hot"><span data-n="wave">…</span><small>cm</small></b><span lang="en">L-band wavelength, reaches through tree canopy</span><span lang="ko">나무 아래까지 닿는 L밴드 파장</span></div>
-      </div>
-      <p class="tech">All figures are read from the pipeline output of <span data-n="built">…</span>. None are typed in by hand.</p>
-    </div>
-  </section>
+  <section id="limits" class="band" data-slide="ember"><div class="wrap">
+    <p class="eyebrow rv"><b>09</b><span lang="en">Limits</span><span lang="ko">한계</span></p>
+    <h2 class="big rv" lang="en">What it cannot do.</h2><h2 class="big rv" lang="ko">할 수 없는 것.</h2>
+    <ul class="plain rv" data-block="limits"></ul>
+  </div></section>
 
-  <section id="why-here" class="sec">
-    <div class="side"><b>03</b><span lang="en">Why here</span><span lang="ko">왜 이곳인가</span></div>
-    <div>
-      <h2 lang="en">Burned hills, then a storm</h2><h2 lang="ko">산불이 지나간 산, 그리고 폭우</h2>
-      <p lang="en">In March 2025 wildfires burned large areas of hillside across North Gyeongsang. Fire kills the roots and ground cover that hold soil in place, so burned slopes stay fragile for years. On 18 and 19 July 2026 a storm hit Uiseong and Andong, inside the burned area. That gave us a real event to test against.</p>
-      <p lang="ko">2025년 3월 산불로 경상북도 곳곳의 넓은 산지가 탔습니다. 불이 흙을 붙잡던 뿌리와 지표 식생을 없애기 때문에, 탄 사면은 몇 년 동안 약한 상태로 남습니다. 2026년 7월 18–19일에는 피해 지역 안의 의성과 안동에 폭우가 내렸습니다. 덕분에 실제 사건으로 검증해 볼 수 있었습니다.</p>
-      <ol class="tl">
-        <li><time lang="en">Mar 2025</time><time lang="ko">2025년 3월</time><p lang="en">Wildfires burn North Gyeongsang hillsides</p><p lang="ko">경북 산지에 대형 산불</p></li>
-        <li><time lang="en">Jun 2026</time><time lang="ko">2026년 6월</time><p lang="en">NISAR radar record over the region begins</p><p lang="ko">이 지역 NISAR 관측 시작</p></li>
-        <li class="hot"><time lang="en">18–19 Jul 2026</time><time lang="ko">2026년 7월 18–19일</time><p lang="en">Storm in Uiseong and Andong</p><p lang="ko">의성·안동 집중호우</p></li>
-        <li><time lang="en">Nov 2026</time><time lang="ko">2026년 11월</time><p lang="en">Expert call, pipeline, map</p><p lang="ko">전문가 자문, 파이프라인, 지도</p></li>
-        <li><time lang="en">Next season</time><time lang="ko">다음 장마</time><p lang="en">The slopes worth fixing first</p><p lang="ko">먼저 손볼 사면</p></li>
-      </ol>
-    </div>
-  </section>
+  <section id="roadmap" class="band" data-slide="black"><div class="wrap">
+    <p class="eyebrow rv"><b>10</b><span lang="en">Roadmap</span><span lang="ko">로드맵</span></p>
+    <h2 class="big rv" lang="en">Done, and still to do.</h2><h2 class="big rv" lang="ko">한 일과 남은 일.</h2>
+    <div class="scroll rv"><table class="tbl road">
+      <tbody>
+        <tr><td><span lang="en">Expert consultation with a landslide researcher</span><span lang="ko">산사태 연구자 자문</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
+        <tr><td><span lang="en">Radar pipeline, two models and hindsight test</span><span lang="ko">레이더 파이프라인, 모델 두 개, 사후 검증</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
+        <tr><td><span lang="en">3D map, inspection sheet, Korean and English</span><span lang="ko">3D 지도, 점검표, 한·영 지원</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
+        <tr><td><span lang="en">Rank every slope in South Korea</span><span lang="ko">전국 모든 사면 순위 매기기</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
+        <tr><td><span lang="en">Check the <span data-n="ncand">…</span> scar candidates by hand (<span data-n="nreviewed">…</span> reviewed so far)</span><span lang="ko">붕괴 후보지 <span data-n="ncand">…</span>곳 직접 확인 (지금까지 <span data-n="nreviewed">…</span>곳)</span></td><td class="num"><span class="tag weak"><span lang="en">In progress</span><span lang="ko">진행 중</span></span></td></tr>
+        <tr><td><span lang="en">Talk to a local government officer who would use the sheet</span><span lang="ko">점검표를 쓸 지자체 담당자와 이야기하기</span></td><td class="num"><span class="tag open"><span lang="en">Next</span><span lang="ko">다음</span></span></td></tr>
+        <tr><td><span lang="en">Find out what the radar changes that read as uphill are (soil moisture, vegetation or something else)</span><span lang="ko">위 방향으로 읽히는 레이더 변화의 원인 규명 (토양 수분, 식생 등)</span></td><td class="num"><span class="tag open"><span lang="en">Next</span><span lang="ko">다음</span></span></td></tr>
+        <tr><td><span lang="en">Test the ranking outside North Gyeongsang</span><span lang="ko">경북 밖에서 순위 검증</span></td><td class="num"><span class="tag off"><span lang="en">Later</span><span lang="ko">이후</span></span></td></tr>
+      </tbody>
+    </table></div>
+  </div></section>
 
-  <section id="who-we-asked" class="sec">
-    <div class="side"><b>04</b><span lang="en">Who we asked</span><span lang="ko">자문</span></div>
-    <div>
-      <h2 lang="en">A phone call that changed the project</h2><h2 lang="ko">프로젝트의 방향을 바꾼 전화 한 통</h2>
-      <p lang="en">On 13 November 2026 we spoke by phone with a landslide researcher at a national research institute in Korea. They asked not to be named and were speaking from memory, so what follows is our summary and not the institute's official position. It showed us how a warning actually travels, and where a slope measurement would fit.</p>
-      <p lang="ko">2026년 11월 13일, 국내 국립 연구기관의 산사태 연구자 한 분과 전화로 이야기했습니다. 이름은 밝히지 말아 달라고 하셨고 기억에 의존해 말씀하신 것이라, 아래 내용은 저희가 정리한 요약이며 기관의 공식 입장이 아닙니다. 경보가 실제로 어떻게 전달되는지, 그리고 사면 측정값이 어디에 들어갈 수 있는지 알게 되었습니다.</p>
-      <ol class="chain">
-        <li><i>1</i><b lang="en">Forecast</b><b lang="ko">예보</b><p lang="en">National level. Soil water content combined with a terrain and geology hazard map.</p><p lang="ko">국가 단위. 토양 함수량과 지형·지질 위험지도를 결합.</p></li>
-        <li class="hot"><i>2</i><b lang="en">Local check</b><b lang="ko">지역 확인</b><p lang="en">A district officer checks local rain and which mountain areas are most vulnerable.</p><p lang="ko">지자체 담당자가 지역 강우와 특히 취약한 산지를 확인.</p><span class="here" lang="en">SLOPEWATCH fits here</span><span class="here" lang="ko">SLOPEWATCH가 들어갈 자리</span></li>
-        <li><i>3</i><b lang="en">Situation meeting</b><b lang="ko">상황판단회의</b><p lang="en">Decides whether people should evacuate.</p><p lang="ko">대피 여부 결정.</p></li>
-        <li><i>4</i><b lang="en">Action</b><b lang="ko">조치</b><p lang="en">The local government recommends or orders evacuation.</p><p lang="ko">지자체가 대피 권고 또는 명령.</p></li>
-      </ol>
-      <div class="two">
-        <div><h3 lang="en">Who the user is</h3><h3 lang="ko">사용자는 누구인가</h3><p lang="en">The officer at the local government, not the research institute. The inspection sheet is written for them.</p><p lang="ko">연구기관이 아니라 지자체 담당자입니다. 점검표는 이분들을 위해 만들었습니다.</p></div>
-        <div><h3 lang="en">How we describe it</h3><h3 lang="ko">어떻게 설명하는가</h3><p lang="en">As adding a measurement the system does not use today. Not as catching what the system misses.</p><p lang="ko">"체계가 놓친 것을 잡아낸다"가 아니라 "지금 쓰지 않는 측정값을 하나 더한다"입니다.</p></div>
-      </div>
-      <p class="note" lang="en">We have not yet spoken to a district officer. That conversation is the next thing on our list.</p>
-      <p class="note" lang="ko">아직 지자체 담당자와는 이야기하지 못했습니다. 가장 먼저 해야 할 일입니다.</p>
-    </div>
-  </section>
+  <section id="thanks" class="band" data-slide="pine"><div class="wrap">
+    <p class="eyebrow rv"><b>11</b><span lang="en">Thanks</span><span lang="ko">감사</span></p>
+    <h2 class="big rv" lang="en">Thank you.</h2><h2 class="big rv" lang="ko">감사합니다.</h2>
+    <p class="after rv" lang="en">To the researcher who gave us their time on the phone. To NASA and ISRO for NISAR and for making its data open from the start. To ESA and the Copernicus programme, the OpenStreetMap community, and the organisers and mentors of NASA Space Apps Seoul.</p>
+    <p class="after rv" lang="ko">전화로 시간을 내어 주신 연구자분께 감사드립니다. NISAR를 만들고 처음부터 자료를 공개한 NASA와 ISRO, ESA와 코페르니쿠스 프로그램, OpenStreetMap 기여자들, 그리고 NASA Space Apps 서울 대회 운영진과 멘토분들께 감사드립니다.</p>
+    <p class="note rv" lang="en">SLOPEWATCH is a student prototype. It is not endorsed by NASA, ISRO, ESA, the Korea Forest Service or any research institute, and it must not be used to decide whether people evacuate.</p>
+    <p class="note rv" lang="ko">SLOPEWATCH는 학생 시제품입니다. NASA, ISRO, ESA, 산림청 또는 어떤 연구기관의 승인도 받지 않았으며, 대피 여부를 정하는 데 쓰여서는 안 됩니다.</p>
+  </div></section>
 
-  <section id="principles" class="sec">
-    <div class="side"><b>05</b><span lang="en">Principles</span><span lang="ko">원칙</span></div>
-    <div>
-      <h2 lang="en">What we hold ourselves to</h2><h2 lang="ko">저희가 지키는 원칙</h2>
-      <div class="cards">
-        <div><i>01</i><b class="k" lang="en">Prevention, not prediction</b><b class="k" lang="ko">예측이 아니라 예방</b><p lang="en">We rank slopes to inspect and reinforce before the rainy season. We never claim to know the day a slope will fail.</p><p lang="ko">장마 전에 점검하고 보강할 사면의 순위를 매깁니다. 사면이 무너질 날짜를 안다고 주장하지 않습니다.</p></div>
-        <div><i>02</i><b class="k" lang="en">One danger index, 0 to 100</b><b class="k" lang="ko">위험 지수 하나, 0–100</b><p lang="en">Higher is worse. 80 and up is check first, 50–79 is watch. It is an inspection priority, not a % chance.</p><p lang="ko">숫자가 높을수록 위험합니다. 80 이상은 우선 점검, 50–79는 주시입니다. 점검 우선순위이며 확률(%)이 아닙니다.</p></div>
-        <div><i>03</i><b class="k" lang="en">Say when we cannot see</b><b class="k" lang="ko">못 보는 곳은 못 본다고</b><p lang="en">Radar sees some slopes badly. Those are marked not measurable instead of being shown as safe.</p><p lang="ko">레이더가 잘 보지 못하는 사면이 있습니다. 그런 곳은 안전하다고 표시하지 않고 측정 불가로 표시합니다.</p></div>
-        <div><i>04</i><b class="k" lang="en">Show the reasons</b><b class="k" lang="ko">근거를 보여준다</b><p lang="en">Each ranked slope lists what pushed it up: steepness, burn damage, movement, what sits below.</p><p lang="ko">순위가 높은 사면마다 이유를 함께 보여줍니다: 경사, 산불 피해, 이동, 아래에 있는 것.</p></div>
-        <div><i>05</i><b class="k" lang="en">Test against reality</b><b class="k" lang="ko">실제 사건으로 검증</b><p lang="en">Results are checked against the July 2026 storm, and the weak results are published next to the good ones.</p><p lang="ko">2026년 7월 폭우로 검증하고, 좋은 결과와 약한 결과를 함께 공개합니다.</p></div>
-        <div><i>06</i><b class="k" lang="en">Open data only</b><b class="k" lang="ko">공개 자료만</b><p lang="en">Everything comes from free, public sources, so anyone can rerun the pipeline.</p><p lang="ko">모든 자료는 무료 공개 자료라 누구나 파이프라인을 다시 돌릴 수 있습니다.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="team" class="sec">
-    <div class="side"><b>06</b><span lang="en">Team</span><span lang="ko">팀</span></div>
-    <div>
-      <h2 lang="en">Who made this</h2><h2 lang="ko">만든 사람들</h2>
-      <p lang="en">We are high school students in Seoul. We entered the Seoul local event on 14 and 15 November 2026 under the challenge <i>Dancing with the Stars: SARs</i>, which is about using NISAR to see how the Earth's surface changes. We picked landslides because the 2025 fires and the 2026 storm happened close to home.</p>
-      <p lang="ko">저희는 서울의 고등학생 팀입니다. 2026년 11월 14–15일 서울 대회에 <i>Dancing with the Stars: SARs</i> 과제로 참가했습니다. NISAR로 지표 변화를 살펴보는 과제입니다. 2025년 산불과 2026년 폭우가 가까운 곳에서 일어났기 때문에 산사태를 주제로 골랐습니다.</p>
-      <!-- Team members go here, for example:
-      <div class="cards">
-        <div><b class="k">Name</b><p>Role · what they built</p></div>
-      </div> -->
-    </div>
-  </section>
-
-  <section id="data" class="sec">
-    <div class="side"><b>07</b><span lang="en">Data</span><span lang="ko">자료</span></div>
-    <div>
-      <h2 lang="en">Sources</h2><h2 lang="ko">출처</h2>
-      <p lang="en">All of it is open data. Viewers of this site download none of it. They get the results only.</p>
-      <p lang="ko">모두 공개 자료입니다. 사이트 방문자는 원자료를 받지 않고 결과만 봅니다.</p>
-      <div class="scroll"><table class="tbl">
-        <thead><tr><th><span lang="en">Source</span><span lang="ko">출처</span></th><th><span lang="en">Used for</span><span lang="ko">용도</span></th><th><span lang="en">Licence</span><span lang="ko">라이선스</span></th></tr></thead>
-        <tbody>
-          <tr><td><b>NISAR L-band interferograms (GUNW)</b><br><span class="small">NASA / ISRO, NASA Earthdata</span></td><td><span lang="en">Ground movement, how well the radar sees each slope</span><span lang="ko">지표 이동, 사면별 레이더 관측 품질</span></td><td class="mono small">NASA open data</td></tr>
-          <tr><td><b>Sentinel-2 L2A</b><br><span class="small">Copernicus, via Microsoft Planetary Computer</span></td><td><span lang="en">Fire damage, vegetation, the July 2026 scars</span><span lang="ko">산불 피해, 식생, 2026년 7월 붕괴 흔적</span></td><td class="mono small">Copernicus free &amp; open</td></tr>
-          <tr><td><b>Copernicus DEM GLO-30</b><br><span class="small">ESA / Airbus</span></td><td><span lang="en">Terrain: slope, facing, where water gathers</span><span lang="ko">지형: 경사, 방향, 물이 모이는 곳</span></td><td class="mono small">Copernicus DEM licence</td></tr>
-          <tr><td><b>ERA5 rainfall</b><br><span class="small">ECMWF, via Open-Meteo</span></td><td><span lang="en">Daily rain before and during the storm</span><span lang="ko">폭우 전과 폭우 중 일 강수량</span></td><td class="mono small">CC BY 4.0</td></tr>
-          <tr><td><b>ESA WorldCover 2021</b></td><td><span lang="en">Land cover</span><span lang="ko">토지 피복</span></td><td class="mono small">CC BY 4.0</td></tr>
-          <tr><td><b>Global Forest Change v1.13</b><br><span class="small">Hansen et al.</span></td><td><span lang="en">Tree cover and past tree loss</span><span lang="ko">수목 피복과 과거 수목 손실</span></td><td class="mono small">CC BY 4.0</td></tr>
-          <tr><td><b>OpenStreetMap</b><br><span class="small">OpenStreetMap contributors</span></td><td><span lang="en">Buildings and main roads below each slope</span><span lang="ko">사면 아래 건물과 주요 도로</span></td><td class="mono small">ODbL</td></tr>
-          <tr><td><b>KOSTAT 2018 boundaries</b><br><span class="small">Statistics Korea, via southkorea-maps</span></td><td><span lang="en">City and county borders</span><span lang="ko">시·군 경계</span></td><td class="mono small">CC BY 4.0</td></tr>
-        </tbody>
-      </table></div>
-      <p class="tech">Contains modified Copernicus Sentinel data (2025–2026) · © OpenStreetMap contributors · Hansen/UMD/Google/USGS/NASA</p>
-    </div>
-  </section>
-
-  <section id="tools" class="sec">
-    <div class="side"><b>08</b><span lang="en">How it was built</span><span lang="ko">만든 방법</span></div>
-    <div>
-      <h2 lang="en">Tools</h2><h2 lang="ko">도구</h2>
-      <ul class="stack">
-        <li><b>Python · NumPy</b><span lang="en">Radar processing and features</span><span lang="ko">레이더 처리와 특징 추출</span></li>
-        <li><b>LightGBM</b><span lang="en">Slope susceptibility model</span><span lang="ko">사면 취약도 모델</span></li>
-        <li><b>PyTorch</b><span lang="en">GRU movement detector</span><span lang="ko">GRU 이동 탐지기</span></li>
-        <li><b>H3</b><span lang="en">Hexagonal slope units</span><span lang="ko">육각형 사면 단위</span></li>
-        <li><b>three.js</b><span lang="en">3D terrain map</span><span lang="ko">3D 지형 지도</span></li>
-        <li><b>Static HTML</b><span lang="en">No server, runs anywhere</span><span lang="ko">서버 없이 어디서나</span></li>
-      </ul>
-      <h3 style="margin-top:40px" lang="en">How we used AI</h3><h3 style="margin-top:40px" lang="ko">AI 사용 내역</h3>
-      <p lang="en">We used AI coding assistants to help write the code and to draft the Korean text. The two models on the <a href="method.html">method page</a> are our own: small models trained only on satellite data of this region. No number on this site is written by hand or by an AI. Each one is read from the pipeline's output file when the page loads.</p>
-      <p>Specifically: the radar label check and uncertainty scripts in <code>analysis/</code>, sections 08–10 of the home page, sections 07–08 of the results page, the README and the demo script were drafted with Claude Code (Anthropic), then reviewed and run by the team.</p>
-      <p lang="ko">코드 작성과 한국어 문안 초안에는 AI 코딩 도구의 도움을 받았습니다. <a href="method.html">방법</a> 페이지의 두 모델은 저희가 직접 만든 것으로, 이 지역의 위성 자료만으로 학습한 작은 모델입니다. 이 사이트의 숫자는 사람이나 AI가 직접 쓴 것이 아니라, 페이지를 열 때 파이프라인 결과 파일에서 읽어 옵니다.</p>
-    </div>
-  </section>
-
-  <section id="limits" class="sec">
-    <div class="side"><b>09</b><span lang="en">Limits</span><span lang="ko">한계</span></div>
-    <div>
-      <h2 lang="en">What it cannot do</h2><h2 lang="ko">할 수 없는 것</h2>
-      <ul class="plain" data-block="limits"></ul>
-    </div>
-  </section>
-
-  <section id="roadmap" class="sec">
-    <div class="side"><b>10</b><span lang="en">Roadmap</span><span lang="ko">로드맵</span></div>
-    <div>
-      <h2 lang="en">Done, and still to do</h2><h2 lang="ko">한 일과 남은 일</h2>
-      <div class="scroll"><table class="tbl road">
-        <tbody>
-          <tr><td><span lang="en">Expert consultation with a landslide researcher</span><span lang="ko">산사태 연구자 자문</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
-          <tr><td><span lang="en">Radar pipeline, two models and hindsight test</span><span lang="ko">레이더 파이프라인, 모델 두 개, 사후 검증</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
-          <tr><td><span lang="en">3D map, inspection sheet, Korean and English</span><span lang="ko">3D 지도, 점검표, 한·영 지원</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
-          <tr><td><span lang="en">Check the <span data-n="ncand">…</span> scar candidates by hand (<span data-n="nreviewed">…</span> reviewed so far)</span><span lang="ko">붕괴 후보지 <span data-n="ncand">…</span>곳 직접 확인 (지금까지 <span data-n="nreviewed">…</span>곳)</span></td><td class="num"><span class="tag weak"><span lang="en">In progress</span><span lang="ko">진행 중</span></span></td></tr>
-          <tr><td><span lang="en">Talk to a local government officer who would use the sheet</span><span lang="ko">점검표를 쓸 지자체 담당자와 이야기하기</span></td><td class="num"><span class="tag open"><span lang="en">Next</span><span lang="ko">다음</span></span></td></tr>
-          <tr><td><span lang="en">Confirm the radar's direction convention on a known moving slope</span><span lang="ko">움직이는 것으로 알려진 지점에서 레이더 방향 규약 확인</span></td><td class="num"><span class="tag open"><span lang="en">Next</span><span lang="ko">다음</span></span></td></tr>
-          <tr><td><span lang="en">Rank every slope in South Korea</span><span lang="ko">전국 모든 사면 순위 매기기</span></td><td class="num"><span class="tag pass"><span lang="en">Done</span><span lang="ko">완료</span></span></td></tr>
-          <tr><td><span lang="en">Test the ranking outside North Gyeongsang</span><span lang="ko">경북 밖에서 순위 검증</span></td><td class="num"><span class="tag off"><span lang="en">Later</span><span lang="ko">이후</span></span></td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
-  <section id="thanks" class="sec">
-    <div class="side"><b>11</b><span lang="en">Thanks</span><span lang="ko">감사</span></div>
-    <div>
-      <h2 lang="en">Acknowledgements</h2><h2 lang="ko">감사의 말</h2>
-      <p lang="en">To the researcher who gave us their time on the phone. To NASA and ISRO for NISAR and for making its data open from the start. To ESA and the Copernicus programme, the OpenStreetMap community, and the organisers and mentors of NASA Space Apps Seoul.</p>
-      <p lang="ko">전화로 시간을 내어 주신 연구자분께 감사드립니다. NISAR를 만들고 처음부터 자료를 공개한 NASA와 ISRO, ESA와 코페르니쿠스 프로그램, OpenStreetMap 기여자들, 그리고 NASA Space Apps 서울 대회 운영진과 멘토분들께 감사드립니다.</p>
-      <p class="note" lang="en">SLOPEWATCH is a student prototype. It is not endorsed by NASA, ISRO, ESA, the Korea Forest Service or any research institute, and it must not be used to decide whether people evacuate.</p>
-      <p class="note" lang="ko">SLOPEWATCH는 학생 시제품입니다. NASA, ISRO, ESA, 산림청 또는 어떤 연구기관의 승인도 받지 않았으며, 대피 여부를 정하는 데 쓰여서는 안 됩니다.</p>
-    </div>
+  <section id="open-map" class="closer plain" data-slide="black" data-enter="early">
+    <div class="inner"><div class="wrap">
+      <p class="eyebrow rv"><i class="live"></i><span lang="en"><span data-n="check">…</span> slopes · <span data-n="provs">…</span> provinces · one printable sheet per county</span><span lang="ko">사면 <span data-n="check">…</span>곳 · <span data-n="provs">…</span>개 시·도 · 시·군별 인쇄용 점검표</span></p>
+      <a class="huge rv" href="map.html" data-lang-href="map.html"><span class="t"><span lang="en">Open the map</span><span lang="ko">지도 열기</span></span><span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 5.5 19.5 12 13 18.5"/></svg></span></a>
+      <p class="more"><a href="sheet.html" data-lang-href="sheet.html"><span lang="en">Print an inspection sheet</span><span lang="ko">점검표 인쇄</span></a><a href="method.html"><span lang="en">How it works</span><span lang="ko">작동 방식</span></a><a href="results.html"><span lang="en">What didn't work</span><span lang="ko">안 된 것들</span></a></p>
+    </div></div>
   </section>
 </main>
-
-<section id="open-map" class="closer">
-  <a class="huge" href="map.html" data-lang-href="map.html"><div class="wrap"><span class="t"><span lang="en">Open the map</span><span lang="ko">지도 열기</span></span><span class="arr">→</span></div></a>
-</section>
 
 <footer class="foot"><div class="wrap">
   <div>
@@ -236,7 +259,7 @@
     <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
   </nav>
 </div></footer>
-<script type="module" src="js/site.js?v=44"></script>
+<script type="module" src="js/site.js?v=48"></script>
 <script src="js/nav.js?v=4" defer></script>
 </body>
 </html>

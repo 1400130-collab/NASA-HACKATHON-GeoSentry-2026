@@ -63,3 +63,11 @@ def pairs(track):
     """Sorted list of (ref, sec) date tags for a track."""
     fs = sorted((NISAR / track).glob("*_unwrapped_HH_unwrappedPhase.tif"))
     return [tuple(f.name.split("_")[:2]) for f in fs]
+
+
+def hazard_units():
+    """Slope units the ranking (top 5%) or the radar (moving) flags, before asking what is below them.
+    Same rule as the first half of "check first" in p08."""
+    U = load("units"); A = load("anomaly"); Su = load("suscept"); Vl = load("velocity")
+    moving = Vl["detected"] & (np.nan_to_num(A["detector_pct"]) >= 0.95)
+    return U["is_slope"] & (moving | (np.nan_to_num(Su["pct"]) >= 0.95))

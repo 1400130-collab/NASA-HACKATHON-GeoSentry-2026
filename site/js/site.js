@@ -37,7 +37,21 @@ function numbers(m) {
     npairs: T.reduce((a, x) => a + x.dates.length - 1, 0), ntracks: T.length,
     noiseLo: Math.min(...noise).toFixed(2), noiseHi: Math.max(...noise).toFixed(2),
     stable: int(S.stable_units), ascR: S.ascending_agreement.r_all.toFixed(2),
+    ...(m.velocity ? { vSolved: int(m.velocity.slopes_solved), vOne: int(m.velocity.slopes_one_direction_only), vSig: m.velocity.sigma_post_mm_pct['50'].toFixed(0),
+      vUb: m.velocity.upper_bound_mm_median.toFixed(0), vDown: m.velocity.detected_downslope, vUp: m.velocity.detected_upslope,
+      vNone: pc(m.velocity.no_detectable_movement_share, 1), vLimit: m.velocity.detect_limit80_mm_median.toFixed(0),
+      nObs: int(m.velocity.observations ?? 0), rec50: m.velocity.recovery['50'].recovered_median.toFixed(1) } : {}),
+    ...(m.sign ? { wxR: Math.min(m.sign.wet_r, m.sign.hydro_r).toFixed(2), tideR: Math.abs(m.sign.tide_r).toFixed(2), signPairs: m.sign.pairs } : {}),
     bld: int(m.levels.buildings_mapped), unitsBld: int(m.levels.units_building_below), unitsRoad: int(m.levels.units_road_below),
+    // ML model 3, the debris-reach emulator (k04b), and what it changes in the nationwide list (k05)
+    ...(m.reach ? { emR2: m.reach.far.r2_heldout.toFixed(2), emX: m.reach.far.err_factor_heldout.toFixed(2), emX0: m.reach.far.err_factor_constant.toFixed(2),
+      emTrain: int(m.reach.far.n_train), emUnits: int(m.reach.units_predicted), emMed: Math.round(m.reach.reach_m_p10_p50_p90[1] / 10) * 10,
+      emLo: Math.round(m.reach.reach_m_p10_p50_p90[0] / 10) * 10, emHi: Math.round(m.reach.reach_m_p10_p50_p90[2] / 10) * 10,
+      emMoved: int((m.levels.reach?.dropped ?? 0) + (m.levels.reach?.added ?? 0)), emOld: int(m.levels.reach?.check_first_fixed_360m) } : {}),
+    // debris-flow simulation (pipeline p11) and what it does to the list (p08)
+    ...(m.runout ? { roSim: int(m.runout.simulated_slopes), roReach: int(m.levels.runout?.exposed_sim_far), roFit: int(m.levels.runout?.exposed_sim_best_fit), roOld: int(m.levels.runout?.exposed_300m_rule),
+      roScars: m.runout.calibration.n_scars, roLobs: Math.round(m.runout.calibration.L_obs_median_m), roMuLo: m.runout.calibration.mu_range_not_ruled_out[0], roMuHi: m.runout.calibration.mu_range_not_ruled_out[1],
+      roFarMed: Math.round(m.runout.far.runout_m.median / 10) * 10, roFitMed: Math.round(m.runout.best_fit.runout_m.median / 10) * 10, roBld: int(m.runout.far.buildings_reached_total) } : {}),
     built: m.generated.slice(0, 10),
   };
 }
@@ -159,14 +173,17 @@ function checks(el) {
   const S = M.series, T = Object.values(M.tracks), ag = S.ascending_agreement, mv = S.movement, lab = M.labels, A = M.anomaly.results;
   const rows = [
     ['c_stable', { a: T.map((x) => x.stable_cum_median.toFixed(2)).join(' / '), n: int(S.stable_units), s: T.map((x) => x.stable_cum_mad.toFixed(1)).join(' / ') }, 'pass', 'ok'],
-    ['c_far', { a: pc(mv.stable_units_flagged_share, 2), b: pc(mv.share_of_measurable_slopes, 2) }, 'pass', 'ok'],
+    ...(M.velocity ? [['c_inv', { p: T.reduce((a, x) => a + x.dates.length - 1, 0), r: M.velocity.recovery['50'].recovered_median.toFixed(1), c: Math.round(Math.abs(M.velocity.calibration_factor.post - 1) * 100) }, 'pass', 'ok'],
+      ['c_floor', { q: pc(M.velocity.no_detectable_movement_share, 1), n: int(M.velocity.slopes_solved), s: M.velocity.sigma_post_mm_pct['50'].toFixed(0) }, 'pass', 'ok'],
+      ['c_dir', { d: M.velocity.detected_downslope, u: M.velocity.detected_upslope, n: M.velocity.detected }, 'pass', 'ok']]
+      : [['c_far', { a: pc(mv.stable_units_flagged_share, 2), b: pc(mv.share_of_measurable_slopes, 2) }, 'pass', 'ok']]),
     ['c_asc', { r: ag.r_all.toFixed(2), n: int(ag.units), p: pc(ag.same_sign_moving) }, 'weak', 'weak'],
     ['c_ml', { a: pc(A.detector.well_oriented[3]), b: pc(A.matched.well_oriented[3]) }, 'pass', 'ok'],
     ['c_ae', { a: pc(A.autoenc.well_oriented[3]), b: pc(A.zmax.well_oriented[3]) }, 'off', 'notused'],
     M.levels.radar_units ? ['c_cov', { a: int(M.levels.radar_measured), b: int(M.levels.radar_units) }, 'pass', 'ok', 'c_cov_kr']
       : ['c_cov', { a: int(M.units.n - M.levels.levels.not_measurable), b: int(M.units.n) }, 'pass', 'ok'],
     ['c_lab', { c: lab.candidates_ge3px, f: lab.auto_failure, u: lab.failed_slope_units, h: lab.human_reviewed }, 'open', 'open_'],
-    ['c_sign', {}, 'open', 'open_'],
+    M.sign?.confirmed ? ['c_sign', { n: M.sign.pairs, r: Math.min(M.sign.wet_r, M.sign.hydro_r).toFixed(2), t: Math.abs(M.sign.tide_r).toFixed(2) }, 'pass', 'ok', 'c_sign_ok'] : ['c_sign', {}, 'open', 'open_'],
   ];
   el.innerHTML = `<table class="tbl"><tbody>${rows.map(([k, v, cls, st, vk]) => `<tr><td><b>${t(k)}</b></td><td>${t(vk || k + '_v', v)}</td><td class="num"><span class="tag ${cls}">${t(st)}</span></td></tr>`).join('')}</tbody></table>`;
 }
@@ -490,5 +507,10 @@ if (ba) ba.querySelector('input').addEventListener('input', (e) => ba.style.setP
 if (heroEl) import('./hero.js?v=28').then((m) => m.startHero(heroEl, document.querySelector('.closer'))).catch((e) => { heroEl.classList.add('nogl'); document.documentElement.classList.add('nogl'); console.warn('3D hero unavailable, showing the still image', e); });
 
 const json = (u) => fetch(u).then((r) => r.json());
-Promise.all([json(document.body.dataset.meta || 'data/meta.json'), document.body.dataset.history ? json(document.body.dataset.history) : null]).then(([m, h]) => { M = m; H = h; render(); pending = $$('.rv'); reveal(); $$('.hero [data-count]').forEach(countUp); })
+Promise.all([json(document.body.dataset.meta || 'data/meta.json'), document.body.dataset.history ? json(document.body.dataset.history) : null]).then(async ([m, h]) => {
+  if (!m.runout && m.region) {                                 // nationwide pages: the debris-flow simulation lives in the regional build
+    const r = await json('data/meta.json').catch(() => null);
+    if (r && r.runout && r.levels.runout) { m.runout = r.runout; m.levels.runout = r.levels.runout; }
+  }
+  M = m; H = h; render(); pending = $$('.rv'); reveal(); $$('.hero [data-count]').forEach(countUp); })
   .catch(() => { $$('[data-n]').forEach((el) => { el.textContent = '?'; }); $$('.rv').forEach((el) => el.classList.add('in')); });

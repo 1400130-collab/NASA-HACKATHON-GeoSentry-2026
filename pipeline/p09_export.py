@@ -8,7 +8,7 @@ from common import PUB, WORK, SITE, TRACKS, read, load, write_json, X0, Y1, CRS,
 
 OUT = SITE / "data"; OUT.mkdir(parents=True, exist_ok=True)
 U = load("units"); T = load("terrain"); Sx = load("series"); A = load("anomaly"); Su = load("suscept")
-Lv = load("levels"); Lb = load("labels"); Nz = load("nisar")
+Lv = load("levels"); Lb = load("labels"); Nz = load("nisar"); Vl = load("velocity")
 tf = Transformer.from_crs("EPSG:4326", CRS, always_xy=True)
 names = json.load(open(WORK / "counties.json"))
 KO = {"Uiseong-gun": "의성군", "Andong-si": "안동시", "Cheongsong-gun": "청송군", "Yeongyang-gun": "영양군", "Yeongdeok-gun": "영덕군",
@@ -58,15 +58,44 @@ cols = {
     "bld": Lv["bld_below"][sl], "road": Lv["road_below"][sl], "dnbr": U["dnbr"][sl], "burn": U["burn_frac"][sl], "ndvi": U["ndvi_pre"][sl],
     "rain_storm": U["rain_storm"][sl], "rain_ante": U["rain_ante30"][sl], "det": A["detector_pct"][sl], "zmax": Sx["zmax"][sl],
     "label": Lb["label"][sl], "seen": Lb["observed"][sl],
+    # time-series inversion (p04b): downslope rate after the storm, mm per 30 days, its error bar, and tracks used (NaN = one direction only)
+    "vd": Vl["v_post"][sl], "vds": Vl["s_post"][sl], "vdn": Vl["ntracks"][sl],
+    # the rest of the solved model, so the map can redraw the fit: rate before the storm, step at the storm, and the shared (non-sliding) term
+    "vpre": Vl["v_pre"][sl], "vstep": Vl["step"][sl], "cpre": Vl["common_pre"][sl], "cstep": Vl["common_step"][sl], "cpost": Vl["common_post"][sl],
     "r1": top[:, 0], "r2": top[:, 1], "r3": top[:, 2], "v1": Xv[rows[:, 0], np.maximum(top[:, 0], 0)], "v2": Xv[rows[:, 0], np.maximum(top[:, 1], 0)],
     "v3": Xv[rows[:, 0], np.maximum(top[:, 2], 0)],
 }
+# simulated debris flow (p11): best-fit friction (ro_) and the far-reaching case (rf_); NaN where not simulated
+HAVE_RO = (WORK / "runout.npz").exists()
+if HAVE_RO:
+    Ro = load("runout")
+    cols["sim"] = Lv["sim"][sl]; cols["bld300"] = Lv["bld300"][sl]; cols["road300"] = Lv["road300"][sl]
+    for k in ("ro_len", "ro_bld", "ro_road", "rf_len", "rf_drop", "rf_bld", "rf_road", "rf_tbld", "rf_vmax", "rf_dir", "rf_left"):
+        cols[k] = Ro[k][sl]
+# The heaviest 48 h rain each slope has stood through since the fire (nearest 0.1 degree rain point), and the day it
+# ended, counted from the first day of the rain file. A fact about past rain, not a threshold.
+Rn = np.load(WORK / "rain.npz")
+rpt = np.argmin((U["lat"][sl, None] - Rn["pts"][None, :, 0]) ** 2 + (U["lon"][sl, None] - Rn["pts"][None, :, 1]) ** 2, axis=1)
+r0 = int(np.where(Rn["dates"] == "2025-04-08")[0][0])
+r48 = Rn["R"][:, r0 + 1:] + Rn["R"][:, r0:-1]
+cols["rec48"] = r48.max(1)[rpt]; cols["rec_day"] = (r0 + 1 + r48.argmax(1))[rpt]
+RAIN_REC = {"since": "2025-04-08", "until": str(Rn["dates"][-1]), "day0": str(Rn["dates"][0]), "grid_deg": 0.1,
+            "mm_min_p50_max": [float(v) for v in np.percentile(cols["rec48"], [0, 50, 100])]}
 for tr in TRACKS:
     t = tr[:3]
     cols[f"cum_{t}"] = Sx[f"{tr}__cum_post"][sl]; cols[f"sig_{t}"] = Sx[f"{tr}__sig_post"][sl]
     cols[f"meas_{t}"] = Sx[f"{tr}__measurable"][sl]; cols[f"sens_{t}"] = Nz[f"{tr}__sens"][sl]
     cols[f"cohpre_{t}"] = Sx[f"{tr}__pre_coh"][sl]; cols[f"cohstorm_{t}"] = Sx[f"{tr}__storm_coh"][sl]
 gz("units.bin.gz", np.stack([np.asarray(v, "float32") for v in cols.values()], 0).astype("<f4"))
+
+# debris-flow animation: per flagged slope, the 10 m cells the far-reaching flow covers.
+# Layout: u32 flows | u32 unit[flows] | u32 count[flows] | u16 col[cells] | u16 row[cells] | u8 arrival (0.5 s) | u8 depth (2 cm) | u8 also in the best-fit case
+if HAVE_RO:
+    nf = Ro["an_unit"].size
+    buf = b"".join([np.array([nf], "<u4").tobytes(), (remap[Ro["an_unit"]] - 1).astype("<u4").tobytes(), Ro["an_n"].astype("<u4").tobytes(),
+                    Ro["an_c"].astype("<u2").tobytes(), Ro["an_r"].astype("<u2").tobytes(), Ro["an_t"].tobytes(), Ro["an_d"].tobytes(), Ro["an_k"].tobytes()])
+    (OUT / "runout.bin.gz").write_bytes(gzip.compress(buf, 6))
+    print(f"  runout.bin.gz: {(OUT / 'runout.bin.gz').stat().st_size / 1e6:.2f} MB ({int(Ro['an_n'].sum())} cells)", flush=True)
 
 # movement history: cumulative cm per track and date (int16, 0.01 cm; -32768 = no data) and coherence per pair (uint8)
 st = json.load(open(WORK / "series_stats.json")); ns = json.load(open(WORK / "nisar_stats.json"))
@@ -179,6 +208,14 @@ for k, c in enumerate(cand):
         sheet.paste(tile, ((k % PER) * 3 * 2 * R_ * Z_ + t * 2 * R_ * Z_, (k // PER) * 2 * R_ * Z_))
 sheet.save(OUT / "review_sheet.jpg", quality=88)
 
+# ---- example slopes for the home page's inversion animation ---------------------
+exs = json.load(open(WORK / "inversion_examples.json"))
+for e in exs:
+    i = e.pop("idx"); e["u"] = int(remap[i]) - 1; ci = int(U["county"][i])
+    e["en"] = names[ci - 1].replace("-gun", "").replace("-si", "") if ci else ""; e["ko"] = KO.get(names[ci - 1], "") if ci else ""
+    e["moving"] = bool(Lv["moving"][i])
+write_json(OUT / "inversion.json", exs)
+
 # ---- numbers -------------------------------------------------------------------
 meta = {
     "generated": str(np.datetime64("now")) + "Z",
@@ -199,7 +236,22 @@ meta = {
     "labels": json.load(open(WORK / "label_stats.json")),
     "suscept": json.load(open(WORK / "suscept_stats.json")),
     "anomaly": json.load(open(WORK / "anomaly_stats.json")),
+    "velocity": json.load(open(WORK / "velocity_stats.json")),
+    "sign": json.load(open(WORK / "sign_check.json")) if (WORK / "sign_check.json").exists() else None,
     "levels": json.load(open(WORK / "level_stats.json")),
 }
+meta["rain_record"] = RAIN_REC
+if HAVE_RO:
+    # For the nationwide map (EPSG:5179): where this grid's corners and a 7 x 6 lattice of its points fall there, so the
+    # browser can place the simulated flows without a projection library. Plus the flow the storm replay zooms in on.
+    t5 = Transformer.from_crs(CRS, "EPSG:5179", always_xy=True)
+    gx, gz = np.meshgrid(np.linspace(0, W20 * 0.02, 7), np.linspace(0, H20 * 0.02, 6))
+    ex, ny_ = t5.transform(X0 + gx.ravel() * 1000, Y1 - gz.ravel() * 1000)
+    c3 = np.where((Lv["level"][sl] == 3) & (Ro["rf_len"][sl] > 150))[0]
+    show = int(c3[np.lexsort((Ro["rf_len"][sl][c3], Ro["rf_bld"][sl][c3]))[-1]])
+    meta["flows"] = {"nx": 7, "nz": 6, "w_km": W20 * 0.02, "h_km": H20 * 0.02, "e": [round(float(v), 1) for v in ex], "n": [round(float(v), 1) for v in ny_],
+                     "show": {"unit": show, "dir": float(Ro["rf_dir"][sl][show]), "bld": int(Ro["rf_bld"][sl][show]), "len": float(Ro["rf_len"][sl][show])}}
+if HAVE_RO: meta["runout"] = json.load(open(WORK / "runout_stats.json"))
+if (WORK / "stability_stats.json").exists(): meta["stability"] = json.load(open(WORK / "stability_stats.json"))
 write_json(OUT / "meta.json", meta)
 print("site/data total:", round(sum(f.stat().st_size for f in OUT.glob('*')) / 1e6, 1), "MB")

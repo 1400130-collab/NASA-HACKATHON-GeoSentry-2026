@@ -5,7 +5,8 @@
 //   50-79   watch           by the slope part alone
 //   0-49    nothing flagged, or radar can't see it: by the slope part alone
 // Slope part (0-100): the AI model's rank among all slopes; 100 where the radar measured movement.
-// Below part (0-100): buildings within 300 m downslope on a log scale (80 points at 30 or more), plus 20 for a main road.
+// Below part (0-100): buildings below on a log scale (80 points at 30 or more), plus 20 for a main road. "Below" is the
+// simulated debris path for flagged slopes on the regional map (pipeline p11), otherwise within 300 m downslope.
 // Keep the formula in step with `prio` in pipeline/p08_levels.py and pipeline/korea/k05_levels.py.
 const clamp = (v) => Math.min(1, Math.max(0, v));
 

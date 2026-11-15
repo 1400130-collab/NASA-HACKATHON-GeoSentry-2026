@@ -10,10 +10,15 @@
   :root { --ink: #111; --mute: #5c5c5c; --line: #111; --soft: #b9b9b4; --fill: #ecece8; --red: #c7341f; --amber: #d99a1c; }
   * { box-sizing: border-box; }
   body { margin: 0; background: #0b0c0d; color: var(--ink); font: 8.4pt/1.4 "Roboto", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; }
-  .bar { position: sticky; top: 0; z-index: 5; background: #0b0c0d; color: #fff; padding: 10px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
-  .bar .brand { font-weight: 800; letter-spacing: .08em; margin-right: 6px; color: #fff; text-decoration: none; border: 0; background: none; padding: 0; }
-  .bar select, .bar button, .bar a { font: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid #444; background: #1a1b1d; color: #fff; cursor: pointer; text-decoration: none; max-width: 210px; }
-  .bar .go { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
+  /* top bar: the site header's type, wordmark and buttons */
+  .bar { position: sticky; top: 0; z-index: 5; background: #0b0c0d; color: #f3f1ec; min-height: 68px; padding: 12px clamp(16px, 4vw, 48px); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font: 500 14px/1 "Roboto", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", system-ui, sans-serif; }
+  .bar .brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; letter-spacing: -.01em; margin-right: 14px; color: #f3f1ec; text-decoration: none; border: 0; background: none; padding: 0; box-shadow: none; max-width: none; }
+  .bar .brand svg { color: #ff4d2e; }
+  .bar select, .bar button:not(.snav-btn), .bar a:not(.brand) { font: inherit; padding: 10px 13px; border-radius: 6px; border: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); background: none; color: #f3f1ec; cursor: pointer; text-decoration: none; max-width: 210px; transition: box-shadow .15s, background .15s, color .15s; }
+  .bar select { background: #121416; color-scheme: dark; }
+  .bar select:hover, .bar button:not(.snav-btn):hover, .bar a:not(.brand):hover { box-shadow: inset 0 0 0 1px #b4b1a9; }
+  .bar .go:not(.snav-btn), .bar .go:not(.snav-btn):hover { background: #f3f1ec; color: #0b0c0d; box-shadow: none; font-weight: 600; }
+  .bar .go:not(.snav-btn):hover { background: #ff4d2e; }
   .bar .sp { flex: 1; }
   .doc { width: 210mm; min-height: 297mm; margin: 14px auto; background: #fff; padding: 11mm 12mm 12mm; }
   header.h1 { display: grid; grid-template-columns: 1fr auto; gap: 6mm; align-items: end; border-bottom: 2.2pt solid var(--line); padding-bottom: 2mm; }
@@ -69,7 +74,7 @@
 <style id="pg"></style>
 </head>
 <body>
-<div class="bar"><a class="brand" href="index.html">SLOPEWATCH</a><select id="prov"></select><select id="county"></select><select id="count"></select><span class="sp"></span><a id="map"></a><a id="forms"></a><button id="lang"></button><button class="go" id="print" onclick="print()"></button></div>
+<div class="bar"><a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a><select id="prov"></select><select id="county"></select><select id="count"></select><span class="sp"></span><a id="map"></a><a id="forms"></a><button id="lang"></button><button class="go" id="print" onclick="print()"></button></div>
 <div class="doc" id="doc">Loading…</div>
 <script type="module">
 // The district priority sheet: one district's check-first slopes in inspection order, on paper.
@@ -160,13 +165,15 @@ function render() {
   $('#pg').textContent = `@page { size: A4; margin: 11mm 12mm 13mm; @bottom-left { content: "SLOPEWATCH · ${name.replace(/"/g, '')} · ${title}"; font: 7pt system-ui, sans-serif; color: #5c5c5c; } @bottom-right { content: counter(page) " / " counter(pages); font: 7pt system-ui, sans-serif; color: #5c5c5c; } }`;
 
   const rows = top.map((u, i) => {
-    const b = best(u), why = [];
+    const b = best(u), sl = C.vd && Number.isFinite(C.vd[u]) && C.vds[u] > 0 ? { v: C.vd[u], s: C.vds[u] } : null, why = [];
     if (C.moving[u]) why.push(`<span class="mv">${L('이동 감지', 'movement detected')}</span>`);
     if (C.pct[u] >= 0.8) why.push(L(`취약도 상위 ${Math.max(1, Math.round((1 - C.pct[u]) * 100))}%`, `top ${Math.max(1, Math.round((1 - C.pct[u]) * 100))}% susceptibility`));
     [[C.r1[u], C.v1[u]], [C.r2[u], C.v2[u]]].forEach(([r, v]) => { if (r >= 0) why.push(reason(M.features[r], v, lang)); });
     if (C.label[u]) why.push(L('2026.7 붕괴 후보지', 'Jul 2026 scar candidate'));
     const below = [C.bld[u] > 0 ? L(`건물 ${C.bld[u]}동`, `${C.bld[u]} bldg`) : '', C.road[u] > 0 ? L('주요 도로', 'main road') : ''].filter(Boolean).join('<br>');
     const mv = K && !C.rcov[u] ? `<small>${L('레이더 없음', 'no radar')}</small>` : !b ? `<small>${L('측정 불가', 'not measurable')}</small>`
+      : sl ? `<span class="n ${C.moving[u] ? 'mv' : ''}" style="white-space:nowrap">${sg(sl.v, 0)} ± ${sl.s.toFixed(0)}</span><br><small>${L('mm/월', 'mm/month')}${C.moving[u] ? '' : ' · ' + L('감지 안 됨', 'not detectable')}</small>`
+      : C.vd ? `<small>${L('한 방향만 관측', 'one direction only')}</small>`
       : `<span class="n ${C.moving[u] ? 'mv' : ''}" style="white-space:nowrap">${sg(b.v)} ± ${b.s.toFixed(1)}</span><br><small>${L('궤도', 'track')} ${b.id}${C.moving[u] ? '' : ' · ' + L('잡음 이내', 'within noise')}</small>`;
     return `<tr><td class="c"><a class="no" href="form.html?u=${u}&lang=${lang}${REG}" title="${L('이 사면의 현장 점검서', 'Field form for this slope')}">${i + 1}</a></td>
       <td class="n"><b>${fno(u)}</b><br>${C.lat[u].toFixed(5)}, ${C.lon[u].toFixed(5)}</td><td class="c"><span class="dz">${Math.round(C.danger[u])}</span></td>
@@ -174,7 +181,7 @@ function render() {
   }).join('');
   const m = mapHTML(top);
   const marks = top.map((u, i) => { const [x, y] = m.px(u); return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="8" fill="#111" stroke="#fff" stroke-width="1.6"/><text y="3.2" text-anchor="middle" font-size="${i > 98 ? 7 : 9}" font-weight="700" fill="#fff">${i + 1}</text></g>`; }).reverse().join('');
-  const H = [L('순위', 'No.'), L('서식 번호 · 좌표 (위도, 경도)', 'Form no. · lat, lon'), L('위험 지수', 'Danger'), L('경사·방향', 'Slope, facing'), L('선정 사유', 'Why it is listed'), L('레이더 이동 cm', 'Radar cm'), L('사면 아래', 'Below'), L('점검일 · 판정', 'Date · result')];
+  const H = [L('순위', 'No.'), L('서식 번호 · 좌표 (위도, 경도)', 'Form no. · lat, lon'), L('위험 지수', 'Danger'), L('경사·방향', 'Slope, facing'), L('선정 사유', 'Why it is listed'), C.vd ? L('레이더 이동', 'Radar') : L('레이더 이동 cm', 'Radar cm'), L('사면 아래', 'Below'), L('점검일 · 판정', 'Date · result')];
   const Wd = [8, 34, 12, 14, 0, 23, 17, 21];
   $('#doc').innerHTML = `
     <header class="h1"><h1><small>SLOPEWATCH · ${L('NISAR 레이더 + AI 취약도 기반', 'FROM NISAR RADAR + AI SUSCEPTIBILITY')}</small>${name}<br>${title}</h1>
@@ -197,8 +204,8 @@ function render() {
       <table class="f"><tr><th style="width:26mm">${L('점검 완료', 'Inspected')}</th><td>${ln(12)} / ${top.length}${L('곳', '')}</td><th style="width:10mm">A</th><td>${ln(10)}</td><th style="width:10mm">B</th><td>${ln(10)}</td><th style="width:10mm">C</th><td>${ln(10)}</td><th style="width:10mm">D</th><td>${ln(10)}</td></tr></table>
       <table class="f sig" style="margin-top:1.6mm"><thead><tr><th style="width:26mm"></th><th>${L('부서 · 직급', 'Office · post')}</th><th>${L('성명', 'Name')}</th><th>${L('서명', 'Signature')}</th><th style="width:30mm">${L('날짜', 'Date')}</th></tr></thead>
         <tr><th>${L('담당자', 'Officer')}</th><td></td><td></td><td></td><td></td></tr><tr><th>${L('확인자', 'Reviewed by')}</th><td></td><td></td><td></td><td></td></tr></table>
-      <div class="foot"><b>${L('등급 규칙', 'Level rule')}</b> — ${L(`"우선 점검": 레이더가 이동을 감지했거나 AI 취약도가 상위 5%이고, 아래쪽 약 ${DOWN} m 이내에 건물이나 주요 도로가 있는 사면. "관찰": 이동 감지 또는 취약도 상위 20%. 이동량은 레이더 시선 방향 값이며 ± 뒤는 잡음 수준입니다${K ? ' (NISAR 레이더는 경북 산불 지역만 처리, 그 밖은 AI 순위만으로 선정)' : ''}. 건물 자료는 OpenStreetMap으로, 농촌 주택이 빠져 있을 수 있습니다. AI 모델은 2026년 7월 폭우 때의 붕괴지(자동 탐지 ${M.suscept.n_failed}곳, 사람이 아직 확인하지 않음)로 학습했습니다. 이동이 없는 사면이 안전하다는 뜻은 아닙니다.`,
-        `"Check first": the radar detected movement or the AI ranks the slope in the top 5%, and a building or main road lies within about ${DOWN} m downslope. "Watch": movement detected, or top 20%. Movement is along the radar line of sight; the figure after ± is the noise level${K ? ' (NISAR radar was processed for the North Gyeongsang burn area only; elsewhere the AI rank alone decides)' : ''}. Buildings come from OpenStreetMap and may miss rural houses. The AI model learned from slopes that failed in the July 2026 storm (${M.suscept.n_failed} found automatically, not yet checked by a person). No movement does not mean a slope is safe.`)}
+      <div class="foot"><b>${L('등급 규칙', 'Level rule')}</b> — ${L(`"우선 점검": 레이더가 이동을 감지했거나 AI 취약도가 상위 5%이고, ${C.sim ? '모의 토석류가 건물이나 주요 도로에 닿는 사면' : C.reach ? 'AI 3이 예측한 그 사면의 토석류 도달 거리 안에 건물이나 주요 도로가 있는 사면' : `아래쪽 약 ${DOWN} m 이내에 건물이나 주요 도로가 있는 사면`}. "관찰": 이동 감지 또는 취약도 상위 20%. 이동량은 레이더 시선 방향 값이며 ± 뒤는 잡음 수준입니다${K ? ' (NISAR 레이더는 경북 산불 지역만 처리, 그 밖은 AI 순위만으로 선정)' : ''}. 건물 자료는 OpenStreetMap으로, 농촌 주택이 빠져 있을 수 있습니다. AI 모델은 2026년 7월 폭우 때의 붕괴지(자동 탐지 ${M.suscept.n_failed}곳, 사람이 아직 확인하지 않음)로 학습했습니다. 이동이 없는 사면이 안전하다는 뜻은 아닙니다.`,
+        `"Check first": the radar detected movement or the AI ranks the slope in the top 5%, and ${C.sim ? 'a simulated debris flow from the slope reaches a building or main road' : C.reach ? 'a building or main road lies inside the debris reach that AI model 3 predicts for the slope' : `a building or main road lies within about ${DOWN} m downslope`}. "Watch": movement detected, or top 20%. Movement is along the radar line of sight; the figure after ± is the noise level${K ? ' (NISAR radar was processed for the North Gyeongsang burn area only; elsewhere the AI rank alone decides)' : ''}. Buildings come from OpenStreetMap and may miss rural houses. The AI model learned from slopes that failed in the July 2026 storm (${M.suscept.n_failed} found automatically, not yet checked by a person). No movement does not mean a slope is safe.`)}
         ${L('지형: Copernicus DEM · 광학: Sentinel-2 · 강우: ERA5 · 레이더: NASA-ISRO NISAR.', 'Terrain: Copernicus DEM · Optical: Sentinel-2 · Rain: ERA5 · Radar: NASA-ISRO NISAR.')}</div>
     </div>`;
   paintMap(m);

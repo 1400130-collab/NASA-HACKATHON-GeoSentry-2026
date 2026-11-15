@@ -338,6 +338,13 @@ body[data-slide="navy"] { --bg: #0a1830; --bg2: #11223f; --ink2: #aab6c8; --mute
 body[data-slide="ember"] { --bg: #1d0805; --bg2: #2a0e09; --ink2: #c9aaa2; --mute: #8d6a62; --line: rgba(255, 140, 110, .16); }
 body[data-slide="amber"] { --bg: #ffb020; --bg2: rgba(255, 255, 255, .24); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .76); --mute: rgba(11, 12, 13, .52); --line: rgba(0, 0, 0, .16); --red: #0b0c0d; }
 body[data-slide="pine"] { --bg: #05211f; --bg2: #0b2f2c; --ink2: #a8c5bf; --mute: #6a8b85; --line: rgba(150, 235, 215, .17); }
+body[data-slide="plum"] { --bg: #1c0d3a; --bg2: #291452; --ink2: #bdb1d8; --mute: #8576a8; --line: rgba(190, 160, 255, .18); }
+body[data-slide="cobalt"] { --bg: #2340f0; --bg2: rgba(0, 0, 0, .16); --ink: #ffffff; --ink2: rgba(255, 255, 255, .84); --mute: rgba(255, 255, 255, .62); --line: rgba(255, 255, 255, .24); --red: #ffd23f; }
+body[data-slide="forest"] { --bg: #0a2611; --bg2: #11351b; --ink2: #b1cab1; --mute: #73916f; --line: rgba(160, 235, 160, .18); }
+body[data-slide="lime"] { --bg: #cdf03a; --bg2: rgba(255, 255, 255, .3); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .5); --line: rgba(0, 0, 0, .18); --red: #0b0c0d; }
+body[data-slide="wine"] { --bg: #300a22; --bg2: #421132; --ink2: #d2b0c1; --mute: #986b81; --line: rgba(255, 150, 200, .18); }
+body[data-slide="cobalt"] .vs .me i { box-shadow: none; }
+body[data-slide="cobalt"] .vs > div:not(.me) i { background: rgba(255, 255, 255, .22); }
 .masthead.solid { border-color: transparent; }
 .band .eyebrow { font-size: 13px; margin-bottom: 40px; }
 .band .statement { font-size: clamp(34px, min(6.2vw, 11vh), 96px); max-width: 15em; }
@@ -493,22 +500,167 @@ html.js .bars.rv.in i { transform: none; }
   .hero .sky { transition: none; }
 }
 
-/* ---- added: uncertainty, radar check, workload, operations ---- */
+/* ---- uncertainty, radar check, workload, operations ---- */
 .xstats { font: 500 14px/1.6 var(--mono); color: var(--ink2); margin-top: 18px; }
 .xstats b { color: var(--ink); font-weight: 600; }
-.xbars { display: grid; gap: 14px; margin: 34px 0 10px; max-width: 760px; }
-.xbar { display: grid; grid-template-columns: minmax(150px, 280px) 1fr 56px; align-items: center; gap: 14px; font-size: 15px; color: var(--ink2); }
-.xbar i { display: block; height: 22px; width: var(--w); min-width: 4px; background: var(--mute); border-radius: 3px; }
-.xbar b { font: 600 18px/1 var(--mono); color: var(--ink); text-align: right; }
-.xbar.me { color: var(--ink); font-weight: 600; }
-.xbar.me i { background: var(--red); box-shadow: 0 0 28px rgba(255, 77, 46, .3); }
-.xnote { color: var(--ink2); max-width: 760px; font-size: 15px; }
-.xbig { display: flex; flex-wrap: wrap; gap: 28px 64px; margin: 30px 0; }
-.xbig > div > b { display: block; font: 800 clamp(56px, 8vw, 112px)/.9 var(--sans); letter-spacing: -.05em; color: var(--red); }
-.xbig > div > span { display: block; margin-top: 10px; max-width: 280px; color: var(--ink2); }
-.xloop { list-style: none; padding: 0; margin: 34px 0 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; counter-reset: s; }
-.xloop li { border: 1px solid var(--line); border-radius: 8px; padding: 18px 16px; counter-increment: s; position: relative; }
-.xloop li::before { content: "0" counter(s); display: block; font: 600 13px/1 var(--mono); color: var(--red); margin-bottom: 12px; }
-.xloop li b { display: block; font-size: 17px; margin-bottom: 6px; }
-.xloop li span { font-size: 14px; color: var(--ink2); }
-@media (max-width: 860px) { .xloop { grid-template-columns: 1fr 1fr; } .xbar { grid-template-columns: 1fr 56px; } .xbar span { grid-column: 1 / -1; } }
+.vs[data-xblock="radarbars"] > div { grid-template-columns: 230px 1fr 64px; }
+.sec .vs { max-width: 760px; margin: 28px 0 14px; }
+.xnote { color: var(--ink2); max-width: 64ch; font-size: 15.5px; margin: 0; }
+
+/* slide 08: the radar as a second witness */
+.witness { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 72px; align-items: center; }
+.witness .after { margin-top: 0; }
+.witness figure { margin: 0; }
+.witness .lab { margin: 0 0 clamp(16px, 3vh, 26px); font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.witness .vs { margin: 0; gap: clamp(12px, 2.2vh, 18px); }
+.witness .vs i { height: 26px; }
+.witness .vs .me i { height: 40px; }
+.witness .vs .me b { font-size: 26px; }
+.witness figcaption { margin-top: clamp(16px, 3vh, 26px); font: 12.5px/1.6 var(--mono); color: var(--mute); }
+.witness + .dropped { margin-top: clamp(22px, 4.4vh, 44px); }
+.dropped b { color: var(--ink2); font-weight: 500; }
+
+/* slide 09: what it asks of an officer. A sheet of paper whose rows tick off one by one */
+.office { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); gap: 32px 72px; align-items: center; }
+.xbig { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px clamp(18px, 2.4vw, 32px); margin: 0 0 clamp(18px, 3.6vh, 30px); }
+.xbig > div > b { display: flex; align-items: baseline; gap: .1em; font: 800 clamp(44px, min(5.2vw, 10.5vh), 84px)/.86 var(--sans); letter-spacing: -.06em; color: var(--red); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.xbig > div > b small { font-size: .36em; font-weight: 700; letter-spacing: -.02em; }
+.xbig > div > b i { font-style: normal; color: var(--mute); }
+.xbig > div > span { display: block; margin-top: clamp(10px, 2vh, 16px); padding-top: clamp(10px, 2vh, 14px); border-top: 2px solid var(--line); font-size: 14px; line-height: 1.42; color: var(--ink2); }
+.sheet { margin: 0; }
+.paper { position: relative; width: min(100%, 440px); margin: 0 auto; padding: clamp(16px, 3vh, 24px) clamp(18px, 2vw, 26px) clamp(12px, 2.2vh, 18px); border-radius: 6px; background: #f8f7f2; color: #0b0c0d; rotate: -2.2deg; box-shadow: 0 34px 70px -24px rgba(0, 0, 0, .45); }
+.paper::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #e9e8e1; rotate: 4.4deg; translate: 10px 6px; box-shadow: 0 24px 50px -24px rgba(0, 0, 0, .35); }
+.paper header { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: clamp(8px, 1.6vh, 12px); border-bottom: 2px solid #0b0c0d; }
+.paper header > b { font-weight: 800; font-size: clamp(17px, 1.6vw, 21px); letter-spacing: -.03em; }
+.paper .cnt { font: 500 12.5px/1 var(--mono); color: rgba(11, 12, 13, .6); font-variant-numeric: tabular-nums; }
+.paper .cnt b { color: #0b0c0d; font-weight: 700; }
+.paper ol { list-style: none; margin: 0; padding: 0; }
+.paper li { display: grid; grid-template-columns: 1.9em minmax(0, 1fr) auto auto 20px; gap: 8px; align-items: center; height: clamp(30px, 5.6vh, 42px); border-bottom: 1px solid rgba(11, 12, 13, .12); }
+.paper li:last-child { border-bottom: 0; }
+.paper li > i { font: 500 11.5px/1 var(--mono); font-style: normal; color: rgba(11, 12, 13, .5); }
+.paper .nm { position: relative; height: 9px; width: var(--w); border-radius: 2px; background: rgba(11, 12, 13, .16); transition: opacity .4s; }
+.paper .nm::after { content: ""; position: absolute; inset: 3.5px -6px auto -6px; height: 2px; background: #0b0c0d; transform: scaleX(0); transform-origin: left; transition: transform .45s var(--ease); }
+.paper em { font: 500 10px/1 var(--mono); font-style: normal; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; padding: 5px 6px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(11, 12, 13, .3); transition: opacity .4s; }
+.paper u { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 4px; box-shadow: inset 0 0 0 2px #0b0c0d; text-decoration: none; transition: background-color .25s, scale .35s var(--ease); }
+.paper u svg { width: 13px; height: 13px; fill: none; stroke: #cdf03a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset .35s var(--ease) .08s; }
+.paper li.done u { background: #0b0c0d; scale: 1.12; }
+.paper li.done u svg { stroke-dashoffset: 0; }
+.paper li.done .nm::after { transform: none; }
+.paper li.done .nm, .paper li.done em { opacity: .45; }
+.sheet figcaption, .orbit figcaption { margin-top: clamp(20px, 4vh, 34px); font: 12.5px/1.6 var(--mono); color: var(--mute); }
+
+/* slide 10: the loop. The satellite goes round once per 12 days; each pass sets the five steps off */
+.loop { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .92fr); gap: 32px 72px; align-items: center; }
+.xloop { list-style: none; margin: 0; padding: 0; }
+.xloop li { position: relative; display: grid; grid-template-columns: 2.5em minmax(0, 1fr); align-items: baseline; padding: clamp(7px, 1.4vh, 11px) 0 clamp(7px, 1.4vh, 11px) 24px; border-left: 2px solid var(--line); }
+.xloop li::before { content: ""; position: absolute; left: -5px; top: calc(clamp(7px, 1.4vh, 11px) + .5em); width: 8px; height: 8px; border-radius: 50%; background: var(--mute); transition: background-color .3s, box-shadow .4s; }
+.xloop li > i { font: 500 12.5px/1 var(--mono); font-style: normal; letter-spacing: .06em; color: var(--mute); transition: color .3s; }
+.xloop li > b { font-weight: 700; font-size: clamp(19px, min(1.9vw, 3.8vh), 26px); letter-spacing: -.03em; line-height: 1.15; color: var(--mute); transition: color .3s; }
+.xloop .d { grid-column: 2; display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .55s var(--ease), opacity .4s; }
+.xloop .d > span { min-height: 0; overflow: hidden; font-size: 14.5px; line-height: 1.45; color: var(--ink2); max-width: 44ch; }
+.xloop .d > span::before { content: ""; display: block; height: 6px; }
+.xloop li.on::before { background: var(--red); }
+.xloop li.on > i { color: var(--red); }
+.xloop li.on > b { color: var(--ink); }
+.xloop li.cur::before { box-shadow: 0 0 0 5px rgba(255, 77, 46, .24); }
+.xloop li.cur .d, .xloop.all .d { grid-template-rows: 1fr; opacity: 1; }
+.orbit { margin: 0; }
+.orbit svg { display: block; width: min(100%, 54vh, 430px); height: auto; margin: 0 auto; overflow: visible; }
+.orbit .track { fill: none; stroke: var(--line); stroke-width: 2; }
+.orbit .ticks line { stroke: var(--mute); stroke-width: 2; stroke-linecap: round; transition: stroke .3s; }
+.orbit .ticks line.past { stroke: var(--red); }
+.orbit .mark { stroke: var(--ink2); stroke-width: 2; stroke-linecap: round; }
+.orbit .sat circle { fill: var(--red); }
+.orbit .ping { fill: none; stroke: var(--red); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.orbit text.lab { font: 500 12px var(--mono); letter-spacing: .1em; fill: var(--mute); }
+.orbit text.num { font: 800 104px var(--sans); letter-spacing: -.06em; fill: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---- home page finish (js/home.js) ---- */
+/* the real contour lines of the hills, far behind every slide; they take the slide's ink colour */
+.topo { position: fixed; inset: -8vh 0 -8vh 0; z-index: 0; pointer-events: none; background: var(--ink); opacity: 0; transition: opacity 1.6s var(--ease);
+  -webkit-mask: var(--topo) center / cover no-repeat; mask: var(--topo) center / cover no-repeat; will-change: transform; }
+.topo.on { opacity: .075; }
+body[data-slide="red"] .topo.on, body[data-slide="amber"] .topo.on, body[data-slide="lime"] .topo.on { opacity: .095; }
+.topo ~ main, .topo ~ .foot { position: relative; z-index: 1; }
+.foot { background: var(--bg); }
+
+/* headlines rise word by word out of their own line */
+.w { display: inline-block; clip-path: inset(-.12em -.12em -.24em -.12em); }
+.w > span { display: inline-block; }
+html.js .rv.split { opacity: 1; transform: none; }
+html.js .rv.split .w > span { transform: translateY(125%); transition: transform 1s var(--ease) calc(var(--d, 0s) + var(--i) * 34ms); }
+html.js .rv.split.in .w > span { transform: none; }
+@keyframes wordup { from { transform: translateY(125%); } }
+.hero h1 { animation: none; text-shadow: none; filter: drop-shadow(0 2px 30px rgba(11, 12, 13, .5)); }
+.hero h1 .w > span { animation: wordup 1.15s var(--ease) calc(.1s + var(--i) * 85ms) both; }
+
+/* the eyebrow draws a short rule between its number and its name */
+.band .eyebrow b { display: inline-flex; align-items: center; gap: 10px; }
+.band .eyebrow b::after { content: ""; width: 26px; height: 1.5px; background: currentColor; transform-origin: left; }
+html.js .band .eyebrow.rv b::after { transform: scaleX(0); transition: transform .9s var(--ease) .25s; }
+html.js .band .eyebrow.rv.in b::after { transform: none; }
+
+/* slide dots: a bar for the slide you are on, a name when you point at one */
+.dots { right: 6px; gap: 2px; }
+.dots button { position: relative; width: 22px; height: 18px; background: none; opacity: 1; border-radius: 0; }
+.dots button::before { content: ""; position: absolute; right: 7px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 4px; background: var(--ink); opacity: .28; transition: opacity .3s, height .45s var(--ease), margin .45s var(--ease), background-color .3s; }
+.dots button:hover { opacity: 1; }
+.dots button:hover::before { opacity: .7; }
+.dots button[aria-current="true"] { transform: none; }
+.dots button[aria-current="true"]::before { opacity: 1; height: 18px; margin-top: -9px; }
+.dots button::after { content: attr(data-en); position: absolute; right: 24px; top: 50%; transform: translate(8px, -50%); padding: 7px 9px; border-radius: 4px; background: var(--ink); color: var(--bg); font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s, transform .3s var(--ease); }
+html[lang="ko"] .dots button::after { content: attr(data-ko); }
+.dots button:hover::after, .dots button:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+
+/* cards: a soft light follows the pointer */
+.model, .two > div:not(.and) { isolation: isolate; }
+.model::after, .two > div:not(.and)::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .4s;
+  background: radial-gradient(440px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .1), transparent 62%); }
+.model { position: relative; transition: border-color .3s, transform .5s var(--ease); }
+.model:hover { transform: translateY(-3px); }
+.model:hover::after, .two > div:not(.and):hover::after { opacity: 1; }
+
+/* buttons */
+.btn { transition: background .2s, color .2s, box-shadow .2s, translate .5s var(--ease), scale .2s var(--ease); }
+.btn:active { scale: .96; }
+.closer .arr { transition: transform .45s var(--ease), background-color .2s, translate .5s var(--ease); }
+.masthead nav a.go, .masthead nav a.out { transition: background .2s, color .2s, box-shadow .2s, scale .2s var(--ease); }
+.masthead nav a.go:active, .masthead nav a.out:active { scale: .95; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; border-radius: 4px; }
+
+/* small touches on the older slides */
+.ba .bar::after { box-shadow: 0 6px 24px rgba(0, 0, 0, .45); transition: scale .25s var(--ease); }
+.ba:hover .bar::after { scale: 1.1; }
+.tiers li { transition: border-color .3s; }
+.kpis li, .figs li { transition: translate .4s var(--ease); }
+.kpis li:hover, .figs li:hover { translate: 0 -3px; }
+
+@media (max-width: 900px) {
+  .witness { grid-template-columns: minmax(0, 1fr); }
+  .vs[data-xblock="radarbars"] > div { grid-template-columns: 1fr 56px; }
+  .office, .loop { grid-template-columns: minmax(0, 1fr); }
+  .xbig { grid-template-columns: minmax(0, 1fr); }
+  .xbig > div > b { font-size: 64px; }
+  .orbit svg { width: min(100%, 320px); }
+  .topo { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 .w > span { animation: none; }
+  html.js .band .eyebrow.rv b::after { transform: none; transition: none; }
+  .topo { transition: none; }
+}
+
+/* home page, section 04: two models and the physics simulation side by side */
+.models.tri { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .models.tri { grid-template-columns: minmax(0, 1fr); } }
+
+/* home hero, fourth engine: the debris-flow simulation. A flow runs down a slope and reaches a house. */
+.g-flow .s { fill: none; stroke: var(--ink); stroke-opacity: .4; stroke-width: 1.4; stroke-linecap: round; }
+.g-flow .f { fill: none; stroke: var(--red); stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: eng-flow 4.6s cubic-bezier(.5, 0, .3, 1) infinite both; }
+.g-flow .h { fill: var(--ink); opacity: .55; animation: eng-house 4.6s infinite both; }
+@keyframes eng-flow { 0%, 12% { stroke-dashoffset: 1; opacity: 1; } 58%, 86% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes eng-house { 0%, 56% { fill: var(--ink); opacity: .55; } 63%, 88% { fill: var(--red); opacity: 1; } 100% { fill: var(--ink); opacity: .55; } }
+.hero .specs.engines:has(> div:nth-child(4)) .eng-glyph { width: clamp(92px, 8vw, 132px); }
+.hero .specs.engines:has(> div:nth-child(4)) div { padding-right: clamp(10px, 1.3vw, 20px); padding-left: 14px; }
+.hero .specs.engines:has(> div:nth-child(4)) dd { max-width: 17ch; }
+@media (prefers-reduced-motion: reduce) { .g-flow .f, .g-flow .h { animation: none; stroke-dashoffset: 0; } .g-flow .h { fill: var(--red); opacity: 1; } }

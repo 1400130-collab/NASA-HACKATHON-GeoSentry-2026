@@ -5,14 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SLOPEWATCH 사면 현장 점검서</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <style>
   :root { --ink: #111; --mute: #5c5c5c; --line: #111; --soft: #b9b9b4; --fill: #ecece8; --red: #c7341f; }
   * { box-sizing: border-box; }
   body { margin: 0; background: #0b0c0d; color: var(--ink); font: 8.6pt/1.4 "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; }
-  .bar { position: sticky; top: 0; z-index: 5; background: #0b0c0d; color: #fff; padding: 10px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
-  .bar .brand { font-weight: 800; letter-spacing: .08em; margin-right: 6px; border: 0; background: none; padding: 0; }
-  .bar select, .bar button, .bar a { font: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid #444; background: #1a1b1d; color: #fff; cursor: pointer; text-decoration: none; max-width: 230px; }
-  .bar .go { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
+  /* top bar: the site header's type, wordmark and buttons */
+  .bar { position: sticky; top: 0; z-index: 5; background: #0b0c0d; color: #f3f1ec; min-height: 68px; padding: 12px clamp(16px, 4vw, 48px); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font: 500 14px/1 "Roboto", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", system-ui, sans-serif; }
+  .bar .brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; letter-spacing: -.01em; margin-right: 14px; color: #f3f1ec; text-decoration: none; border: 0; background: none; padding: 0; box-shadow: none; max-width: none; }
+  .bar .brand svg { color: #ff4d2e; }
+  .bar select, .bar button:not(.snav-btn), .bar a:not(.brand) { font: inherit; padding: 10px 13px; border-radius: 6px; border: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); background: none; color: #f3f1ec; cursor: pointer; text-decoration: none; max-width: 230px; transition: box-shadow .15s, background .15s, color .15s; }
+  .bar select { background: #121416; color-scheme: dark; }
+  .bar select:hover, .bar button:not(.snav-btn):hover, .bar a:not(.brand):hover { box-shadow: inset 0 0 0 1px #b4b1a9; }
+  .bar .go:not(.snav-btn), .bar .go:not(.snav-btn):hover { background: #f3f1ec; color: #0b0c0d; box-shadow: none; font-weight: 600; }
+  .bar .go:not(.snav-btn):hover { background: #ff4d2e; }
   .bar .sp { flex: 1; }
   .page { position: relative; width: 210mm; height: 297mm; margin: 14px auto; background: #fff; padding: 11mm 13mm 15mm; overflow: hidden; }
   .pf { position: absolute; left: 13mm; right: 13mm; bottom: 7mm; display: flex; justify-content: space-between; border-top: .5pt solid var(--line); padding-top: 1.2mm; font-size: 7pt; color: var(--mute); }
@@ -88,7 +94,7 @@
 </style>
 </head>
 <body>
-<div class="bar"><a class="brand" href="index.html">SLOPEWATCH</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
+<div class="bar"><a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a><select id="county"></select><select id="slope"></select><select id="count"></select><span class="sp"></span><a id="back" href="sheet.html"></a><button id="lang"></button><button class="go" onclick="print()" id="print"></button></div>
 <div id="out"><div class="page">Loading…</div></div>
 <script type="module">
 // One printable field inspection form per slope: six A4 pages.
@@ -132,6 +138,7 @@ const LV = () => [L('측정 불가', 'Not measurable'), L('신호 없음', 'No s
 const kv = (rows) => `<table class="f kv">${rows.map((r) => `<tr>${r.map(([k, v, span]) => `<th>${k}</th><td${span ? ` colspan="${span}"` : ''}>${v}</td>`).join('')}</tr>`).join('')}</table>`;
 const day = (s) => `${+s.slice(4, 6)}.${+s.slice(6, 8)}`;
 const best = (u) => { let b = null; D.tracks.forEach((tr) => { const v = C['cum_' + tr.id][u], s = C['sig_' + tr.id][u]; if (C['meas_' + tr.id][u] && Number.isFinite(v) && s > 0 && (!b || Math.abs(v / s) > Math.abs(b.v / b.s))) b = { v, s, id: tr.id }; }); return b; };
+const slide = (u) => (C.vd && Number.isFinite(C.vd[u]) && C.vds[u] > 0 ? { v: C.vd[u], s: C.vds[u], ub: Math.ceil(Math.abs(C.vd[u]) + 2 * C.vds[u]) } : null);   // merged downslope rate, mm a month
 const hasRadar = (u) => !K || C.rcov[u] > 0;
 
 // ---- maps: OpenStreetMap tiles over a hillshade made from our own terrain (the hillshade shows if tiles can't load) ----
@@ -192,10 +199,13 @@ function chart(u) {
 
 // ---- what the data says about one slope ----------------------------------------
 function facts(u) {
-  const lv = C.level[u], b = best(u), pct = C.pct[u], radar = hasRadar(u);
+  const lv = C.level[u], b = best(u), sl = slide(u), pct = C.pct[u], radar = hasRadar(u);
   const rs = [[C.r1[u], C.v1[u]], [C.r2[u], C.v2[u]], [C.r3[u], C.v3[u]]].filter((r) => r[0] >= 0).map((r) => ({ f: M.features[r[0]], v: r[1], s: reason(M.features[r[0]], r[1], lang) }));
   const mv = !radar ? L('NISAR 레이더 미처리 지역 (경북 산불 지역만 처리). 안정하다는 뜻이 아님.', 'No NISAR radar here yet (processed for the North Gyeongsang burn area only). Not the same as stable.')
     : !b ? L('어느 궤도에서도 레이더로 측정할 수 없음. 안정하다는 뜻이 아님.', 'Radar cannot measure this slope on any track. Not the same as stable.')
+      : C.vd && !sl ? L('레이더가 이 사면을 한쪽에서만 보아 미끄러짐을 다른 신호와 구분할 수 없음. 안정하다는 뜻이 아님.', 'Radar sees this slope from one side only, so sliding cannot be told apart from other signals. Not the same as stable.')
+      : sl && C.moving[u] ? L(`폭우 이후 사면 방향 이동: 월 ${sg(sl.v, 0)} ± ${sl.s.toFixed(0)} mm (${sl.v > 0 ? '아래 방향' : '위 방향으로 읽힘, 방향 미확인'}), 모든 궤도 종합`, `Movement along the slope since the storm: ${sg(sl.v, 0)} ± ${sl.s.toFixed(0)} mm a month (${sl.v > 0 ? 'downslope' : 'reads as upslope, direction not confirmed'}), all tracks combined`)
+      : sl ? L(`사면 방향으로 감지되는 이동 없음: 월 ${sg(sl.v, 0)} ± ${sl.s.toFixed(0)} mm. 월 ${sl.ub} mm보다 빠른 이동은 배제됨.`, `No detectable movement along the slope: ${sg(sl.v, 0)} ± ${sl.s.toFixed(0)} mm a month. Anything faster than ${sl.ub} mm a month is ruled out.`)
       : C.moving[u] ? L(`잡음 수준을 넘는 이동 감지: 궤도 ${b.id}에서 ${sg(b.v)} cm (잡음 ±${b.s.toFixed(1)} cm)`, `Movement above the noise floor: ${sg(b.v)} cm on track ${b.id} (noise ±${b.s.toFixed(1)} cm)`)
         : L(`잡음 수준을 넘는 이동 없음 (최대: 궤도 ${b.id}에서 ${sg(b.v)} cm, 잡음 ±${b.s.toFixed(1)} cm)`, `No movement above the noise floor (largest: ${sg(b.v)} cm on track ${b.id}, noise ±${b.s.toFixed(1)} cm)`);
   const rank = pct >= 0.8 ? L(`AI 취약도 순위: 전체 사면 중 상위 ${Math.max(1, Math.round((1 - pct) * 100))}%`, `AI susceptibility rank: top ${Math.max(1, Math.round((1 - pct) * 100))}% of all slopes`) : L(`AI 취약도 순위: 전체 사면의 ${Math.round(pct * 100)}%보다 높음`, `AI susceptibility rank: above ${Math.round(pct * 100)}% of all slopes`);
@@ -256,9 +266,9 @@ function form(u) {
       <td class="n c"><b>${ok ? sg(v) : '—'}</b></td><td class="n c">${ok ? '±' + s.toFixed(1) : '—'}</td><td class="n c">${Number.isFinite(z) ? Math.abs(z).toFixed(1) + '×' : '—'}</td><td class="n c">${Number.isFinite(se) ? Math.abs(se).toFixed(2) : '—'}</td><td class="n c">${Number.isFinite(c0) ? c0.toFixed(2) : '—'} → ${Number.isFinite(c1) ? c1.toFixed(2) : '—'}</td>
       <td class="c">${ok ? L('측정됨', 'measured') : L('측정 불가', 'not measurable')}</td></tr>`;
   }).join('');
-  const radarBlock = F.radar && trs ? `<table class="f"><thead><tr><th>${L('궤도', 'Track')}</th><th>${L('비행 방향', 'Pass')}</th><th>${L('관측 기간 (2026)', 'Period (2026)')}</th><th>${L('누적 이동 cm', 'Movement cm')}</th><th>${L('잡음 cm', 'Noise cm')}</th><th>${L('잡음 대비', 'vs noise')}</th><th>${L('방향 민감도', 'Sensitivity')}</th><th>${L('긴밀도 전→폭우', 'Coherence pre→storm')}</th><th>${L('상태', 'Status')}</th></tr></thead>${trs}</table>
+  const radarBlock = F.radar && trs ? `${C.vd ? `<table class="f"><tr><th style="width:38mm">${L('사면 방향 이동 속도 (모든 궤도 종합)', 'Rate along the slope (all tracks combined)')}</th><td>${F.mv}</td></tr></table><div style="height:1.6mm"></div>` : ''}<table class="f"><thead><tr><th>${L('궤도', 'Track')}</th><th>${L('비행 방향', 'Pass')}</th><th>${L('관측 기간 (2026)', 'Period (2026)')}</th><th>${L('누적 이동 cm', 'Movement cm')}</th><th>${L('잡음 cm', 'Noise cm')}</th><th>${L('잡음 대비', 'vs noise')}</th><th>${L('방향 민감도', 'Sensitivity')}</th><th>${L('긴밀도 전→폭우', 'Coherence pre→storm')}</th><th>${L('상태', 'Status')}</th></tr></thead>${trs}</table>
       <div style="height:1.6mm"></div>${chart(u)}
-      <div class="foot">${L('이동량은 레이더 시선 방향 값이며 사면을 따라 실제로 움직인 거리와 다릅니다. "방향 민감도"는 사면 아래 방향으로 1 cm 움직일 때 레이더가 보는 크기(0–1)로, 0에 가까우면 그 궤도는 이 사면의 이동을 거의 못 봅니다. 이동 방향(부호)은 ISCE 규약을 가정한 것으로 아직 확인하지 못했습니다. "긴밀도"가 낮으면(식생·지표 변화) 측정 신뢰도가 떨어집니다.', 'Movement is along the radar line of sight, not the distance moved down the slope. "Sensitivity" is how much of 1 cm of downslope movement the radar sees (0–1); near 0 that track is almost blind to this slope. The direction (sign) assumes the ISCE convention and is not yet confirmed. Low "coherence" (vegetation or surface change) means a less reliable measurement.')}</div>`
+      <div class="foot">${L('이동량은 레이더 시선 방향 값이며 사면을 따라 실제로 움직인 거리와 다릅니다. "방향 민감도"는 사면 아래 방향으로 1 cm 움직일 때 레이더가 보는 크기(0–1)로, 0에 가까우면 그 궤도는 이 사면의 이동을 거의 못 봅니다. 양수는 위성 쪽으로의 이동이며, 방향은 영상쌍 23개 모두에서 기상 자료와 대조해 확인했습니다. "긴밀도"가 낮으면(식생·지표 변화) 측정 신뢰도가 떨어집니다.', 'Movement is along the radar line of sight, not the distance moved down the slope. "Sensitivity" is how much of 1 cm of downslope movement the radar sees (0–1); near 0 that track is almost blind to this slope. Positive is toward the satellite; the direction was checked against weather data on all 23 image pairs. Low "coherence" (vegetation or surface change) means a less reliable measurement.')}</div>`
     : `<table class="f"><tr><td style="padding:3mm">${F.mv}<br><small>${L('이 사면은 AI 취약도 순위와 사면 아래 시설만으로 선정되었습니다. 레이더 이동 측정값이 없으므로 B3 변형 징후 점검이 유일한 이동 확인 수단입니다.', 'This slope was chosen from the AI susceptibility rank and what lies below it only. With no radar measurement, the B3 signs of movement are the only check on movement.')}</small></td></tr></table>`;
   const p2 = `<section class="page">${rh(partA)}
     ${h2('A4', L('레이더 이동 측정 (NISAR)', 'Radar movement (NISAR)'), L('L밴드 파장 24.2 cm · 12일 간격', 'L-band, 24.2 cm wavelength · every 12 days'))}
@@ -360,7 +370,7 @@ function form(u) {
   // ---------- page 5: check the satellite, judgment, signatures ----------
   const YN = cb(L('맞음', 'Right'), L('다름', 'Wrong'), L('판단 불가', 'Can\'t tell'));
   const x8 = [
-    F.radar && F.b ? [C.moving[u] ? L(`레이더: 궤도 ${F.b.id}에서 ${sg(F.b.v)} cm 이동 감지`, `Radar: ${sg(F.b.v)} cm of movement on track ${F.b.id}`) : L('레이더: 잡음 수준을 넘는 이동 없음', 'Radar: no movement above the noise floor'), cb(L('변형 징후 확인', 'Signs found'), L('징후 없음', 'No signs'), L('판단 불가', 'Can\'t tell'))] : null,
+    F.radar && F.b ? [C.moving[u] ? (slide(u) ? L(`레이더: 사면 방향 월 ${sg(slide(u).v, 0)} ± ${slide(u).s.toFixed(0)} mm 이동 감지`, `Radar: ${sg(slide(u).v, 0)} ± ${slide(u).s.toFixed(0)} mm a month along the slope`) : L(`레이더: 궤도 ${F.b.id}에서 ${sg(F.b.v)} cm 이동 감지`, `Radar: ${sg(F.b.v)} cm of movement on track ${F.b.id}`)) : L('레이더: 감지되는 이동 없음', 'Radar: no detectable movement'), cb(L('변형 징후 확인', 'Signs found'), L('징후 없음', 'No signs'), L('판단 불가', 'Can\'t tell'))] : null,
     ...F.rs.map((r) => [`AI: ${r.s}`, YN]),
     C.label[u] ? [L('2026년 7월 붕괴 후보지 (자동 탐지)', 'July 2026 scar candidate (automatic)'), cb(L('실제 붕괴', 'Real failure'), L('벌채·개간', 'Clearing'), L('기타', 'Other'), L('확인 불가', 'Can\'t tell'))] : null,
     [L(`지도 자료: 건물 ${C.bld[u].toFixed(0)}동, 주요 도로 ${C.road[u] > 0 ? '있음' : '없음'}`, `Map data: ${C.bld[u].toFixed(0)} building(s), main road ${C.road[u] > 0 ? 'yes' : 'none'}`), YN],
@@ -400,7 +410,19 @@ function form(u) {
       ${Array.from({ length: 10 }, (_, i) => `<tr><td class="c">${'①②③④⑤⑥⑦⑧⑨⑩'[i]}</td><td class="w"></td><td></td><td></td><td></td></tr>`).join('')}</table>
     <div class="foot">${L('이 점검서는 SLOPEWATCH 팀(2026 NASA Space Apps Challenge 서울)이 만든 시제품입니다. 점검 항목은 급경사지·산사태 취약지 현장 조사에서 일반적으로 확인하는 징후를 따랐으며, 정부 고시 서식이나 법정 평가표를 대체하지 않습니다. 건물 자료: OpenStreetMap. 지형: Copernicus DEM. 광학: Sentinel-2. 강우: ERA5. 레이더: NASA-ISRO NISAR.', 'This form is a prototype by the SLOPEWATCH team (NASA Space Apps Challenge 2026, Seoul). The items follow the signs usually checked in field surveys of steep slopes and landslide-prone areas; it does not replace any official form or statutory assessment sheet. Buildings: OpenStreetMap. Terrain: Copernicus DEM. Optical: Sentinel-2. Rain: ERA5. Radar: NASA-ISRO NISAR.')}</div>
     ${pf(6)}</section>`;
-  return (p1 + p2 + p3 + p4 + p5 + p6).replaceAll('300 m', (K ? 360 : 300) + ' m');      // downslope search distance: k05 / p08
+  let html = p1 + p2 + p3 + p4 + p5 + p6;
+  if (!K && C.sim) {                                          // regional map: flagged slopes use the simulated debris flow (p11), not the 300 m rule
+    const swap = [['아래쪽 약 300 m 이내에 건물이나 주요 도로가 있는 사면', '모의 토석류가 건물이나 주요 도로에 닿는 사면'], ['a building or main road lies within about 300 m downslope', 'a simulated debris flow from the slope reaches a building or main road']];
+    if (C.sim[u] > 0) swap.push(['아래쪽 약 300 m 이내 건물', '모의 토석류가 닿는 건물'], ['within about 300 m downslope (OpenStreetMap)', 'reached by the simulated debris flow (OpenStreetMap)'],
+      ['사면 아래 약 300 m 이내', '모의 토석류 경로'], ['Within about 300 m downslope', 'In the simulated debris path'], ['(약 300 m 이내)', '(모의 토석류 경로)'], ['(within about 300 m)', '(simulated debris path)']);
+    for (const [a, b] of swap) html = html.replaceAll(a, b);
+  }
+  if (K && C.reach) {                                         // nationwide: each slope's own debris reach, predicted by ML model 3 (k04b)
+    html = html.replaceAll('아래쪽 약 300 m 이내에 건물이나 주요 도로가 있는 사면', 'AI 3이 예측한 그 사면의 토석류 도달 거리 안에 건물이나 주요 도로가 있는 사면')
+      .replaceAll('a building or main road lies within about 300 m downslope', 'a building or main road lies inside the debris reach that AI model 3 predicts for the slope');
+    return html.replaceAll('300 m', (Math.round(C.reach[u] / 10) * 10) + ' m');
+  }
+  return html.replaceAll('300 m', (K ? 360 : 300) + ' m');      // downslope search distance: k05 / p08
 }
 
 // ---- toolbar and render ------------------------------------------------------------

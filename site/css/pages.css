@@ -1,0 +1,130 @@
+/* Inner pages (method, results, history, about) as slides, in the home page's language.
+   Loaded after site.css. The home page does not load this file. */
+
+/* opening slide: the page title at hero size, sitting at the bottom like the home hero */
+.lead { align-items: flex-end; padding-bottom: clamp(36px, 8vh, 80px); }
+.lead h1 { font-weight: 800; font-size: clamp(44px, min(9.4vw, 15.5vh), 144px); line-height: .9; letter-spacing: -.05em; margin: 0 0 clamp(18px, 3.4vh, 32px); max-width: 10em; animation: rise 1.1s var(--ease) .1s both; }
+html[lang="ko"] .lead h1 { font-size: clamp(40px, min(7.6vw, 13vh), 116px); line-height: 1.04; letter-spacing: -.045em; }
+.lead .lede { font-size: clamp(16px, min(1.5vw, 2.6vh), 20px); line-height: 1.45; color: var(--ink2); max-width: 46ch; margin: 0; animation: rise 1.1s var(--ease) .3s both; }
+.lead .eyebrow { color: var(--ink2); margin-bottom: 22px; animation: rise 1.1s var(--ease) both; }
+.lead .under { margin-top: clamp(26px, 5.4vh, 56px); animation: rise 1.1s var(--ease) .5s both; }
+.lead .flow { margin: 0; }
+.lead .flow li { font-size: clamp(14px, 1.3vw, 17px); }
+.lead .flow a { display: block; }
+.lead .flow a:hover { color: var(--red); }
+.lead .stats { margin: 0; gap: 24px 32px; }
+.lead .stat b { font-size: clamp(38px, min(5.4vw, 10vh), 88px); white-space: nowrap; }
+.lead .stat > span { margin-top: 10px; }
+.lead .facts { margin: 0; border-top: 0; }
+.lead .facts > div, .lead .facts > div + div { padding: 2px 24px 2px 18px; border-right: 0; border-left: 2px solid var(--line); }
+.lead .facts dt { margin-bottom: 10px; }
+.lead .fine { margin: clamp(16px, 3vh, 26px) 0 0; font: 12.5px/1.6 var(--mono); color: var(--mute); max-width: 96ch; }
+
+/* text inside a slide */
+.band h2 + .after, .band .statement + .after { margin-top: 0; }
+.band .statement + .after { margin-top: clamp(22px, 4vh, 36px); }
+.band .after { font-size: clamp(16px, 1.35vw, 18.5px); line-height: 1.5; }
+.band .after + .after { margin-top: 14px; }
+.band .after b { color: var(--ink); }
+h2.mid.wide { max-width: 20em; }
+.band .tech { font: 12.5px/1.6 var(--mono); color: var(--mute); margin: clamp(18px, 3.4vh, 28px) 0 0; max-width: 96ch; }
+.band .dropped a, .band .tech a { color: var(--ink2); }
+.band .note { color: var(--ink2); margin: clamp(18px, 3.4vh, 28px) 0 0 !important; }
+.band code { font: .9em var(--mono); color: var(--ink); }
+
+/* a row of large figures */
+.nums { list-style: none; margin: clamp(24px, 5vh, 48px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px clamp(24px, 4vw, 56px); }
+.nums li { padding-left: 18px; border-left: 2px solid var(--line); }
+.nums b { display: block; font-weight: 800; font-size: clamp(34px, min(4.8vw, 9vh), 72px); line-height: 1; letter-spacing: -.05em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.nums b small { font-size: .45em; letter-spacing: -.02em; font-weight: 700; margin-left: .1em; }
+.nums li.hot b { color: var(--red); }
+.nums li > span { display: block; margin-top: 10px; font-size: 14.5px; line-height: 1.4; color: var(--ink2); max-width: 26ch; }
+
+/* one giant figure beside a chart */
+.giant { display: block; font-weight: 800; font-size: clamp(84px, min(13vw, 26vh), 200px); line-height: .84; letter-spacing: -.065em; color: var(--red); white-space: nowrap; margin: 0 0 clamp(16px, 3vh, 28px); font-variant-numeric: tabular-nums; }
+.giant small { font-size: .42em; letter-spacing: -.03em; margin-left: .06em; }
+.say { font-weight: 600; font-size: clamp(18px, 1.75vw, 24px); letter-spacing: -.02em; line-height: 1.28; margin: 0 0 14px; max-width: 26em; }
+.band .say + .after { margin-top: 0; }
+.band .chart { margin: 0; padding: clamp(18px, 2.4vw, 28px) clamp(18px, 2.4vw, 28px) 18px; border-radius: 14px; border: 1px solid var(--line); }
+.band .chart h3 { margin: 0 0 4px; font-weight: 700; font-size: 18px; letter-spacing: -.02em; }
+.band .chart > p { margin: 0 0 16px; font-size: 14px; line-height: 1.45; color: var(--ink2); max-width: 60ch; }
+.band figure { margin: 0; }
+.band .lab { margin: 0 0 14px; font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.band .bars { margin: 0; max-width: none; }
+.band .bars div { grid-template-columns: minmax(120px, 230px) 1fr; padding: 8px 0; }
+.band .bars i { height: 12px; border-radius: 3px; }
+.bars.split { columns: 2; column-gap: clamp(32px, 5vw, 72px); }
+.bars.split div { break-inside: avoid; grid-template-columns: minmax(110px, 190px) 1fr; }
+
+/* tiles: the home page's model cards, in twos and threes */
+.models.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.model.sm h3 { font-weight: 700; font-size: clamp(19px, 1.8vw, 25px); letter-spacing: -.03em; line-height: 1.15; margin-bottom: 10px; }
+.model.sm > p { margin-bottom: 0; }
+.model .kind b.num { font: 800 clamp(34px, 3.6vw, 52px)/.9 var(--sans); letter-spacing: -.05em; }
+.model .kind.tall { align-items: baseline; margin-bottom: clamp(14px, 2.4vh, 22px); }
+.band .models + .after, .band .models + .tech, .band .models + .dropped { margin-top: clamp(16px, 3vh, 26px); }
+.band .tl { margin-top: clamp(26px, 5vh, 48px); }
+.band .chain { margin: clamp(22px, 4.4vh, 40px) 0 0; }
+.band .chain li { border-radius: 14px; }
+.band .chain p { font-size: 14.5px; line-height: 1.45; margin: 0; color: var(--ink2); }
+.band .stack { margin: 0; }
+.band .stack li { border-radius: 14px; background: var(--bg2); }
+.band .stats { margin-top: clamp(8px, 2vh, 20px); }
+.band .stat b { font-size: clamp(44px, min(6vw, 12vh), 96px); white-space: nowrap; }
+.band .tbl { margin: 0; }
+.band ul.plain { max-width: 78ch; }
+.band .src { margin: clamp(18px, 3.4vh, 28px) 0 0 !important; }
+.band .rank { margin-top: 0; }
+.band .xbars { margin: clamp(22px, 4.4vh, 36px) 0 clamp(14px, 2.6vh, 22px); }
+.xbars > div { display: grid; grid-template-columns: minmax(150px, 280px) 1fr 56px; align-items: center; gap: 14px; font-size: 15.5px; color: var(--ink2); }
+.xbars > div i { display: block; height: 22px; min-width: 4px; border-radius: 4px; background: rgba(255, 255, 255, .14); }
+.xbars > div b { font: 600 18px/1 var(--mono); text-align: right; }
+.xbars > div.me { color: var(--ink); font-weight: 600; }
+.xbars > div.me i { height: 34px; background: var(--red); }
+.xbars > div.me b { color: var(--red); font-size: 22px; }
+.aiuse { display: grid; grid-template-columns: minmax(0, .5fr) minmax(0, 1fr); gap: 16px clamp(24px, 4vw, 56px); margin-top: clamp(24px, 5vh, 44px); padding-top: clamp(18px, 3vh, 26px); border-top: 2px solid var(--line); }
+.aiuse h3 { margin: 0; font-weight: 700; font-size: clamp(22px, 2.2vw, 30px); letter-spacing: -.03em; line-height: 1.1; }
+.aiuse p { margin: 0 0 12px; font-size: 15px; line-height: 1.55; color: var(--ink2); max-width: 70ch; }
+
+/* the long version, folded away so the slide stays short */
+.fold { margin-top: clamp(18px, 3.4vh, 28px); }
+.fold summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 6px; background: var(--bg2); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink2); transition: color .15s, box-shadow .15s; user-select: none; }
+.fold summary::-webkit-details-marker { display: none; }
+.fold summary::after { content: "+"; font-size: 15px; color: var(--red); }
+.more[open] summary::after { content: "–"; }
+.fold summary:hover { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink2); }
+.fold .txt { margin-top: 18px; columns: 2 340px; column-gap: 48px; max-width: 1040px; }
+.fold .txt p { margin: 0 0 14px; font-size: 15px; line-height: 1.55; color: var(--ink2); break-inside: avoid; }
+.fold .txt p b { color: var(--ink); }
+.fold .txt .note { margin: 0 0 14px !important; max-width: none; }
+.fold .txt ul.plain { break-inside: avoid; }
+
+/* closing slide without the live terrain: type only */
+.closer.plain { min-height: 80svh; align-items: center; }
+.closer.plain::before { content: none; }
+.closer.plain .inner { padding: clamp(88px, 12vh, 108px) 0 clamp(40px, 7vh, 64px); }
+
+@media (max-width: 900px) {
+  .nums, .models.three { grid-template-columns: minmax(0, 1fr); }
+  .nums { gap: 18px; }
+  .bars.split { columns: 1; }
+  .lead { padding-top: 128px; }
+  .lead .facts > div, .lead .facts > div + div { border-bottom: 0; padding: 2px 12px 14px 14px; }
+  .aiuse { grid-template-columns: minmax(0, 1fr); }
+  .xbars > div { grid-template-columns: 1fr 56px; }
+  .xbars > div > span { grid-column: 1 / -1; }
+  .closer.plain { min-height: 70svh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lead h1, .lead .lede, .lead .eyebrow, .lead .under { animation: none; }
+}
+
+/* a figure the current data file does not have yet is left out, not shown as "?" */
+.figs li:has([data-v="?"]), .nums li:has([data-v="?"]), .kpis li:has([data-v="?"]) { display: none; }
+
+/* history: the legend above the ranked years */
+.band .key { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0 0 clamp(18px, 3.4vh, 30px); font: 12px/1.4 var(--mono); color: var(--mute); }
+/* a chart beside its headline figure gets the wider column */
+.duo.wide-r { grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); gap: 32px 56px; }
+.band .bars i { min-width: 3px; }
+@media (max-width: 900px) { .duo.wide-r { grid-template-columns: minmax(0, 1fr); } }

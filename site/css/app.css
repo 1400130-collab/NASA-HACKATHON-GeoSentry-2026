@@ -436,3 +436,8 @@ table.t td.n { padding-right: 0; text-align: right; white-space: nowrap; font: 5
   nav { gap: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* rain layer: forecast slider and its count in the legend */
+#legend .slider { grid-template-columns: minmax(0, 1fr) 104px 50px; margin-top: 12px; }
+#legend .rainc { margin-top: 10px; color: var(--ink2); font-size: 13px; line-height: 1.45; }
+#legend .rainc b { color: var(--ink); font-weight: 800; }

@@ -1,0 +1,54 @@
+/* home slide 05: the time-series inversion. Its own colour, and a chart that solves real slopes while you watch. */
+body[data-slide="ice"] { --bg: #bfeaf4; --bg2: rgba(255, 255, 255, .36); --ink: #0b0c0d; --ink2: rgba(11, 12, 13, .78); --mute: rgba(11, 12, 13, .54); --line: rgba(0, 0, 0, .16); --red: #0b0c0d; }
+body[data-slide="ice"] .topo.on { opacity: .095; }
+.inv { margin: 0; --inv-b: #1f3fe0; --inv-c: #e23a1c; }
+.inv svg { display: block; width: 100%; height: auto; overflow: visible; }
+.inv text { font: 500 12.5px var(--mono); fill: var(--ink2); }
+.inv text.who { fill: var(--ink); font-weight: 600; }
+.inv text.num { font: 800 46px var(--sans); letter-spacing: -.05em; fill: var(--ink); }
+.inv text.per { font: 600 13px var(--mono); fill: var(--ink); }
+.inv text.tag { font: 600 11.5px var(--mono); letter-spacing: .07em; }
+.inv .axis { stroke: var(--ink); stroke-opacity: .22; }
+.inv .zero { stroke: var(--ink); stroke-opacity: .5; stroke-dasharray: 2 5; }
+.inv .storm { stroke: var(--inv-c); stroke-width: 1.5; stroke-dasharray: 5 5; }
+.inv .fit { fill: none; stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.inv .band { fill: var(--ink); fill-opacity: .13; }
+.inv figcaption { margin-top: 16px; font: 12.5px/1.6 var(--mono); color: var(--mute); }
+@media (max-width: 900px) { .inv text.num { font-size: 40px; } }
+/* the same chart inside the map's slope panel (dark) */
+#tab-detail .inv { --inv-c: #ff4d2e; margin: 6px 0 0; }
+#tab-detail .inv text { font-size: 11.5px; }
+#tab-detail .inv text.num { font-size: 38px; }
+#tab-detail .inv text.per { font-size: 11px; }
+#tab-detail .inv text.tag { font-size: 10.5px; }
+
+/* home hero: the three engines, each with a small live drawing of what it does */
+.hero .specs.engines div { padding-top: 0; padding-bottom: 0; }
+.hero .specs.engines dd { max-width: 20ch; }
+.eng-kind { display: block; font: 600 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); margin: 0 0 12px; white-space: nowrap; }
+.eng-kind b { display: block; font-weight: 700; color: var(--red); margin-bottom: 6px; }
+.eng-glyph { display: block; width: clamp(112px, 10.5vw, 172px); height: auto; aspect-ratio: 112 / 40; margin: 0 0 14px; overflow: visible; }
+.g-solve .d { fill: var(--ink); opacity: 0; transform-box: fill-box; transform-origin: center; animation: eng-pop 4.6s calc(var(--i) * .11s) infinite both; }
+.g-solve .fit { fill: none; stroke: var(--red); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: eng-line 4.6s infinite both; }
+.g-gru .b { fill: var(--ink); opacity: .34; }
+.g-gru .b.hit { animation: eng-hit 4.6s infinite both; }
+.g-gru .scan { fill: var(--ink); opacity: .13; animation: eng-scan 4.6s cubic-bezier(.4, 0, .2, 1) infinite both; }
+.g-tree .e { fill: none; stroke: var(--ink); stroke-opacity: .55; stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: eng-edge0 4.6s infinite both; }
+.g-tree .e[style*="--i:1"] { animation-name: eng-edge1; }
+.g-tree .n { fill: var(--ink); opacity: 0; animation: eng-node0 4.6s infinite both; }
+.g-tree .n[style*="--i:1"] { animation-name: eng-node1; }
+.g-tree .n[style*="--i:2"] { animation-name: eng-node2; }
+.g-tree .n.hit { fill: var(--red); }
+@keyframes eng-pop { 0% { opacity: 0; transform: scale(.2); } 6% { opacity: .9; transform: scale(1.5); } 12%, 76% { opacity: .62; transform: scale(1); } 88%, 100% { opacity: 0; } }
+@keyframes eng-line { 0%, 30% { stroke-dashoffset: 1; opacity: 1; } 52%, 80% { stroke-dashoffset: 0; opacity: 1; } 92%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes eng-scan { 0% { transform: translateX(-14px); } 62%, 100% { transform: translateX(112px); } }
+@keyframes eng-hit { 0%, 44% { fill: var(--ink); opacity: .34; } 54%, 84% { fill: var(--red); opacity: 1; } 96%, 100% { fill: var(--ink); opacity: .34; } }
+@keyframes eng-edge0 { 0%, 4% { stroke-dashoffset: 1; opacity: 1; } 16%, 84% { stroke-dashoffset: 0; opacity: 1; } 94%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes eng-edge1 { 0%, 20% { stroke-dashoffset: 1; opacity: 1; } 32%, 84% { stroke-dashoffset: 0; opacity: 1; } 94%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes eng-node0 { 0% { opacity: 0; } 4%, 84% { opacity: 1; } 94%, 100% { opacity: 0; } }
+@keyframes eng-node1 { 0%, 14% { opacity: 0; } 20%, 84% { opacity: 1; } 94%, 100% { opacity: 0; } }
+@keyframes eng-node2 { 0%, 30% { opacity: 0; } 36%, 84% { opacity: 1; } 94%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .g-solve .d, .g-solve .fit, .g-gru .b.hit, .g-gru .scan, .g-tree .e, .g-tree .n { animation: none; opacity: 1; stroke-dashoffset: 0; }
+  .g-gru .scan { opacity: 0; } .g-gru .b.hit { fill: var(--red); }
+}

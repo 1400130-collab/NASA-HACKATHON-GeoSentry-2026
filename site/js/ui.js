@@ -1,13 +1,14 @@
-import { STR, reason, compass, featName } from './i18n.js?v=7';
+import { STR, reason, compass, featName } from './i18n.js?v=11';
 import { addScores, checkOrder } from './score.js';
-import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js';
-import { DAY0, DAYS, dayOf, AREA } from './data.js';
+import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js?v=4';
+import { DAY0, DAYS, dayOf, AREA } from './data.js?v=2';
+import { playSolver } from './inversion.js';
 const stored = () => { try { return localStorage.getItem('sw_lang'); } catch { return null; } };
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const S4 = '#c98500';
-const MODES = ['level', 'suscept', 'move', 'burn', 'img'], ADV = ['coh', 'ifg'], AI_MODES = ['level', 'suscept'];
+const MODES = ['level', 'suscept', 'move', 'speed', 'burn', 'img'], ADV = ['coh', 'ifg'], AI_MODES = ['level', 'suscept'];
 const LV_ICON = ['?', '·', '!', '!!'];
 
 export class UI {
@@ -42,7 +43,7 @@ export class UI {
   build() {
     const a = this.app;
     const modeBtn = (m) => `<button class="mode" data-m="${m}" role="radio"><i></i><b data-i18n="m_${m}"></b></button>`;
-    $('#modes').innerHTML = (this.D.past ? [...MODES, 'past'] : MODES).map(modeBtn).join(''); $('#modesAdv').innerHTML = ADV.map(modeBtn).join('');
+    $('#modes').innerHTML = (this.D.past ? [...MODES, 'past'] : this.D.col.rec48 ? [...MODES, 'rain'] : MODES).map(modeBtn).join(''); $('#modesAdv').innerHTML = ADV.map(modeBtn).join('');
     $('#left').addEventListener('click', (e) => { const b = e.target.closest('.mode'), p = e.target.closest('[data-past]'); if (b) a.setMode(b.dataset.m); else if (p) a.flyPast(+p.dataset.past); });
     $('#tracks').innerHTML = this.D.tracks.map((t, i) => `<button data-t="${i}"><span class="dot" style="background:${TRACK_COLORS[i]}"></span>${t.id} ${t.dir === 'ascending' ? '↑' : '↓'}</button>`).join('');
     $('#tracks').onclick = (e) => { const b = e.target.closest('button'); if (b) a.setTrack(+b.dataset.t); };
@@ -55,8 +56,9 @@ export class UI {
     const ex = $('#exag'); ex.max = this.D.view.exagMax; ex.value = this.D.view.exag; $('#exagOut').textContent = '×' + (+ex.value).toFixed(1);
     $('#areaSel').innerHTML = `<a class="${AREA === 'korea' ? 'on' : ''}" href="map.html" data-i18n="area_kr_s" data-tip="area_kr"></a><a class="${AREA === 'region' ? 'on' : ''}" href="map.html?area=region" data-i18n="area_rg_s" data-tip="area_rg"></a>`;
     const togs = [['borders', 1], ['roads', 1], ['labels', 1], ['edges', 1], ['scars', 0]];
+    $('#debrisSwitch').hidden = !this.D.runout;
     $('#toggles').innerHTML = togs.map(([k, on]) => `<label class="tog"><input type="checkbox" data-k="${k}" ${on ? 'checked' : ''}><span data-i18n="t_${k}"></span></label>`).join('');
-    $('#toggles').onchange = $('#bldSwitch').onchange = (e) => a.setToggle(e.target.dataset.k, e.target.checked);
+    $('#toggles').onchange = $('#debrisSwitch').onchange = $('#bldSwitch').onchange = (e) => a.setToggle(e.target.dataset.k, e.target.checked);
     $('#exag').oninput = (e) => { a.setExag(+e.target.value); $('#exagOut').textContent = '×' + (+e.target.value).toFixed(1); };
     $('#opac').oninput = (e) => { a.terrain.uniforms.uOverlay.value = +e.target.value; $('#opacOut').textContent = Math.round(e.target.value * 100) + '%'; };
     $('#tabs').onclick = (e) => { const b = e.target.closest('button'); if (b) this.tab(b.dataset.tab); };
@@ -98,6 +100,14 @@ export class UI {
     document.querySelectorAll('.mode').forEach((b) => b.classList.toggle('on', b.dataset.m === m));
     $('#trackSel').hidden = !['move', 'coh', 'ifg'].includes(m); $('#imgSel').hidden = m !== 'img';
     this.legend();
+    if ((m === 'rain') !== !!this.rainList) { this.rainList = m === 'rain'; this.shown = 30; this.list(); }      // the list follows the rain layer
+  }
+  // rain layer: how many flagged slopes get more rain than the heaviest they have stood through since the fire
+  rain(mm) {
+    const C = this.D.col; let a = 0, b = 0;
+    for (let u = 0; u < this.D.n; u++) if (C.rec48[u] < mm) { if (C.level[u] === 3) a++; else if (C.level[u] === 2) b++; }
+    if ($('#rainOut')) { $('#rainOut').textContent = `${mm} mm`; $('#rainCount').innerHTML = this.t('rf_count', { a: a.toLocaleString(), b: b.toLocaleString() }); }
+    if (this.rainList) this.list();
   }
   track(i) { document.querySelectorAll('#tracks button').forEach((b) => b.classList.toggle('on', +b.dataset.t === i)); this.legend(); }
   image(k) {
@@ -134,13 +144,16 @@ export class UI {
       h += [3, 2, 1, 0].map((l) => `<div class="row" title="${esc(t('lv' + l + '_d'))}"><i class="sw ${l === 0 ? 'hatch' : ''}" style="${l ? `background:${LEVEL_COLORS[l]}` : ''}">${l >= 2 ? LV_ICON[l] : ''}</i><b>${t('lv' + l)}${l >= 2 ? `<em>${l === 3 ? '80–100' : '50–79'}</em>` : ''}<small>${t('lv' + l + '_s')}</small></b><span>${cnt[l].toLocaleString()}</span></div>`).join('');
     } else if (m === 'suscept') h += `<div class="ramp" style="background:${grad('suscept')}"></div><div class="ticks"><span>${t('low')}</span><span>${t('high')}</span></div>`;
     else if (m === 'move') h += `<div class="ramp" style="background:${grad('move')}"></div><div class="ticks"><span>−3 ${t('away')}</span><span>0</span><span>+3 ${t('toward')}</span></div><div class="note">${t('hatch')}. ${t('sign')}</div>`;
+    else if (m === 'speed') h += `<div class="ramp" style="background:${grad('move')}"></div><div class="ticks"><span>−30 ${t('sp_up')}</span><span>0</span><span>+30 ${t('sp_dn')}</span></div><div class="note">${t('sp_note')}</div>`;
     else if (m === 'burn') h += `<div class="ramp" style="background:${grad('burn')}"></div><div class="ticks"><span>${t('unburned')}</span><span>${t('severe')}</span></div>`;
+    else if (m === 'rain') h += `<label class="slider"><span>${t('rf_label')}</span><input id="rainIn" type="range" min="80" max="200" step="5" value="${this.app.state.rain}"><output id="rainOut"></output></label><div class="rainc" id="rainCount"></div><div class="note">${t('rf_note')}</div>`;
     else if (m === 'coh') h += `<div class="ramp" style="background:${grad('coh')}"></div><div class="ticks"><span>0</span><span>0.5</span><span>1</span></div>`;
     if (m === 'img' && this.D.trueColour && this.app.state.tc) h = `<div class="ttl">${t('lg_img_tc')}</div>`;
     if (m === 'img' && this.D.trueColour) h += `<div class="note">${t('img_src')}</div>`;
-    if (['move', 'coh', 'ifg'].includes(m) && this.D.korea) h += `<div class="note">${t('radar_only')}</div>`;
+    if (['move', 'speed', 'coh', 'ifg'].includes(m) && this.D.korea) h += `<div class="note">${t('radar_only')}</div>`;
     if (m === 'ifg') h += `<div class="ramp" style="background:linear-gradient(90deg,#ff4040,#c8c81e,#40ff40,#1ec8c8,#4040ff,#c81ec8,#ff4040)"></div><div class="ticks"><span>0</span><span>π</span><span>2π</span></div>`;
     $('#legend').innerHTML = h;
+    if (m === 'rain') { $('#rainIn').oninput = (e) => this.app.setRain(+e.target.value); this.app.setRain(this.app.state.rain); }
   }
 
   // ---- "check first" list -----------------------------------------------------
@@ -148,11 +161,11 @@ export class UI {
     const C = this.D.col, st = this.app.state, L = this.D.meta.levels, K = this.D.korea, nm = (x) => esc(this.lang === 'ko' ? x.ko : x.en);
     const cs = K ? this.D.meta.counties.filter((c) => L.check_first_by_county[String(c.id)] && (!st.prov || c.prov === st.prov)).sort((a, b) => (this.lang === 'ko' ? a.ko.localeCompare(b.ko, 'ko') : a.en.localeCompare(b.en)))
       : this.D.meta.counties.filter((c) => L.check_first_by_county[c.en + '-gun'] || L.check_first_by_county[c.en + '-si']);
-    let rows = this.order.filter((u) => (!st.county || C.county[u] === st.county) && (!K || !st.prov || C.prov[u] === st.prov));
+    let rows = this.order.filter((u) => (!st.county || C.county[u] === st.county) && (!K || !st.prov || C.prov[u] === st.prov) && (st.mode !== 'rain' || C.rec48[u] < st.rain));
     const provSel = K ? `<select id="prov"><option value="0">${this.t('prov_all')}</option>${this.D.meta.provinces.map((p) => `<option value="${p.id}" ${st.prov === p.id ? 'selected' : ''}>${nm(p)} (${(L.check_first_by_province[p.en] || 0).toLocaleString()})</option>`).join('')}</select>` : '';
     const pv = K && st.prov ? this.D.meta.provinces.find((p) => p.id === st.prov) : null;
     const scope = st.county ? esc(this.county(st.county, K)) : pv ? nm(pv) : this.t(K ? 'area_kr' : 'area_rg');
-    let h = `<div class="lhero"><b>${rows.length.toLocaleString()}</b><span>${this.t('l_big')}<small>${scope}</small></span></div>
+    let h = `<div class="lhero"><b>${rows.length.toLocaleString()}</b><span>${this.t(st.mode === 'rain' ? 'rf_big' : 'l_big')}<small>${scope}</small></span></div>
       <div class="lfilt">${provSel}<select id="county"><option value="0">${this.t('all')}</option>${cs.map((c) => `<option value="${c.id}" ${st.county === c.id ? 'selected' : ''}>${nm(c)}${K ? ` (${L.check_first_by_county[String(c.id)]})` : ''}</option>`).join('')}</select></div>
       <div class="lcols"><span>${this.t('l_order')}</span><span>${this.t('sc_dz_s')}</span></div>`;
     const pvOf = new Map((this.D.meta.provinces || []).map((p) => [p.id, p]));
@@ -179,7 +192,12 @@ export class UI {
     let best = -1, bz = -1;
     T.forEach((tr, i) => { const c = C['cum_' + tr.id][u], s = C['sig_' + tr.id][u]; if (C['meas_' + tr.id][u] && Number.isFinite(c) && Math.abs(c / s) > bz) { bz = Math.abs(c / s); best = i; } });
     const why = [];
+    const vd = C.vd ? C.vd[u] : NaN, vs = C.vd ? C.vds[u] : NaN, sgn = (x) => { const r = Math.round(x); return (r > 0 ? '+' : r < 0 ? '−' : '') + Math.abs(r); };
     if (best < 0) why.push(['na', D.korea && !C.rcov[u] ? t('w_norcov') : t('w_nomeas')]);
+    else if (C.vd && Number.isFinite(vd) && vs > 0)        // merged downslope rate from the time-series inversion
+      why.push(['mv', C.moving[u] ? t('w_slide', { v: sgn(vd), s: vs.toFixed(0), d: t(vd > 0 ? 'w_slide_dn' : 'w_slide_up') })
+        : vd / vs <= -4 ? t('w_upslope', { v: sgn(vd), s: vs.toFixed(0) }) : t('w_noslide', { v: sgn(vd), s: vs.toFixed(0), u: Math.ceil(Math.abs(vd) + 2 * vs) })]);
+    else if (C.vd) why.push(['na', t('w_onedir')]);
     else {
       const id = T[best].id, v = C['cum_' + id][u], s = C['sig_' + id][u];
       why.push(['mv', t(C.moving[u] ? 'w_move' : 'w_nomove', { v: (v > 0 ? '+' : '') + v.toFixed(1), t: id, s: s.toFixed(1) })]);
@@ -188,14 +206,18 @@ export class UI {
     why.push(['', pct >= 0.8 ? t('w_top', { p: Math.max(1, Math.round((1 - pct) * 100)) }) : t('w_rank', { p: Math.round(pct * 100) })]);
     const rs = [[C.r1[u], C.v1[u]], [C.r2[u], C.v2[u]], [C.r3[u], C.v3[u]]].filter((r) => r[0] >= 0).map((r) => reason(D.meta.features[r[0]], r[1], this.lang));
     const ex = [];
-    if (C.bld[u] > 0) ex.push(t('w_bld', { n: C.bld[u] }));
-    if (C.road[u] > 0) ex.push(t('w_road'));
-    if (!ex.length) ex.push(t('w_nothing'));
+    const sim = !!(C.sim && C.sim[u] > 0), r10 = (v) => (Math.round(v / 10) * 10).toLocaleString();      // flagged slopes: what the simulated debris flow reaches (p11)
+    // nationwide: "below" reaches as far as this slope's debris reach, predicted by ML model 3 or simulated on the GPU (k04b)
+    const ml = !sim && !!C.reach, sfx = sim ? '_sim' : ml ? '_ml' : '', rr = ml ? r10(C.reach[u]) : '';
+    if (C.bld[u] > 0) ex.push(t('w_bld' + sfx, { n: C.bld[u], r: rr }));
+    if (C.road[u] > 0) ex.push(t('w_road' + sfx, { r: rr }));
+    if (!ex.length) ex.push(t('w_nothing' + sfx, { m: sim ? r10(C.rf_len[u]) : '', r: rr }));
     const meas = T.filter((tr) => C['meas_' + tr.id][u]).map((tr) => tr.id).join(', ');
+    const sx = this.solverEx(u);
     const dz = this.dz(u), nb = C.bld[u], rd = C.road[u] > 0, od = this.odds(u);
     const dzc = lv === 3 ? t('dz_c3', { r: this.rank.get(u).toLocaleString(), n: this.order.length.toLocaleString() }) : t('dz_c' + lv);
     const rkc = C.moving[u] ? t('sc_risk_m') : t('sc_risk_c', { p: Math.min(99, Math.round(pct * 100)) });
-    const ppc = nb > 0 ? t(rd ? 'sc_ppl_br' : 'sc_ppl_b', { n: nb }) : t(rd ? 'sc_ppl_r' : 'sc_ppl_0');
+    const ppc = t((nb > 0 ? (rd ? 'sc_ppl_br' : 'sc_ppl_b') : (rd ? 'sc_ppl_r' : 'sc_ppl_0')) + sfx, { n: nb, r: rr }), tb = sim && Number.isFinite(C.rf_tbld[u]);
     const part = (name, v, cap) => `<div class="gauge"><span>${name}</span><b>${v}<small>/100</small></b><i><em style="width:${v}%"></em></i><p>${esc(cap)}</p></div>`;
     el.innerHTML = `
       <div class="dhead"><div><span class="badge l${lv}"><span>${LV_ICON[lv]}</span>${t('lv' + lv)}</span><h2>${esc(this.county(C.county[u], D.korea))} #${u}</h2></div>
@@ -205,20 +227,28 @@ export class UI {
       <div class="gauges">${part(t('sc_hz'), Math.round(C.hz[u]), rkc)}${part(t('sc_ex'), C.ex[u], ppc)}</div>
       <div class="odds"><b>${t('od_t')}</b><p>${od.one ? t('od_p', { n: od.one, f: od.fails, m: od.n, avg: od.avg }) : t('od_0', { m: od.n, avg: od.avg })}${C.moving[u] ? ' ' + t('od_m') : ''}</p><small>${t('od_n', { k: od.k })}</small></div>
       <div class="scnote">${t('sc_note')}</div>
-      <div class="kv two"><div><b>${C.slope[u].toFixed(0)}°</b><span>${t('slope')} · ${t('faces')} ${compass(C.aspect[u], this.lang)}</span></div>
-        <div><b>${C.rain_storm[u].toFixed(0)} mm</b><span>${t('stormRain')}</span></div></div>
+      <div class="kv ${C.rec48 || ml ? '' : 'two'}"><div><b>${C.slope[u].toFixed(0)}°</b><span>${t('slope')} · ${t('faces')} ${compass(C.aspect[u], this.lang)}</span></div>
+        <div><b>${C.rain_storm[u].toFixed(0)} mm</b><span>${t('stormRain')}</span></div>
+        ${ml ? `<div><b>${rr} m</b><span>${t(C.reach_src[u] === 2 ? 'rc_tile_sim' : 'rc_tile_ml')}</span></div>` : ''}
+        ${C.rec48 ? `<div><b>${C.rec48[u].toFixed(0)} mm</b><span>${t('rf_tile', { d: new Date(Date.parse(D.meta.rain_record.day0) + C.rec_day[u] * 864e5).toLocaleDateString(this.lang === 'ko' ? 'ko-KR' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) })}</span></div>` : ''}</div>
+      ${sim ? `<div class="sec runout"><h4>${t('ro_h')}</h4><div><div class="kv"><div><b>${r10(C.rf_len[u])} m</b><span>${t('ro_far')}</span></div><div><b>${r10(C.ro_len[u])} m</b><span>${t('ro_fit')}</span></div>
+        <div><b>${tb ? Math.round(C.rf_tbld[u]) + ' s' : Math.round(C.rf_vmax[u]) + ' m/s'}</b><span>${t(tb ? 'ro_t' : 'ro_v')}</span></div></div>
+        <p class="whysum">${t('ro_note')}</p>${this.D.runout ? `<div class="links"><button id="dFlow">${t('ro_play')}</button></div>` : ''}</div></div>` : ''}
       <div class="sec"><h4>${t('why', { l: t('lv' + lv) })}</h4><p class="whysum">${t(lv === 2 ? (C.moving[u] || pct >= 0.95 ? 'why2a' : 'why2b') : 'why' + lv)}</p>
         <div class="q"><b>1 · ${t('d_q1')}</b><ul class="why">${why.map(([c, s]) => `<li class="${c}">${esc(s)}</li>`).join('')}${rs.map((s) => `<li>${esc(s)}</li>`).join('')}
         ${C.label[u] ? `<li class="ex">${esc(t('w_scar'))}</li>` : ''}</ul></div>
         <div class="q"><b>2 · ${t('d_q2')}</b><ul class="why">${ex.map((s) => `<li class="ex">${esc(s)}</li>`).join('')}</ul></div></div>
       ${D.korea && !C.rcov[u] ? `<div class="sec"><h4>${t('history')}</h4><p class="whysum">${t('norcov_p')}</p><div class="links"><a class="btn" href="map.html?area=region">${t('area_rg')}</a></div></div>` : ''}
+      ${sx ? `<div class="sec"><h4>${t('solver_h')}</h4><div id="dsolve" class="inv"></div><div class="caveat" style="border:0;padding:0;margin-top:6px">${esc(t('solver_c'))}</div></div>` : ''}
       <div class="sec" ${D.korea && !C.rcov[u] ? 'hidden' : ''}><h4>${t('history')} <span style="text-transform:none;letter-spacing:0">(${t('cm')})</span></h4><div id="dchart" class="chart"></div>
         <div class="cleg">${T.map((tr, i) => C['meas_' + tr.id][u] ? `<span><i style="background:${TRACK_COLORS[i]}"></i>${tr.id} ${tr.dir === 'ascending' ? '↑' : '↓'}</span>` : '').join('')}<span><i style="background:#555;height:8px;opacity:.5"></i>${t('noise')}</span></div>
         ${meas ? `<div class="caveat" style="border:0;padding:0;margin-top:6px">${esc(t('w_meas', { t: meas }))}. ${esc(t('sign'))}</div>` : ''}</div>
       <div class="links"><button id="dFly">${t('fly')}</button><a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/link/map/SLOPEWATCH,${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}">${t('kakao')}</a><button id="dCopy">${t('copy')}</button><a class="btn" target="_blank" href="form.html?u=${u}&lang=${this.lang}${AREA === 'region' ? '&area=region' : ''}">${t('form')}</a></div>
       <div class="caveat">${t('caveat')}</div>`;
     $('#dFly').onclick = () => this.app.flyToUnit(u);
+    if ($('#dFlow')) $('#dFlow').onclick = () => { this.app.debris.focus(this.D.runout.flow.get(u) ?? -1); this.app.flyToUnit(u); };
     $('#dCopy').onclick = (e) => { navigator.clipboard?.writeText(`${C.lat[u].toFixed(6)}, ${C.lon[u].toFixed(6)}`); e.target.textContent = t('copied'); };
+    if (sx) playSolver($('#dsolve'), sx, { W: 340, H: 250, X0: 34, header: false, legend: false, colors: TRACK_COLORS });
     // movement chart
     const series = T.map((tr, i) => ({ name: `${tr.id}`, color: TRACK_COLORS[i], pts: C['meas_' + tr.id][u] ? tr.days.map((d, k) => [d, D.cum(u, i, k)]).filter((p) => Number.isFinite(p[1])) : [] })).filter((s) => s.pts.length > 1);
     const sg = T[0].noise_pair.reduce((a, b) => a + b, 0) / T[0].noise_pair.length;
@@ -226,6 +256,30 @@ export class UI {
     let ymax = 2; series.forEach((s) => s.pts.forEach((p) => { ymax = Math.max(ymax, Math.abs(p[1]) * 1.15); }));
     lineChart($('#dchart'), { w: 320, h: 150, series, band, x: [15, 147], y: [-ymax, ymax], vband: [47, 49],
       xt: [[30, 'Jul'], [61, 'Aug'], [92, 'Sep'], [122, 'Oct']], yt: niceTicks(-ymax, ymax, 4), fmtX: (d) => this.fmtDay(d), unit: ' cm', markers: true });
+  }
+
+  // the selected slope as the solver sees it: the passes of each usable track projected onto the slope line (same
+  // arithmetic as p04b), and the solved model. The nationwide cells carry the model only, so no dots there.
+  solverEx(u) {
+    const D = this.D, C = D.col;
+    if (!C.vd || !Number.isFinite(C.vd[u]) || !(C.vds[u] > 0)) return null;
+    const Ts = Math.round((Date.parse(D.meta.storm[0]) - Date.UTC(2026, 5, 1)) / 864e5), f = (a) => (Number.isFinite(a) ? a : 0);
+    const vpre = f(C.vpre?.[u]), step = f(C.vstep?.[u]), v = C.vd[u];
+    const model = (t) => vpre * (Math.min(t, Ts) - Ts) / 30 + (t >= Ts ? step : 0) + v * Math.max(t - Ts, 0) / 30;
+    const tracks = [];
+    if (C.cpost) D.tracks.forEach((tr, i) => {
+      const s = C['sens_' + tr.id][u]; let prev = D.cum(u, i, 0);
+      if (!C['meas_' + tr.id][u] || !(Math.abs(s) >= 0.25) || !Number.isFinite(prev)) return;
+      const days = tr.days, mm = [model(days[0])]; let acc = mm[0];
+      for (let k = 1; k < days.length; k++) {
+        const cur = D.cum(u, i, k), a = days[k - 1], b = days[k];
+        if (!Number.isFinite(cur)) { acc += model(b) - model(a); mm.push(null); continue; }          // a missing pass follows the fit and is not drawn
+        const shared = f(C.cpre[u]) * Math.max(Math.min(b, Ts) - a, 0) / 30 + (a < Ts && b >= Ts ? f(C.cstep[u]) : 0) + f(C.cpost[u]) * Math.max(b - Math.max(a, Ts), 0) / 30;
+        acc += ((cur - prev) * 10 - shared) / s; prev = cur; mm.push(acc);
+      }
+      tracks.push({ id: tr.id, k: i, days, mm });
+    });
+    return { u, v, s: C.vds[u], z: v / C.vds[u], v_pre: vpre, step, storm_day: Ts, slope: C.slope[u], moving: !!C.moving[u], tracks };
   }
 
   // ---- the three numbers -----------------------------------------------------------
@@ -329,11 +383,12 @@ export class UI {
         <div class="fcol">
           <div class="fbox ai"><h3>${t('ai_m1')}</h3><p>${t('ai_m1_p')}</p><small>${t('ai_m1_top', { a: esc(top) })}<br>${t('ai_m1_t', { f: s.features.length, n: s.n_units.toLocaleString() })}${s.joint?.shipped ? '<br>' + t('ai_m1_j', { n: s.joint.teacher_slopes.toLocaleString() }) : ''}</small></div>
           <div class="fbox ai"><h3>${t('ai_m2')}</h3><p>${t('ai_m2_p')}</p><small>${t('ai_m2_t', { n: a.units.toLocaleString() })}</small></div>
+          ${m.reach ? `<div class="fbox ai"><h3>${t('ai_m3')}</h3><p>${t('ai_m3_p', { n: m.reach.simulated_slopes.toLocaleString() })}</p><small>${t('ai_m3_t', { r: m.reach.far.r2_heldout.toFixed(2), x: m.reach.far.err_factor_heldout.toFixed(2) })}</small></div>` : ''}
         </div>
         <div class="farrow">→</div>
         <div class="fbox out"><h3>${t('ai_out')}</h3><div class="big">${m.levels.levels.check_first.toLocaleString()}</div><p><b>${t('ai_out_v')}</b><br>${t('ai_out_p')}</p></div>
       </div>
-      <h3 class="hh">${t('ai_rule')}</h3><ol class="limits">${[1, 2, 3].map((i) => `<li>${t('ai_r' + i, { n: m.levels.check_first_moving })}</li>`).join('')}</ol><p class="rulenote">${t('ai_rule_n')}</p>
+      <h3 class="hh">${t('ai_rule')}</h3><ol class="limits">${[1, 2, 3].map((i) => `<li>${t(i === 2 && m.reach ? 'ai_r2_ml' : 'ai_r' + i, { n: m.levels.check_first_moving })}</li>`).join('')}</ol><p class="rulenote">${t('ai_rule_n')}</p>
       <h3 class="hh">${t('ai_work')}</h3><div class="g2 tight">${this.aiTiles()}</div>
       <h3 class="hh">${t('ai_honest')}</h3><ul class="limits">${[1, 2, 3].map((i) => `<li>${t('ai_h' + i, { n: s.n_failed })}</li>`).join('')}</ul>
       <button id="aiProof" class="more">${t('ai_more')}</button>`;
@@ -343,7 +398,7 @@ export class UI {
 
   proof() {
     const { m, R, a, pc } = this.nums(), t = (k, v) => this.t(k, v), S = m.series, T = m.tracks, ag = S.ascending_agreement, mv = S.movement, lab = m.labels;
-    const ship = m.suscept.shipped_uses_nisar;
+    const ship = m.suscept.shipped_uses_nisar, V = m.velocity;
     const row = (name, val, cls, status) => `<tr><td>${name}</td><td>${val}</td><td class="n ${cls}">${status}</td></tr>`;
     const stab = Object.values(T).map((x) => x.stable_cum_median.toFixed(2)).join(' / '), stabn = Object.values(T).map((x) => x.stable_cum_mad.toFixed(1)).join(' / ');
     const meas = this.D.korea ? m.levels.radar_measured : this.D.n - m.levels.levels.not_measurable;
@@ -352,14 +407,17 @@ export class UI {
         <div><h3>${t('p_inj')}</h3><p class="s">${t('p_inj_s')}</p><div id="injChart" class="chart"></div><div class="cleg" id="injLeg"></div></div></div>
       <div class="g2"><div><h3>${t('p_checks')}</h3><table class="t">
         ${row(t('c_stable'), t('c_stable_v', { a: stab, n: S.stable_units.toLocaleString(), s: stabn }), 'pass', t('ok'))}
-        ${row(t('c_far'), t('c_far_v', { a: (mv.stable_units_flagged_share * 100).toFixed(2), b: (mv.share_of_measurable_slopes * 100).toFixed(2) }), 'pass', t('ok'))}
+        ${V ? row(t('c_inv'), t('c_inv_v', { p: Object.values(T).reduce((a, x) => a + x.dates.length - 1, 0), r: V.recovery['50'].recovered_median.toFixed(1), c: Math.round(Math.abs(V.calibration_factor.post - 1) * 100) }), 'pass', t('ok'))
+          + row(t('c_floor'), t('c_floor_v', { q: (V.no_detectable_movement_share * 100).toFixed(1), n: V.slopes_solved.toLocaleString(), s: V.sigma_post_mm_pct['50'].toFixed(0) }), 'pass', t('ok'))
+          + row(t('c_dir'), t('c_dir_v', { d: V.detected_downslope, u: V.detected_upslope, n: V.detected }), 'pass', t('ok'))
+          : row(t('c_far'), t('c_far_v', { a: (mv.stable_units_flagged_share * 100).toFixed(2), b: (mv.share_of_measurable_slopes * 100).toFixed(2) }), 'pass', t('ok'))}
         ${row(t('c_asc'), t('c_asc_v', { r: ag.r_all.toFixed(2), n: ag.units.toLocaleString(), p: pc(ag.same_sign_moving) }), 'warn', t('weak'))}
         ${row(t('c_ml'), t('c_ml_v', { a: pc(a.results.detector.well_oriented[3]), b: pc(a.results.matched.well_oriented[3]) }), 'pass', t('ok'))}
         ${row(t('c_ae'), t('c_ae_v', { a: pc(a.results.autoenc.well_oriented[3]), b: pc(a.results.zmax.well_oriented[3]) }), 'fail', t('notused'))}
         ${row(t('c_cov'), t('c_cov_v', { a: meas.toLocaleString(), b: (this.D.korea ? m.levels.radar_units : this.D.n).toLocaleString() }), 'pass', t('ok'))}
         ${this.D.korea ? row(t('c_nat'), t('c_nat_v', { n: this.D.n.toLocaleString(), r: m.levels.radar_units.toLocaleString() }), 'warn', t('open_')) : ''}
         ${row(t('c_lab'), t('c_lab_v', { c: lab.candidates_ge3px, f: lab.auto_failure, u: lab.failed_slope_units, h: lab.human_reviewed }), 'warn', t('open_'))}
-        ${row(t('c_sign'), t('c_sign_v'), 'warn', t('open_'))}</table></div>
+        ${m.sign?.confirmed ? row(t('c_sign'), t('c_sign_ok', { n: m.sign.pairs, r: Math.min(m.sign.wet_r, m.sign.hydro_r).toFixed(2), t: Math.abs(m.sign.tide_r).toFixed(2) }), 'pass', t('ok')) : row(t('c_sign'), t('c_sign_v'), 'warn', t('open_'))}</table></div>
         <div><h3>${t('p_limits')}</h3><ul class="limits">${[1, 2, 3, 4, 5, 6].map((i) => `<li>${t('l' + i)}</li>`).join('')}</ul></div></div>`;
     $('#modal').hidden = false;
     const x = Array.from({ length: 101 }, (_, i) => i);

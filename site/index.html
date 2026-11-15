@@ -10,7 +10,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
-<link rel="stylesheet" href="css/site.css?v=40">
+<link rel="stylesheet" href="css/site.css?v=46">
+<link rel="stylesheet" href="css/inversion.css?v=5">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
 </script>
@@ -35,21 +36,30 @@
     <div class="sky"></div>
     <div class="stage"><canvas aria-hidden="true"></canvas></div>
     <div class="inner"><div class="wrap">
-      <h1 lang="en">Check these slopes first.</h1>
-      <h1 lang="ko">이 사면부터 점검하세요.</h1>
+      <h1 lang="en"><span class="w" style="--i:0"><span>Check</span></span> <span class="w" style="--i:1"><span>these</span></span> <span class="w" style="--i:2"><span>slopes</span></span> <span class="w" style="--i:3"><span>first.</span></span></h1>
+      <h1 lang="ko"><span class="w" style="--i:0"><span>이</span></span> <span class="w" style="--i:1"><span>사면부터</span></span> <span class="w" style="--i:2"><span>점검하세요.</span></span></h1>
       <div class="row">
         <div>
-          <p class="lede" lang="en"><b><span data-n="check">…</span> hillsides</b> to inspect before the rainy season. Picked by two machine-learning models and a radar satellite that measures the ground moving, centimetre by centimetre.</p>
-          <p class="lede" lang="ko">장마 전에 점검할 <b>사면 <span data-n="check">…</span>곳</b>. 머신러닝 모델 두 개와, 지표의 움직임을 센티미터 단위로 재는 레이더 위성이 골랐습니다.</p>
+          <p class="lede" lang="en"><b><span data-n="check">…</span> hillsides</b> to inspect before the rainy season. Picked by three machine-learning models and a radar satellite that measures the ground moving, centimetre by centimetre. The third model learned from <b><span data-n="roSim">…</span> GPU debris-flow simulations</b> how far a slide runs below each slope.</p>
+          <p class="lede" lang="ko">장마 전에 점검할 <b>사면 <span data-n="check">…</span>곳</b>. 머신러닝 모델 세 개와, 지표의 움직임을 센티미터 단위로 재는 레이더 위성이 골랐습니다. 세 번째 모델은 <b>GPU 토석류 모의 <span data-n="roSim">…</span>건</b>에서 사면 아래로 토석류가 얼마나 멀리 가는지를 배웠습니다.</p>
           <div class="actions">
             <a class="btn" href="map.html" data-lang-href="map.html"><span lang="en">Open the map</span><span lang="ko">지도 열기</span><span class="arr">→</span></a>
             <a class="btn line" href="sheet.html" data-lang-href="sheet.html"><span lang="en">Print inspection sheets</span><span lang="ko">점검표 인쇄</span></a>
           </div>
         </div>
-        <dl class="specs">
-          <div><dt data-n="units" data-count>…</dt><dd><span lang="en">hillsides ranked, all 17 provinces</span><span lang="ko">전국 17개 시·도 사면에 순위</span></dd></div>
-          <div><dt><span data-n="det50" data-count>…</span> cm</dt><dd><span lang="en">of ground movement, detectable from orbit</span><span lang="ko">의 지표 이동을 궤도에서 탐지</span></dd></div>
-          <div><dt>2</dt><dd><span lang="en">models: a neural network and boosted trees</span><span lang="ko">개 모델: 신경망과 부스팅 트리</span></dd></div>
+        <dl class="specs engines">
+          <div><dt><span class="eng-kind"><b><span lang="en">InSAR inversion</span><span lang="ko">InSAR 역산</span></b><span lang="en">Least-squares fit</span><span lang="ko">최소제곱 풀이</span></span>
+            <svg class="eng-glyph g-solve" viewBox="0 0 112 40" aria-hidden="true"><circle class="d" style="--i:0" cx="6" cy="31" r="2.6"/><circle class="d" style="--i:1" cx="17" cy="27" r="2.6"/><circle class="d" style="--i:2" cx="28" cy="30" r="2.6"/><circle class="d" style="--i:3" cx="40" cy="23" r="2.6"/><circle class="d" style="--i:4" cx="51" cy="25" r="2.6"/><circle class="d" style="--i:5" cx="62" cy="17" r="2.6"/><circle class="d" style="--i:6" cx="73" cy="19" r="2.6"/><circle class="d" style="--i:7" cx="84" cy="11" r="2.6"/><circle class="d" style="--i:8" cx="95" cy="12" r="2.6"/><circle class="d" style="--i:9" cx="106" cy="6" r="2.6"/><path class="fit" pathLength="1" d="M3 32L109 6"/></svg>
+            <span data-n="nObs" data-count>…</span></dt><dd><span lang="en">radar readings inverted into how fast <span data-n="vSolved">…</span> slopes are moving</span><span lang="ko">개 레이더 측정값을 역산해 사면 <span data-n="vSolved">…</span>곳의 이동 속도를 계산</span></dd></div>
+          <div><dt><span class="eng-kind"><b><span lang="en">ML model 1</span><span lang="ko">ML 모델 1</span></b><span lang="en">Neural network</span><span lang="ko">신경망</span></span>
+            <svg class="eng-glyph g-gru" viewBox="0 0 112 40" aria-hidden="true"><rect class="b" style="--i:0" x="4" y="28" width="5" height="10" rx="1.5"/><rect class="b" style="--i:1" x="13" y="22" width="5" height="16" rx="1.5"/><rect class="b" style="--i:2" x="22" y="30" width="5" height="8" rx="1.5"/><rect class="b" style="--i:3" x="31" y="24" width="5" height="14" rx="1.5"/><rect class="b" style="--i:4" x="40" y="27" width="5" height="11" rx="1.5"/><rect class="b" style="--i:5" x="49" y="20" width="5" height="18" rx="1.5"/><rect class="b" style="--i:6" x="58" y="29" width="5" height="9" rx="1.5"/><rect class="b" style="--i:7" x="67" y="25" width="5" height="13" rx="1.5"/><rect class="b hit" style="--i:8" x="76" y="16" width="5" height="22" rx="1.5"/><rect class="b hit" style="--i:9" x="85" y="10" width="5" height="28" rx="1.5"/><rect class="b hit" style="--i:10" x="94" y="5" width="5" height="33" rx="1.5"/><rect class="b hit" style="--i:11" x="103" y="1" width="5" height="37" rx="1.5"/><rect class="scan" x="0" y="0" width="14" height="40" rx="3"/></svg>
+            <span><span data-n="det50" data-count>…</span> cm</span></dt><dd><span lang="en">of ground movement caught from orbit by a GRU network</span><span lang="ko">의 지표 이동을 GRU 신경망이 궤도에서 탐지</span></dd></div>
+          <div><dt><span class="eng-kind"><b><span lang="en">ML model 2</span><span lang="ko">ML 모델 2</span></b><span lang="en">Boosted trees</span><span lang="ko">부스팅 트리</span></span>
+            <svg class="eng-glyph g-tree" viewBox="0 0 112 40" aria-hidden="true"><path class="e" style="--i:0" pathLength="1" d="M56 5L28 20"/><path class="e" style="--i:0" pathLength="1" d="M56 5L84 20"/><path class="e" style="--i:1" pathLength="1" d="M28 20L14 35"/><path class="e" style="--i:1" pathLength="1" d="M28 20L42 35"/><path class="e" style="--i:1" pathLength="1" d="M84 20L70 35"/><path class="e" style="--i:1" pathLength="1" d="M84 20L98 35"/><circle class="n" style="--i:0" cx="56" cy="5" r="3.2"/><circle class="n" style="--i:1" cx="28" cy="20" r="3.2"/><circle class="n" style="--i:1" cx="84" cy="20" r="3.2"/><circle class="n" style="--i:2" cx="14" cy="35" r="3.2"/><circle class="n hit" style="--i:2" cx="70" cy="35" r="3.2"/><circle class="n" style="--i:2" cx="42" cy="35" r="3.2"/><circle class="n" style="--i:2" cx="98" cy="35" r="3.2"/></svg>
+            <span data-n="units" data-count>…</span></dt><dd><span lang="en">hillsides ranked by machine learning, all 17 provinces</span><span lang="ko">곳의 사면에 머신러닝으로 순위. 전국 17개 시·도</span></dd></div>
+          <div><dt><span class="eng-kind"><b><span lang="en">ML model 3</span><span lang="ko">ML 모델 3</span></b><span lang="en">GPU physics emulator</span><span lang="ko">GPU 물리 에뮬레이터</span></span>
+            <svg class="eng-glyph g-flow" viewBox="0 0 112 40" aria-hidden="true"><path class="s" d="M4 5C30 7 44 21 62 29S96 35 109 35"/><path class="f" pathLength="1" d="M9 6C31 9 44 21 62 29S82 34 90 35"/><path class="h" d="M91 35v-8l6-5 6 5v8z"/></svg>
+            <span data-n="roSim" data-count>…</span></dt><dd><span lang="en">shallow-water debris flows solved on the GPU to train a reach model</span><span lang="ko">건의 천수 흐름 토석류를 GPU로 풀어 도달 거리 모델을 학습</span></dd></div>
         </dl>
       </div>
     </div></div>
@@ -84,7 +94,7 @@
     </div>
   </div></section>
 
-  <section id="where-it-learned" class="band" data-slide="black"><div class="wrap">
+  <section id="where-it-learned" class="band" data-slide="ember"><div class="wrap">
     <p class="eyebrow rv"><b>03</b><span lang="en">Where it learned</span><span lang="ko">어디서 배웠나</span></p>
     <div class="fire">
       <div>
@@ -114,9 +124,9 @@
 
   <section id="machine-learning" class="band" data-slide="navy"><div class="wrap">
     <p class="eyebrow rv"><b>04</b><span lang="en">The machine learning</span><span lang="ko">머신러닝</span></p>
-    <h2 class="big wide rv" lang="en">Two models. <span class="dim">One watches the ground move. One learned which slopes fail.</span></h2>
-    <h2 class="big wide rv" lang="ko">모델은 둘. <span class="dim">하나는 지표의 움직임을 봅니다. 하나는 어떤 사면이 무너지는지 배웠습니다.</span></h2>
-    <div class="models">
+    <h2 class="big wide rv" lang="en">Three models and a physics engine. <span class="dim">One watches the ground move. One learned which slopes fail. One learned how far the debris runs.</span></h2>
+    <h2 class="big wide rv" lang="ko">모델 셋과 물리 엔진 하나. <span class="dim">하나는 지표의 움직임을 봅니다. 하나는 어떤 사면이 무너지는지 배웠습니다. 하나는 토석류가 얼마나 멀리 가는지 배웠습니다.</span></h2>
+    <div class="models tri">
       <article class="model rv">
         <p class="kind"><b>01</b><span lang="en">Neural network · GRU</span><span lang="ko">신경망 · GRU</span></p>
         <h3 lang="en">The detector</h3><h3 lang="ko">탐지 모델</h3>
@@ -140,12 +150,46 @@
           </ul>
         </div>
       </article>
+      <article class="model rv" style="--d:.2s">
+        <p class="kind"><b>03</b><span lang="en">Boosted trees · trained on GPU physics</span><span lang="ko">부스팅 트리 · GPU 물리 계산으로 학습</span></p>
+        <h3 lang="en">The reach model</h3><h3 lang="ko">도달 거리 모델</h3>
+        <p lang="en">A GPU solver (2-D shallow-water equations, Voellmy friction, finite volumes in PyTorch) let <span data-n="roSim">…</span> flagged slopes go and followed the debris. This model learned from those runs how far debris travels and predicts it for every slope in Korea, <span data-n="emLo">…</span> to <span data-n="emHi">…</span> m. The list looks that far downhill instead of the same 360 m everywhere. It copies the simulator, whose friction real scars only loosely pin down.</p>
+        <p lang="ko">GPU 해석기(2차원 천수 방정식, Voellmy 마찰, PyTorch 유한체적법)로 표시된 사면 <span data-n="roSim">…</span>곳을 무너뜨려 토석류를 따라갔습니다. 이 모델은 그 결과에서 토석류가 가는 거리를 배워 전국 모든 사면에 대해 예측합니다(<span data-n="emLo">…</span>–<span data-n="emHi">…</span> m). 목록은 어디서나 같은 360 m 대신 그 거리만큼 아래를 확인합니다. 이 모델은 모의 결과를 따라 하는 것이며, 모의의 마찰 계수는 실제 붕괴지로 느슨하게만 정해집니다.</p>
+        <div class="base">
+          <ul class="figs">
+            <li><b data-n="emR2">…</b><span lang="en">R² against the simulator, on counties it never saw. Typical error ×<span data-n="emX">…</span>, a constant gets ×<span data-n="emX0">…</span></span><span lang="ko">처음 보는 시·군에서 모의 결과 대비 R². 일반적인 오차 ×<span data-n="emX">…</span>, 상수 예측은 ×<span data-n="emX0">…</span></span></li>
+            <li><b data-n="emMoved">…</b><span lang="en">slopes moved on or off the list by it</span><span lang="ko">곳이 이 모델로 목록에 들어오거나 빠짐</span></li>
+            <li><b>▸</b><span><a href="map.html" data-lang-href="map.html"><span lang="en">Watch the flows on the map</span><span lang="ko">지도에서 토석류 보기</span></a></span></li>
+          </ul>
+        </div>
+      </article>
     </div>
-    <p class="dropped rv"><span lang="en">Tried and thrown out: an autoencoder (caught <span data-n="ae3">…</span>%, a plain z-score catches <span data-n="z3">…</span>%) and radar inputs in the ranker (the ranking got worse). <a href="results.html">What didn't work</a></span><span lang="ko">써 보고 버린 것: 오토인코더(탐지율 <span data-n="ae3">…</span>%, 단순 z값은 <span data-n="z3">…</span>%)와 순위 모델의 레이더 입력(순위가 나빠짐). <a href="results.html">안 된 것들</a></span></p>
+    <p class="dropped rv"><span lang="en">Tried and thrown out: an autoencoder (caught <span data-n="ae3">…</span>%, a plain z-score catches <span data-n="z3">…</span>%) and radar inputs in the ranker (the gain was inside the noise). <a href="results.html">What didn't work</a></span><span lang="ko">써 보고 버린 것: 오토인코더(탐지율 <span data-n="ae3">…</span>%, 단순 z값은 <span data-n="z3">…</span>%)와 순위 모델의 레이더 입력(개선 폭이 잡음 이내). <a href="results.html">안 된 것들</a></span></p>
+  </div></section>
+
+  <section id="inversion" class="band" data-slide="ice"><div class="wrap">
+    <p class="eyebrow rv"><b>05</b><span lang="en">InSAR inversion</span><span lang="ko">InSAR 역산</span></p>
+    <div class="duo">
+      <div>
+        <h2 class="big rv" lang="en"><em><span data-n="nObs">…</span></em> radar readings. One speed for every slope.</h2>
+        <h2 class="big rv" lang="ko">레이더 측정값 <em><span data-n="nObs">…</span></em>개. 사면마다 속도 하나.</h2>
+        <p class="after rv" lang="en">Each pass sees a slope from a different angle, through different weather. We solve all <span data-n="npairs">…</span> image pairs at once, weigh every one by noise we measured ourselves, and split real sliding from signals that only look like it.</p>
+        <p class="after rv" lang="ko">위성은 지날 때마다 다른 각도에서, 다른 날씨를 뚫고 사면을 봅니다. 영상쌍 <span data-n="npairs">…</span>개를 한꺼번에 풀고, 직접 잰 잡음만큼 가중치를 주어, 진짜 미끄러짐과 그렇게 보이기만 하는 신호를 갈라냅니다.</p>
+        <ul class="kpis">
+          <li class="rv"><b>±<span data-n="vSig">…</span> mm</b><span lang="en">a month: the error bar on a typical slope's speed</span><span lang="ko">월 단위, 일반적인 사면 속도의 오차 범위</span></li>
+          <li class="rv" style="--d:.08s"><b><span data-n="rec50">…</span> / 50</b><span lang="en">mm a month of movement we hid in real data, found again</span><span lang="ko">실제 자료에 숨긴 월 50 mm 이동을 되찾은 값</span></li>
+          <li class="rv" style="--d:.16s"><b>r = <span data-n="wxR">…</span></b><span lang="en">match with real weather on every pair: how we proved which way is downhill</span><span lang="ko">모든 영상쌍에서 실제 날씨와의 일치도. 어느 쪽이 아래 방향인지 이렇게 확인</span></li>
+        </ul>
+      </div>
+      <figure class="inv rv" style="--d:.15s">
+        <div data-block="inversion"></div>
+        <figcaption><span lang="en">Real slopes from the map, solved live. Each dot is one satellite pass projected onto the slope line; the band is the error bar. Direction checked against weather data and Earth tides computed from the Sun and Moon.</span><span lang="ko">지도에 있는 실제 사면을 바로 풉니다. 점 하나는 위성이 한 번 지나며 잰 값을 사면 방향으로 옮긴 것, 띠는 오차 범위입니다. 방향은 기상 자료와, 해와 달의 위치로 계산한 지구 조석으로 확인했습니다.</span></figcaption>
+      </figure>
+    </div>
   </div></section>
 
   <section id="rule" class="band" data-slide="amber"><div class="wrap">
-    <p class="eyebrow rv"><b>05</b><span lang="en">The rule</span><span lang="ko">규칙</span></p>
+    <p class="eyebrow rv"><b>06</b><span lang="en">The rule</span><span lang="ko">규칙</span></p>
     <h2 class="big rv" lang="en">Two questions. Both have to be yes.</h2>
     <h2 class="big rv" lang="ko">질문은 둘. 둘 다 "예"여야 합니다.</h2>
     <div class="two">
@@ -157,15 +201,15 @@
       <div class="and rv" style="--d:.05s" aria-hidden="true">+</div>
       <div class="rv" style="--d:.1s">
         <h3 lang="en">Is anything below it?</h3><h3 lang="ko">아래에 무엇이 있는가?</h3>
-        <p lang="en">A building or main road within about 300 m downhill. We checked <span data-n="bld">…</span> mapped buildings.</p>
-        <p lang="ko">아래쪽 약 300 m 안에 건물 또는 주요 도로. 지도에 있는 건물 <span data-n="bld">…</span>동을 확인했습니다.</p>
+        <p lang="en">A building or main road inside the slope's own debris reach, which the third model predicts (typically <span data-n="emMed">…</span> m downhill). We checked <span data-n="bld">…</span> mapped buildings.</p>
+        <p lang="ko">세 번째 모델이 예측한 그 사면의 토석류 도달 거리(보통 아래쪽 <span data-n="emMed">…</span> m) 안에 건물 또는 주요 도로. 지도에 있는 건물 <span data-n="bld">…</span>동을 확인했습니다.</p>
       </div>
     </div>
     <p class="verdict rv"><span class="pill"><span lang="en">CHECK FIRST</span><span lang="ko">우선 점검</span></span><span lang="en">Every slope on the list shows its reasons.</span><span lang="ko">목록의 모든 사면에 이유가 표시됩니다.</span> <a href="method.html"><span lang="en">Full method</span><span lang="ko">방법 전체</span></a></p>
   </div></section>
 
-  <section id="short-list" class="band" data-slide="black"><div class="wrap">
-    <p class="eyebrow rv"><b>06</b><span lang="en">The short list</span><span lang="ko">짧은 목록</span></p>
+  <section id="short-list" class="band" data-slide="plum"><div class="wrap">
+    <p class="eyebrow rv"><b>07</b><span lang="en">The short list</span><span lang="ko">짧은 목록</span></p>
     <div class="funnel">
       <div>
         <h2 class="mid rv" lang="en">Every hillside in Korea, down to a short list.</h2>
@@ -183,8 +227,8 @@
     </div>
   </div></section>
 
-  <section id="does-it-work" class="band" data-slide="ember"><div class="wrap">
-    <p class="eyebrow rv"><b>07</b><span lang="en">Does it work</span><span lang="ko">효과가 있나</span></p>
+  <section id="does-it-work" class="band" data-slide="cobalt"><div class="wrap">
+    <p class="eyebrow rv"><b>08</b><span lang="en">Does it work</span><span lang="ko">효과가 있나</span></p>
     <div class="proof">
       <b class="rv"><span data-n="cap5" data-count>…</span><small>%</small></b>
       <div class="rv" style="--d:.1s">
@@ -198,37 +242,76 @@
     <p class="xstats rv"><b><span data-x="found">…</span> of <span data-x="of">…</span></b> failed slopes · 90% interval <b><span data-x="ciLo">…</span>–<span data-x="ciHi">…</span>%</b> · p = <b data-x="pModel">…</b> against chance. The steep + burned rule finds <span data-x="ruleFound">…</span> of <span data-x="of">…</span> (p = <span data-x="pRule">…</span>). <a href="results.html#uncertainty">How these were computed</a></p>
   </div></section>
 
-  <section id="second-witness" class="band" data-slide="black"><div class="wrap">
-    <p class="eyebrow rv"><b>08</b><span>A second witness</span></p>
-    <h2 class="mid rv">The radar found the same scars without being told where they were.</h2>
-    <p class="after rv">Our failure labels come only from optical photos. So we asked NISAR separately: did the ground at those exact spots change during the storm? Coherence measures how alike two radar echoes are. Fresh bare soil and moved ground make it drop.</p>
-    <div class="xbars rv" data-xblock="radarbars"></div>
-    <p class="xnote rv">Share of spots where coherence across the storm pair (descending orbit, <span data-x="dPair">…</span>) dropped by more than 0.1 compared with the ground 240 m around it. <span data-x="dN">…</span> scars, <span data-x="dNc">…</span> clearings. Scars against old clearings: p = <span data-x="dP">…</span> (permutation test).</p>
-    <p class="xnote rv">The pair ending <b>21 July</b>, two days after the storm, already shows a weak signal: <span data-x="eScar">…</span>% of scars against <span data-x="eRand">…</span>% of random places (p = <span data-x="eP">…</span>). That was 16 days before the first clear optical image. We tested three orbits, so read these p-values as suggestive, not as proof. <a href="results.html#radar-check">Full radar check</a></p>
-  </div></section>
-
-  <section id="officer" class="band" data-slide="pine"><div class="wrap">
-    <p class="eyebrow rv"><b>09</b><span>What it asks of an officer</span></p>
-    <h2 class="mid rv">A list one county office can actually walk.</h2>
-    <div class="xbig rv">
-      <div><b data-x="perCounty">…</b><span>slopes to check first in the median county (the busiest has <span data-x="perCountyMax">…</span>)</span></div>
-      <div><b><span data-x="shareChecked">…</span>%</b><span>of all hillsides in Korea, spread over <span data-x="counties">…</span> cities and counties</span></div>
-      <div><b><span data-x="reached">…</span> vs <span data-x="randomReached">…</span></b><span>July failures reached by visiting the top <span data-x="regionVisits">…</span> of <span data-x="regionUnits">…</span> burn-area slopes, against random visits</span></div>
+  <section id="second-witness" class="band" data-slide="forest"><div class="wrap">
+    <p class="eyebrow rv"><b>09</b><span lang="en">A second witness</span><span lang="ko">두 번째 증인</span></p>
+    <div class="witness">
+      <div>
+        <h2 class="big rv" lang="en">The radar found the same scars. <span class="dim">Nobody told it where they were.</span></h2>
+        <h2 class="big rv" lang="ko">레이더도 같은 흔적을 찾았습니다. <span class="dim">위치는 알려 주지 않았습니다.</span></h2>
+        <p class="after rv" lang="en">Our failure labels come only from optical photos. So we asked NISAR separately: did the ground at those exact spots change during the storm? Coherence measures how alike two radar echoes are. Fresh bare soil and moved ground make it drop.</p>
+        <p class="after rv" lang="ko">붕괴 정답 자료는 광학 사진에서만 얻었습니다. 그래서 NISAR에 따로 물었습니다. 바로 그 지점의 지표가 폭우 동안 변했는가? 긴밀도는 두 레이더 반사파가 얼마나 닮았는지를 나타냅니다. 새로 드러난 맨땅과 움직인 지표에서는 긴밀도가 떨어집니다.</p>
+      </div>
+      <figure class="rv" style="--d:.12s">
+        <p class="lab"><span lang="en">Spots where the radar echo changed across the storm</span><span lang="ko">폭우 전후로 레이더 반사파가 변한 지점</span></p>
+        <div class="vs rv" data-xblock="radarbars"></div>
+        <figcaption><span lang="en">Share of spots where coherence across the storm pair (descending orbit, <span data-x="dPair">…</span>) dropped by more than 0.1 compared with the ground 240 m around it. <span data-x="dN">…</span> scars, <span data-x="dNc">…</span> clearings. Scars against old clearings: p = <span data-x="dP">…</span> (permutation test).</span><span lang="ko">폭우 전후 영상쌍(하강 궤도, <span data-x="dPair">…</span>)의 긴밀도가 주변 240 m 지표보다 0.1 넘게 떨어진 지점의 비율. 붕괴 흔적 <span data-x="dN">…</span>곳, 벌채지 <span data-x="dNc">…</span>곳. 붕괴 흔적 대 기존 벌채지: p = <span data-x="dP">…</span> (순열 검정).</span></figcaption>
+      </figure>
     </div>
-    <p class="xnote rv">The same number of site visits, pointed at the right hillsides, would have reached five times as many of the slopes that failed in July 2026.</p>
+    <p class="dropped rv"><span lang="en">The pair ending <b>21 July</b>, two days after the storm, already shows a weak signal: <span data-x="eScar">…</span>% of scars against <span data-x="eRand">…</span>% of random places (p = <span data-x="eP">…</span>). That was 16 days before the first clear optical image. We tested three orbits, so read these p-values as suggestive, not as proof. <a href="results.html#radar-check">Full radar check</a></span><span lang="ko">폭우 이틀 뒤인 <b>7월 21일</b>에 끝나는 영상쌍에서도 약한 신호가 보입니다: 붕괴 흔적의 <span data-x="eScar">…</span>%, 무작위 지점의 <span data-x="eRand">…</span>% (p = <span data-x="eP">…</span>). 첫 맑은 광학 영상보다 16일 빠릅니다. 궤도 세 개를 시험했으므로 이 p값은 증거가 아니라 참고 수준으로 읽어 주세요. <a href="results.html#radar-check">레이더 검증 전체</a></span></p>
   </div></section>
 
-  <section id="keeps-running" class="band" data-slide="black"><div class="wrap">
-    <p class="eyebrow rv"><b>10</b><span>How it keeps running</span></p>
-    <h2 class="mid rv">Every 12 days, the list updates itself.</h2>
-    <ol class="xloop rv">
-      <li><b>NISAR passes</b><span>Every land area is imaged every 12 days, day or night, through cloud.</span></li>
-      <li><b>Fetch the pairs</b><span>Interferograms (GUNW) from NASA's ASF archive, read over HTTPS without downloading whole files.</span></li>
-      <li><b>Rerun the pipeline</b><span>Movement, detector, ranking and rule. About 4 minutes for the regional build on a laptop.</span></li>
-      <li><b>Update map and sheets</b><span>Static files only. No server to run, any web host works.</span></li>
-      <li><b>Officer prints a sheet</b><span>One page per county, in Korean, with the reasons for each slope.</span></li>
-    </ol>
-    <p class="xnote rv">Nothing in the pipeline is specific to Korea except the building and border files. NISAR covers nearly all land, so the same steps could run for any country with burned or landslide-prone hills.</p>
+  <section id="officer" class="band" data-slide="lime"><div class="wrap">
+    <p class="eyebrow rv"><b>10</b><span lang="en">What it asks of an officer</span><span lang="ko">담당자가 할 일</span></p>
+    <div class="office">
+      <div>
+        <h2 class="big rv" lang="en">A list one county office can actually walk.</h2>
+        <h2 class="big rv" lang="ko">시·군청 한 곳이 실제로 다 돌 수 있는 목록.</h2>
+        <div class="xbig">
+          <div class="rv"><b><span data-x="perCounty">…</span></b><span lang="en">slopes to check first in the median county (the busiest has <span data-x="perCountyMax">…</span>)</span><span lang="ko">중간 수준 시·군의 우선 점검 사면 수 (가장 많은 곳은 <span data-x="perCountyMax">…</span>곳)</span></div>
+          <div class="rv" style="--d:.1s"><b><span data-x="shareChecked">…</span><small>%</small></b><span lang="en">of all hillsides in Korea, spread over <span data-x="counties">…</span> cities and counties</span><span lang="ko">전국 사면 가운데 비율. <span data-x="counties">…</span>개 시·군에 분포</span></div>
+          <div class="rv" style="--d:.2s"><b><span data-x="reached">…</span><small>vs</small><i data-x="randomReached">…</i></b><span lang="en">July failures reached by visiting the top <span data-x="regionVisits">…</span> of <span data-x="regionUnits">…</span> burn-area slopes, against random visits</span><span lang="ko">산불 피해 지역 사면 <span data-x="regionUnits">…</span>곳 중 상위 <span data-x="regionVisits">…</span>곳 점검 시 닿는 7월 붕괴 사면 수. 무작위 점검과 비교</span></div>
+        </div>
+        <p class="xnote rv"><span lang="en">The same number of site visits, pointed at the right hillsides, would have reached five times as many of the slopes that failed in July 2026.</span><span lang="ko">같은 횟수의 현장 점검을 올바른 사면에 쓰면, 2026년 7월에 무너진 사면에 다섯 배 더 많이 닿았을 것입니다.</span></p>
+      </div>
+      <figure class="sheet rv" style="--d:.12s">
+        <div class="paper" id="paper">
+          <header><b><span lang="en">Inspection sheet</span><span lang="ko">점검표</span></b><span class="cnt"><b>0</b> / <span data-x="perCounty">…</span></span></header>
+          <ol></ol>
+        </div>
+        <figcaption><span lang="en">Illustration. The median county's list is <span data-x="perCounty">…</span> slopes on one page, each with its reasons.</span><span lang="ko">예시 그림. 중간 수준 시·군의 목록은 한 장에 사면 <span data-x="perCounty">…</span>곳이며, 사면마다 이유가 적혀 있습니다.</span></figcaption>
+      </figure>
+    </div>
+  </div></section>
+
+  <section id="keeps-running" class="band" data-slide="wine"><div class="wrap">
+    <p class="eyebrow rv"><b>11</b><span lang="en">How it keeps running</span><span lang="ko">계속 돌아가는 방식</span></p>
+    <div class="loop">
+      <div>
+        <h2 class="big rv" lang="en">Every 12 days, the list updates itself.</h2>
+        <h2 class="big rv" lang="ko">12일마다 목록이 스스로 갱신됩니다.</h2>
+        <ol class="xloop rv" id="xloop">
+          <li><i>01</i><b><span lang="en">NISAR passes</span><span lang="ko">NISAR 통과</span></b><div class="d"><span lang="en">Every land area is imaged every 12 days, day or night, through cloud.</span><span lang="ko">모든 육지를 12일마다, 밤낮없이, 구름을 뚫고 촬영.</span></div></li>
+          <li><i>02</i><b><span lang="en">Fetch the pairs</span><span lang="ko">영상쌍 받기</span></b><div class="d"><span lang="en">Interferograms (GUNW) from NASA's ASF archive, read over HTTPS without downloading whole files.</span><span lang="ko">NASA ASF 보관소의 간섭도(GUNW)를 파일 전체를 받지 않고 HTTPS로 읽음.</span></div></li>
+          <li><i>03</i><b><span lang="en">Rerun the pipeline</span><span lang="ko">파이프라인 재실행</span></b><div class="d"><span lang="en">Movement, detector, ranking and rule. About 4 minutes for the regional build on a laptop.</span><span lang="ko">이동량, 탐지, 순위, 규칙. 노트북에서 지역 단위 실행에 약 4분.</span></div></li>
+          <li><i>04</i><b><span lang="en">Update the map</span><span lang="ko">지도 갱신</span></b><div class="d"><span lang="en">Map and sheets are static files. No server to run, any web host works.</span><span lang="ko">지도와 점검표는 정적 파일. 서버가 필요 없고 어느 웹 호스트든 가능.</span></div></li>
+          <li><i>05</i><b><span lang="en">Print the sheet</span><span lang="ko">점검표 인쇄</span></b><div class="d"><span lang="en">One page per county, in Korean, with the reasons for each slope.</span><span lang="ko">시·군별 한 장, 한국어, 사면마다 이유 표시.</span></div></li>
+        </ol>
+      </div>
+      <figure class="orbit rv" style="--d:.12s">
+        <svg id="orbit" viewBox="0 0 400 400" aria-hidden="true">
+          <circle class="track" cx="200" cy="200" r="150"/>
+          <g class="ticks"></g>
+          <circle class="ping" cx="200" cy="50" r="10"/>
+          <g class="sat"></g>
+          <path class="mark" d="M200 22V36"/>
+          <text class="lab" x="200" y="13" text-anchor="middle" lang="en">NISAR PASS</text><text class="lab" x="200" y="13" text-anchor="middle" lang="ko">NISAR 통과</text>
+          <text class="lab" x="200" y="146" text-anchor="middle" lang="en">DAY</text><text class="lab" x="200" y="146" text-anchor="middle" lang="ko">12일 주기</text>
+          <text class="num" x="200" y="236" text-anchor="middle">1</text>
+          <text class="lab" x="200" y="272" text-anchor="middle" lang="en">OF 12</text><text class="lab" x="200" y="272" text-anchor="middle" lang="ko">일째</text>
+        </svg>
+        <figcaption><span lang="en">Nothing in the pipeline is specific to Korea except the building and border files. NISAR covers nearly all land, so the same steps could run for any country with burned or landslide-prone hills.</span><span lang="ko">건물·경계 파일 말고는 한국에만 해당하는 부분이 없습니다. NISAR는 거의 모든 육지를 촬영하므로, 산불 피해지나 산사태 위험지가 있는 어느 나라에서든 같은 절차를 돌릴 수 있습니다.</span></figcaption>
+      </figure>
+    </div>
   </div></section>
 
   <section id="open-map" class="closer" data-slide="black" data-enter="early">
@@ -259,8 +342,10 @@
     <a href="about.html#data"><span lang="en">Data sources</span><span lang="ko">자료 출처</span></a>
   </nav>
 </div></footer>
-<script type="module" src="js/site.js?v=44"></script>
-<script type="module" src="js/extra.js?v=1"></script>
+<script type="module" src="js/site.js?v=48"></script>
+<script type="module" src="js/extra.js?v=2"></script>
+<script type="module" src="js/home.js?v=3"></script>
+<script type="module" src="js/inversion.js?v=4"></script>
 <script src="js/nav.js?v=4" defer></script>
 </body>
 </html>

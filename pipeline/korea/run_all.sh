@@ -10,5 +10,5 @@ if [ "$1" != "build" ]; then
   $PY scripts/download_korea.py --only bounds,mask,dem,slope30,worldcover,hansen,rain,osm
   $PY scripts/download_korea.py --only s2 --periods prefire_2025,postfire_2025,prestorm_2026,poststorm_2026,latest_2026
 fi
-for s in k01_terrain k02_units k03_region k04_model k05_levels k06_export k07_site_images; do $PY pipeline/korea/$s.py; done
+for s in k01_terrain k02_units k03_region k04_model k04b_reach k05_levels k06_export k07_site_images; do $PY pipeline/korea/$s.py; done
 echo "done. Preview: python3 -m http.server 5173 --directory site  ->  map.html (nationwide), map.html?area=region (20 m)"

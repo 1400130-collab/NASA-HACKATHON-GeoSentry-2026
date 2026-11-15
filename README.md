@@ -31,7 +31,10 @@ NISAR GUNW interferograms (3 orbits, 23 pairs, Jun–Oct 2026)
   → model 1, the detector (GRU neural network): real movement or noise?
 Terrain, burn severity, vegetation, land cover (Copernicus DEM, Sentinel-2, ESA WorldCover, Hansen GFC)
   → model 2, the ranker (LightGBM): which slopes look like the ones that failed in July 2026?
-Rule: CHECK FIRST = (ranker top 5%, or real movement) AND a building or main road within ~300 m downhill
+Physics: a GPU debris-flow simulation lets each flagged slope in the burn area go and follows the flow downhill
+  → model 3, the reach model (LightGBM): learns the simulation, predicts how far debris runs below every slope in Korea
+Rule: CHECK FIRST = (ranker top 5%, or real movement) AND a building or main road inside the slope's debris reach
+      (regional 20 m map: the simulated flow itself has to reach it)
   → map + county inspection sheets (static site, no server)
 ```
 
@@ -60,15 +63,24 @@ The model beats chance clearly. With 20 failures it cannot yet prove it beats th
 
 **What it asks of an officer.** The median county gets 7 slopes to check first (the busiest gets 252). In the burn area, visiting the top 360 of 7,207 slopes would have reached 5 of the 20 July failures, against 1 for random visits.
 
+**Where the debris goes.** For the 4,351 slopes that the ranker or the radar flags on the regional map, a shallow-water solver with Voellmy friction (`pipeline/runout_solver.py`, PyTorch on the Mac GPU, 4,351 slopes at once) releases one 40 m × 40 m slide, 1.5 m deep, at the steepest spot and follows it. The debris reaches a mapped building or main road from 664 of them with cautious friction and 417 with the best-fit friction, against 1,326 under the old rule ("anything within 300 m downhill"). The check-first list is now those 664 slopes, each with a flow path, a reach and the buildings in it, and the map plays the flows in the storm replay. On a test plane the deposit's centre stops 13% short of where a rigid sliding block would (a spreading flow should stop a little short), and volume is conserved.
+
+**A third model learns the physics.** The simulation only covers the burn area, so `pipeline/korea/k04b_reach.py` trains gradient-boosted trees on its 4,351 runs to predict the simulated reach from terrain alone. On counties it never saw it gets R² 0.46 and a typical error of ×1.22 (a constant gets ×1.45). Every slope in the country gets its own reach (161–345 m for 80% of them), and the nationwide rule looks that far downhill instead of 360 m everywhere. That moves 139 slopes: 110 leave the check-first list and 29 join it, leaving 3,168. The error is measured against the simulator, not against real debris flows, and it was trained only on flagged slopes in one region.
+
 ### What did not work
 
-- **NISAR inputs in the ranker.** Adding pre-storm radar readings made the ranking worse, so the ranker does not use them. NISAR is used for movement detection and for seeing the ground through cloud.
+- **Pinning down the friction.** The two friction numbers were tuned so simulated run-out matches the 33 July 2026 scars. The scars are too small for that: their median length is 50 m, two and a half pixels. Friction μ anywhere from 0.06 to 0.33 fits about equally well, and on held-out counties the simulation is off by a typical factor of 1.59, worse than assuming every slide runs the median length (1.43). So the simulation gives a physically routed path, not a validated reach. We show two cases (best fit μ 0.27, median run 121 m; most mobile friction the scars cannot rule out μ 0.06, median 242 m) and let the cautious one decide the list.
+
+- **NISAR inputs in the susceptibility model.** With pre-storm radar inputs (now including the downslope rate from the time-series inversion) the model caught 11 instead of 9 of the 29 failed slopes in its top 10%. That gain holds in only 68% of resamples, so the shipped model still leaves them out. NISAR enters the danger index through the movement flag instead.
+- **Detectable sliding.** All 23 NISAR pairs are solved together into one downslope rate per slope with an error bar (`pipeline/p04b_velocity.py`). The typical error bar is ±7 mm a month, and 99.9% of the 69,799 slopes seen from two directions show no detectable movement. 95 slopes stand 4 error bars from zero: 21 downslope, which count as movement, and 74 upslope, which sliding cannot be, so they are not counted (cause unknown). After the detector agrees, 14 slopes are flagged as moving.
+- **Rain thresholds from a physics model.** `pipeline/p12_stability.py` is an infinite-slope stability model with rain soaking into the soil, written in PyTorch so gradient descent tunes its soil numbers on the failures. It was meant to give each slope a number like "fails at 180 mm in 48 h". It does not, and we do not show one: rain does not separate the failed slopes in this data. Failed slopes had no more rain than the rest (AUC 0.43, where 0.5 is chance), the wettest 48 h between the two photos was 84 mm against 106 mm that the same slopes had already stood through since the fire, and the model's held-out top 10% holds 10% of the failures (chance is 10%, the ranker gets 31%). The one consistent result is the sign: fitted cohesion is lower on burned ground in every fold (0.2–1.3 kPa against 1.8–4.8 kPa unburned, for a 1.5 m soil layer), but the burned value sits at its lower bound, so read it as a direction, not a measurement. What the regional map shows instead is a fact, not a threshold: the heaviest 48 h rain each slope has stood through since the fire (87–189 mm, median 122 mm, from the 0.1° daily rain grid), and a "Rain forecast" layer whose slider lights up the flagged slopes that a forecast would take past that.
 - **A sequence autoencoder** caught 7% of 3 cm movements, worse than a plain z-score (22%), so it was dropped.
 
 ### Limits
 
 - The 20 failed slopes were found automatically and have not been checked by hand. [docs/label-review.md](docs/label-review.md) lists them, with the ones the radar does not support first.
-- The sign convention of the radar phase (toward or away from the satellite) is assumed, not yet confirmed on a known moving slope.
+- The sign of the radar phase was checked on all 23 pairs against weather-model delays and computed Earth tides (`analysis/sign_check.py`), not yet on a known moving slope. What causes the 74 uphill-reading changes is not known.
+- A slope seen from one radar direction only (14,973 of them) cannot be given a downslope rate.
 - The ranking is validated only in North Gyeongsang, the one place failures are mapped.
 - It does not say when a slope will fail and must not be used to decide evacuations.
 
@@ -104,7 +116,7 @@ python3 -m http.server 5173 --directory site     # then open http://localhost:51
 ```
 
 - `site/index.html`: home page. `site/map.html`: 3D map of Korea (`map.html?area=region` for the 20 m North Gyeongsang build with NISAR). `site/sheet.html`: inspection sheets. `site/review.html`: manual label review.
-- Rebuild the regional results: `sh pipeline/run_all.sh` (about 4 minutes; needs the data in `data/`, see [scripts/](scripts/), and a free NASA Earthdata token for NISAR).
+- Rebuild the regional results: `sh pipeline/run_all.sh` (about 4 minutes, plus about 25 the first time for the debris-flow simulation, which afterwards only reruns slopes that changed; `STABILITY=1` adds the soil-strength model; needs the data in `data/`, see [scripts/](scripts/), and a free NASA Earthdata token for NISAR).
 - Rebuild the nationwide results: `sh pipeline/korea/run_all.sh`.
 - Recompute the new statistics: `python3 analysis/headline_stats.py` and `python3 analysis/radar_scar_check.py`.
 

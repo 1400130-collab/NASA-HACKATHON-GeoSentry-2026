@@ -11,10 +11,13 @@ if [ "$1" != "labels" ]; then
   $PY pipeline/p02_units.py
   $PY pipeline/p03_nisar.py
   $PY pipeline/p04_series.py
+  $PY pipeline/p04b_velocity.py
 fi
 $PY pipeline/p05_labels.py
 $PY pipeline/p06_susceptibility.py
 $PY pipeline/p07_anomaly.py
+$PY pipeline/p11_runout.py        # GPU debris-flow reach for the flagged slopes. Reuses earlier results; from scratch (or with --all) about 25 min
+[ "$STABILITY" = "1" ] && $PY pipeline/p12_stability.py   # optional, about 8 min: soil-strength model and the rain test (numbers only)
 $PY pipeline/p08_levels.py
 $PY pipeline/p09_export.py
 $PY pipeline/p10_site_images.py

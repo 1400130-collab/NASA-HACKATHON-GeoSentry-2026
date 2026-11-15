@@ -2,8 +2,9 @@
 
 For every pair: phase -> cm, minus ionosphere, troposphere and solid-earth tide screens, coherence mask,
 plane + height trend removed, ~1 km spatial high-pass, then the median per hexagon.
-Sign convention ASSUMED (ISCE): positive phase = range increase, so d_los = -lambda/(4 pi) * phase and
-positive d_los = toward the satellite. Not yet confirmed on a known moving feature.
+Sign convention: positive phase = range increase, so d_los = -lambda/(4 pi) * phase and positive d_los = toward the
+satellite. Checked on all 23 pairs against weather-model delays and computed earth tides (analysis/sign_check.py).
+The tide layer is added, not subtracted: it carries the opposite sign (changes the result by under 0.01 mm).
 
 Output: data/work/nisar.npz, data/work/nisar_rasters.npz, data/work/qa_nisar_*.png, data/work/nisar_stats.json
 """
@@ -102,7 +103,7 @@ for tr in TRACKS:
         ok = covered & (coh >= COH_MIN) & (cc == main)
         sd = lambda v: float(np.nanstd(detrend(v, ok)[0][ok]))
         raw_sd = sd(phi)
-        corr = phi - iono - tropo - tide
+        corr = phi - iono - tropo + tide          # the tide layer has the opposite sign to the others (analysis/sign_check.py)
         st = {"pair": f"{a}_{b}", "days": int((np.datetime64(f"{b[:4]}-{b[4:6]}-{b[6:]}") - np.datetime64(f"{a[:4]}-{a[4:6]}-{a[6:]}")).astype(int)),
               "covered": float(covered.mean()), "pass_frac": float(ok.sum() / max(covered.sum(), 1)),
               "coh_median": float(np.nanmedian(coh[covered])),

@@ -25,6 +25,7 @@ cloudy = ndi.binary_dilation(ndi.binary_opening(cloudy, np.ones((3, 3))), iterat
 land_ok = np.isin(wc, (10, 20, 30, 60))
 cand = (drop > 0.20) & (post < 0.55) & (pre > 0.35) & (T["slope"] > 15) & land_ok & np.isfinite(drop) & ~cloudy
 still = np.isfinite(octo) & (octo < pre - 0.12)
+visible = (pre > 0.35) & (T["slope"] > 15) & land_ok & np.isfinite(drop) & ~cloudy      # where a scar could have been seen at all
 cand &= still
 drop = np.where(cloudy, np.nan, drop)
 lab, n = ndi.label(cand, np.ones((3, 3)))
@@ -82,6 +83,6 @@ for i, nm in enumerate(names):
     k = int((label.astype(bool) & U["is_slope"] & observed & (U["county"] == i + 1)).sum())
     if k: by[nm] = k
 S["failed_units_by_county"] = by; print(by)
-save("labels", label=label, fail_px=fpx, observed=observed, scar_class=cls.astype(np.uint8))
+save("labels", label=label, fail_px=fpx, observed=observed, scar_class=cls.astype(np.uint8), visible=np.packbits(visible))
 write_json(WORK / "candidates.json", rows)
 write_json(WORK / "label_stats.json", S)

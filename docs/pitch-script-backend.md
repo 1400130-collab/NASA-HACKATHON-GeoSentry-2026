@@ -46,8 +46,8 @@ Honest part: that is only 29 failed slopes, found automatically from satellite i
 
 Every slope gets one danger index from 0 to 100, from a rule anyone can read. Higher is worse, and the list is in that order:
 
-- 50 to 79, **Watch**: moving, or top 20% weakest (15,871 slopes)
-- 80 to 100, **Check first**: moving or top 5%, with a building or main road within 300 m downhill (1,355 slopes)
+- 50 to 79, **Watch**: moving, or top 20% weakest (15,863 slopes)
+- 80 to 100, **Check first**: moving or top 5%, with a building or main road within 300 m downhill (1,335 slopes)
 
 Inside Check first the number is 60% the slope and 40% what is below it. It is an inspection priority, not a % chance.
 
@@ -60,9 +60,9 @@ Then everything is exported as a static site. No server, nothing to download.
 | Question | Answer |
 |---|---|
 | Do you predict landslides? | No. We rank slopes for inspection before the rainy season. |
-| Does NISAR improve model 2? | Not yet. With NISAR inputs the top 10% capture fell from 31% to 17%, so the shipped ranking leaves them out. NISAR is used in model 1. |
+| Does NISAR improve model 2? | Not provably. With NISAR inputs it catches 11 instead of 9 of the 29 failed slopes in the top 10%, a gain that holds in only 68% of resamples, so the shipped ranking leaves them out. NISAR enters the danger index through the movement flag. |
 | Why trust a model trained on fake movement? | The noise is real, only the movement is injected. Tested on held-out hexagons. 50% detection at 2.5 cm, 80% at 3.9 cm, on slopes the radar sees at a useful angle (73% of them). |
-| How many slopes are moving right now? | 108 pass both the noise rule and the detector. 35 of them are Check first. |
+| How many slopes are moving right now? | We solve all 23 radar pairs together into one downslope rate per slope, with an error bar of about ±7 mm a month. 99.9% of slopes show no detectable movement. 14 pass both the 4-error-bar rule and the detector. We proved which way is downhill by checking the radar against weather data and against Earth tides we computed from the Sun and Moon, so radar changes that read as uphill (74 slopes) are not counted. |
 | What can't you measure? | 873 slopes, where the radar signal is too weak. They are marked Not measurable, not safe. |
 | Biggest weakness? | Labels. 33 scars from 170 candidates, automatic, zero human-checked so far. |
 | What matters most in model 2? | Rain in the 30 days before, vegetation after the fire, and relief. |

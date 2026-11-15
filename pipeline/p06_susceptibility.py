@@ -10,7 +10,7 @@ import lightgbm as lgb
 from sklearn.metrics import average_precision_score, roc_auc_score
 from common import WORK, TRACKS, load, save, write_json
 
-U = load("units"); L = load("labels"); Sx = load("series")
+U = load("units"); L = load("labels"); Sx = load("series"); Vl = load("velocity")
 names = json.load(open(WORK / "counties.json"))
 TERRAIN = ["slope", "steep30", "relief", "curv", "tpi", "twi", "dstream", "dem", "northness", "eastness"]
 BURN = ["dnbr", "burn_frac", "burn_high", "loss2025", "loss_pre", "ndvi_pre", "ndvi_postfire", "treecover",
@@ -22,6 +22,9 @@ for tr in TRACKS:
     t = tr[:3]
     feats[f"coh_pre_{t}"] = Sx[f"{tr}__pre_coh"]; feats[f"move_pre_{t}"] = np.abs(Sx[f"{tr}__pre_inc"])
     NIS += [f"coh_pre_{t}", f"move_pre_{t}"]
+# pre-storm downslope rate from the time-series inversion (p04b), in units of its own error bar
+feats["slide_pre_z"] = Vl["z_pre"]; feats["slide_pre_abs"] = np.abs(Vl["z_pre"])
+NIS += ["slide_pre_z", "slide_pre_abs"]
 ALL = TERRAIN + BURN + RAIN + NIS
 X = np.stack([feats[k] for k in ALL], 1)
 y = L["label"].astype(int)
@@ -100,19 +103,30 @@ R = {}
 R["steepness_only"], _ = summarise("steepness only", feats["slope"])
 R["steep_and_burned"], _ = summarise("steepness + burn rule", z(feats["slope"]) + z(np.nan_to_num(feats["burn_frac"])))
 s_no, _c = oof(TERRAIN + BURN + RAIN, want_models=True)
-R["model_without_nisar"], _ = summarise("model without NISAR", s_no)
+R["model_without_nisar"], rank_no = summarise("model without NISAR", s_no)
 s_full, contrib = oof(ALL, want_models=True)
 R["model_full"], rank_cv = summarise("model with NISAR", s_full)
 s_nis = oof(NIS)
 R["model_nisar_only"], _ = summarise("model, NISAR inputs only", s_nis)
 
-# Ship the simpler model unless the NISAR inputs measurably help the held-out capture rate.
-use_nisar = R["model_full"]["capture_top10"] > R["model_without_nisar"]["capture_top10"]
+# Ship the simpler model unless the NISAR inputs measurably help the held-out capture rate. "Measurably" = the gain in
+# failed slopes caught in the top 10% stays above zero in at least 90% of paired resamples of the failed slopes
+# (with about 30 failures, one or two slopes swing the plain comparison either way).
+pos = np.where(pop & (y == 1))[0]
+hit_full, hit_no = rank_cv[pos] >= 0.9, rank_no[pos] >= 0.9
+bs = rng.integers(0, pos.size, (4000, pos.size))
+diff = hit_full[bs].mean(1) - hit_no[bs].mean(1)
+p_gain = float((diff > 0).mean())
+use_nisar = p_gain >= 0.9
+print(f"NISAR inputs: {int(hit_full.sum())} vs {int(hit_no.sum())} of {pos.size} failed slopes in the top 10%; gain > 0 in {p_gain:.0%} of resamples "
+      f"(90% range {np.percentile(diff, 5):+.2f} to {np.percentile(diff, 95):+.2f})")
+imp_full = np.abs(contrib[U["is_slope"]][:, :-1]).mean(0)
+print("NISAR inputs by mean |SHAP| in the full model:", {c: round(float(imp_full[ALL.index(c)]), 3) for c in NIS})
 if not use_nisar:
     s_full, contrib, ALLX = s_no, _c, TERRAIN + BURN + RAIN
 else:
     ALLX = ALL
-print("shipped model:", "with NISAR inputs" if use_nisar else "without NISAR inputs (they did not improve held-out capture)")
+print("shipped model:", "with NISAR inputs" if use_nisar else "without NISAR inputs (their gain is not clear of noise)")
 allr = np.full(len(y), np.nan, "float32")
 m = U["is_slope"]
 allr[m] = (np.argsort(np.argsort(s_full[m])) + 1) / m.sum()
@@ -123,6 +137,9 @@ stats = {"n_units": int(pop.sum()), "n_failed": int(y[pop].sum()), "labels_human
          "folds": {str(k): [names[c - 1] for c in cs if fold_of[c] == k] for k in range(K)},
          "failed_per_fold": [int(y[pop & (fold == k)].sum()) for k in range(K)],
          "results": R, "features": ALLX, "shipped_uses_nisar": bool(use_nisar), "importance": {ALLX[i]: float(imp[i]) for i in order},
-         "nisar_adds_top10": R["model_full"]["capture_top10"] - R["model_without_nisar"]["capture_top10"]}
+         "nisar_adds_top10": R["model_full"]["capture_top10"] - R["model_without_nisar"]["capture_top10"],
+         "nisar_adds_top10_ci90": [float(np.percentile(diff, 5)), float(np.percentile(diff, 95))], "nisar_gain_confidence": p_gain,
+         "nisar_caught": [int(hit_full.sum()), int(hit_no.sum())], "nisar_features": NIS,
+         "nisar_importance_share": float(sum(imp_full[ALL.index(c)] for c in NIS) / imp_full.sum())}
 save("suscept", score=s_full.astype("float32"), pct=allr, contrib=contrib.astype("float32"), X=X[:, [ALL.index(c) for c in ALLX]], fold=fold)
 write_json(WORK / "suscept_stats.json", stats)

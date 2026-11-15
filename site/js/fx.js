@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { TRACK_COLORS } from './terrain.js';
+import { TRACK_COLORS } from './terrain.js?v=4';
 
 const az2dir = (deg) => new THREE.Vector2(Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180));   // (x east, z south)
 // Flight headings measured from the look vectors in the NISAR files (left-looking radar).
@@ -195,6 +195,63 @@ export function makeVectors(D, uExag) {
   out.scars = pts(D.cands.map((c) => ({ x: c.x, z: c.z, w: c.final === 1 ? 1 : 0 })), D.korea ? 120 : 520, '#7fe3ff', 'ring');
   for (const k in out) { out[k].frustumCulled = false; out[k].renderOrder = 2; }
   return out;
+}
+
+// ---- debris flows: the cells each simulated slide covers, lit in the order the flow reaches them ---------------
+// Times are simulated seconds. The front glows, what it leaves behind stays as mud. Cells that only the far-reaching
+// friction case covers are drawn darker than the ones the best-fit case reaches too.
+export class Debris {
+  constructor(D, uExag, terrain) {
+    // Height of the drawn terrain mesh (coarser than the height grid), so the flow lies on the surface the viewer sees.
+    const { W80, H80, h } = D, mp = terrain.mesh.geometry.attributes.position.array, st = Math.max(1, Math.round((mp[3] - mp[0]) / (D.Ws / W80)));      // mesh spacing in 80 m cells
+    const nx = Math.floor((W80 - 1) / st) + 1, nz = Math.floor((H80 - 1) / st) + 1, vh = (i, j) => h[Math.min(i * st, H80 - 1) * W80 + Math.min(j * st, W80 - 1)];
+    const meshH = (x, z) => {
+      const gj = Math.min(Math.max(((x / D.Ws + 0.5) * W80 - 0.5) / st, 0), nx - 1.001), gi = Math.min(Math.max(((z / D.Hs + 0.5) * H80 - 0.5) / st, 0), nz - 1.001);
+      const j = gj | 0, i = gi | 0, a = gj - j, b = gi - i, ha = vh(i, j), hb = vh(i, j + 1), hc = vh(i + 1, j), hd = vh(i + 1, j + 1);
+      return a + b <= 1 ? ha + (hb - ha) * a + (hc - ha) * b : hd + (hc - hd) * (1 - a) + (hb - hd) * (1 - b);
+    };
+    const R = D.runout, m = R.m, pos = new Float32Array(m * 3), aT = new Float32Array(m), aD = new Float32Array(m), aF = new Float32Array(m), aK = new Float32Array(m), aS = new Float32Array(m);
+    this.R = R; this.pos = pos; this.len = new Float32Array(R.nf);
+    for (let f = 0; f < R.nf; f++) {
+      const s0 = (f * 0.618034) % 1;                                  // each slope lets go at its own moment
+      for (let i = R.off[f]; i < R.off[f + 1]; i++) {
+        const [x, z] = R.at(R.col[i], R.row[i]);
+        pos[i * 3] = x; pos[i * 3 + 1] = meshH(x, z); pos[i * 3 + 2] = z;
+        aT[i] = R.t[i] * 0.5; aD[i] = R.d[i] / 50; aF[i] = f; aK[i] = R.k[i]; aS[i] = s0;
+        if (aT[i] > this.len[f]) this.len[f] = aT[i];
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    for (const [k, a, n] of [['position', pos, 3], ['aT', aT, 1], ['aD', aD, 1], ['aF', aF, 1], ['aK', aK, 1], ['aS', aS, 1]]) g.setAttribute(k, new THREE.BufferAttribute(a, n));
+    this.u = { uExag, uT: { value: 0 }, uSpread: { value: 70 }, uSel: { value: -1 }, uSelT: { value: 0 }, uOn: { value: 0 }, uScale: { value: 1000 } };
+    this.points = new THREE.Points(g, new THREE.ShaderMaterial({
+      uniforms: this.u, transparent: true, depthWrite: false,
+      vertexShader: `uniform float uExag, uT, uSpread, uSel, uSelT, uOn, uScale; attribute float aT, aD, aF, aK, aS; varying float vF, vD, vK, vDim, vFar;
+        void main(){ bool sel = abs(aF - uSel) < 0.5; float t = sel ? uSelT - aT : uT - aS * uSpread - aT;
+          if (t < 0.0 || (!sel && uOn < 0.5)) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); gl_PointSize = 0.0; return; }
+          vF = exp(-t / 5.0); vD = clamp(aD / 0.8, 0.3, 1.0); vK = aK; vDim = (uSel > -0.5 && !sel) ? 0.3 : 1.0;
+          vec3 p = position; p.y = p.y * uExag + ${(0.008 / D.k).toFixed(5)}; vec4 mv = viewMatrix * vec4(p, 1.0);
+          float px = ${(0.015 / D.k).toFixed(5)} * uScale / -mv.z; vFar = clamp(2.8 / max(px, 0.01), 1.0, 3.2);       // seen from far away a flow is a spark: bigger and brighter than its true size
+          gl_PointSize = clamp(px, 2.8, 48.0); gl_Position = projectionMatrix * mv; }`,
+      fragmentShader: `varying float vF, vD, vK, vDim, vFar; void main(){ float r = length(gl_PointCoord - 0.5) * 2.0; float a = smoothstep(1.0, 0.5, r); if (a < 0.03) discard;
+          vec3 mud = mix(vec3(0.6, 0.26, 0.1), vec3(1.0, 0.52, 0.14), vK), hot = vec3(1.0, 0.85, 0.5) * 2.6;
+          gl_FragColor = vec4(mix(mud, hot, vF) * (0.6 + 0.4 * vD) * (0.55 + 0.45 * vFar), min(1.0, a * mix(0.5 + 0.35 * vK, 1.0, vF) * (0.7 + 0.3 * vFar)) * vDim); }`,
+    }));
+    this.points.frustumCulled = false; this.points.renderOrder = 3;
+    this.playing = false; this.sel = -1;
+  }
+  get active() { return this.playing || this.sel >= 0; }
+  centre(f) { let x = 0, z = 0; const a = this.R.off[f], b = this.R.off[f + 1]; for (let i = a; i < b; i++) { x += this.pos[i * 3]; z += this.pos[i * 3 + 2]; } return [x / (b - a), z / (b - a)]; }
+  fireAll() { this.u.uOn.value = 1; this.u.uT.value = -4; this.playing = true; }
+  showAll() { this.u.uOn.value = 1; this.u.uT.value = 1e4; this.playing = false; }        // every flow at its end state
+  clear() { this.u.uOn.value = 0; this.playing = false; }
+  focus(f) { this.sel = f; this.u.uSel.value = f; this.u.uSelT.value = -6; }                // replay one slope's flow in a loop
+  update(dt, camera, renderer) {
+    const RATE = 9;                                                    // simulated seconds per second on screen
+    this.u.uScale.value = renderer.domElement.height / (2 * Math.tan(camera.fov * Math.PI / 360));
+    if (this.playing) { this.u.uT.value += dt * RATE; if (this.u.uT.value > this.u.uSpread.value + 140) this.playing = false; }
+    if (this.sel >= 0) { this.u.uSelT.value += dt * RATE; if (this.u.uSelT.value > this.len[this.sel] + 45) this.u.uSelT.value = -6; }
+  }
 }
 
 // ---- selection beacon -------------------------------------------------------------------

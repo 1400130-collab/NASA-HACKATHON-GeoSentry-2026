@@ -17,5 +17,6 @@ Every shot is a screen recording of the real site (`map.html` and `index.html`),
 
 - Record at 1920×1080 with the browser in full screen. Hide the bookmarks bar.
 - `map.html` has a built-in *Storm replay* button that runs the camera moves; record it once and cut from it.
+- The replay now ends with the debris-flow simulation (every flagged slope in the burn area lets go, then the camera follows one flow to the houses it reaches). The *Debris flows (burn area)* switch on the map plays the same thing on its own; either makes a good three-second shot. There are now three trained models: the detector, the ranker, and the reach model, which learned from the GPU physics runs how far debris travels and sets how far downhill the list looks for each slope. The physics solver itself is not a trained model, so say "three models and a physics engine".
 - Keep subtitles on screen for the whole video, white text on a dark strip, at least 40 px high.
 - Check the length: export, then confirm it is 0:30 or shorter before uploading.

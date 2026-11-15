@@ -6,31 +6,43 @@
 <title>SLOPEWATCH — scar review</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
 <style>
-  body { margin: 0; background: #0b1014; color: #f0efec; font: 13px/1.45 "Roboto", system-ui, "Apple SD Gothic Neo", sans-serif; }
-  header { position: sticky; top: 0; z-index: 2; background: #121a21; border-bottom: 1px solid #263039; padding: 12px 18px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-  header p { margin: 0; color: #a9b0b5; max-width: 76ch; }
-  button { font: inherit; color: #f0efec; background: #1d2831; border: 1px solid #33414c; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-  button:hover { background: #283641; }
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0c0d; color: #f3f1ec; font: 14px/1.5 "Roboto", system-ui, "Apple SD Gothic Neo", sans-serif; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #ff4d2e; color: #0b0c0d; }
+  header { position: sticky; top: 0; z-index: 2; background: #0b0c0d; padding: 14px clamp(16px, 4vw, 48px) 16px; display: flex; gap: 10px 18px; align-items: center; flex-wrap: wrap; }
+  header .brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; letter-spacing: -.01em; color: #f3f1ec; text-decoration: none; }
+  header .brand svg { color: #ff4d2e; }
+  header h1 { margin: 0; font-weight: 800; font-size: clamp(22px, 2.6vw, 34px); letter-spacing: -.04em; line-height: 1; }
+  header p { margin: 0; flex-basis: 100%; color: #b4b1a9; max-width: 110ch; font-size: 14px; }
+  header p b { color: #f3f1ec; }
+  header button:not(.snav-btn), .btns button { font: 500 13.5px/1 "Roboto", system-ui, sans-serif; color: #f3f1ec; background: none; border: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); border-radius: 6px; padding: 10px 13px; cursor: pointer; transition: box-shadow .15s, background .15s, color .15s; }
+  header button:not(.snav-btn):hover, .btns button:hover { box-shadow: inset 0 0 0 1px #b4b1a9; }
+  #export { background: #f3f1ec; color: #0b0c0d; box-shadow: none; font-weight: 600; }
+  #export:hover { background: #ff4d2e; }
+  #prog { font: 500 12px/1 "Roboto Mono", ui-monospace, monospace; letter-spacing: .06em; text-transform: uppercase; color: #b4b1a9; }
   .sp { flex: 1; }
-  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(410px, 1fr)); gap: 12px; padding: 16px; }
-  .card { background: #121a21; border: 1px solid #263039; border-radius: 12px; padding: 10px; outline: 2px solid transparent; }
-  .card.cur { outline-color: #ff7a45; }
-  .card.failure { border-color: #c7341f; } .card.logging { border-color: #b97a00; } .card.unclear { border-color: #5d6a73; }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(418px, 1fr)); gap: 14px; padding: 8px clamp(16px, 4vw, 48px) 48px; }
+  .card { background: #121416; border: 1px solid rgba(255, 255, 255, .12); border-radius: 14px; padding: 14px; outline: 2px solid transparent; outline-offset: 2px; transition: border-color .2s; }
+  .card.cur { outline-color: #ff4d2e; }
+  .card.failure { border-color: #ff4d2e; } .card.logging { border-color: #ffb020; } .card.unclear { border-color: #77756f; }
   .chips { display: grid; grid-template-columns: repeat(3, 128px); gap: 3px; }
-  .chips div { width: 128px; height: 128px; background-image: url(data/review_sheet.jpg); image-rendering: pixelated; border-radius: 4px; position: relative; }
+  .chips div { width: 128px; height: 128px; background-image: url(data/review_sheet.jpg); image-rendering: pixelated; border-radius: 6px; position: relative; }
   .chips div::after { content: ""; position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px; border: 1.5px solid rgba(255,255,255,.85); border-radius: 50%; }
-  .cap { display: grid; grid-template-columns: repeat(3, 128px); gap: 3px; color: #8b959c; font-size: 11px; margin: 3px 0 8px; }
-  .meta { color: #a9b0b5; font-size: 12px; margin-bottom: 8px; }
+  .cap { display: grid; grid-template-columns: repeat(3, 128px); gap: 3px; color: #77756f; font: 500 10.5px/1 "Roboto Mono", ui-monospace, monospace; letter-spacing: .06em; text-transform: uppercase; margin: 8px 0 10px; }
+  .meta { color: #b4b1a9; font: 12px/1.5 "Roboto Mono", ui-monospace, monospace; margin-bottom: 12px; }
+  .meta b { color: #f3f1ec; font-weight: 500; }
+  .meta a { color: #f3f1ec !important; text-underline-offset: 3px; }
   .btns { display: flex; gap: 6px; }
-  .btns button.on { background: #ff7a45; color: #1a0d06; border-color: transparent; font-weight: 650; }
-  kbd { background: #263039; border-radius: 4px; padding: 0 5px; font-size: 11px; }
+  .btns button { flex: 1; text-transform: capitalize; }
+  .btns button.on { background: #ff4d2e; color: #0b0c0d; box-shadow: none; font-weight: 700; }
+  kbd { font: 500 11px/1 "Roboto Mono", ui-monospace, monospace; background: rgba(255, 255, 255, .1); border-radius: 4px; padding: 2px 6px; color: #f3f1ec; }
 </style>
 </head>
 <body>
-<header>
-  <b>Scar review</b>
+<header class="bar">
+  <a class="brand" href="index.html"><svg viewBox="0 0 48 40" width="24" height="20" aria-hidden="true"><path d="M3 36 L18 10 L26 23 L32 15 L45 36 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>SLOPEWATCH</a>
+  <h1>Scar review</h1><span class="sp"></span><span id="prog"></span><button id="export">Export review.json</button>
   <p>Each card is one patch that lost vegetation between 12 June and 6 August 2026 and was still bare on 2 October. Decide: a <b>failure</b> (fresh scar running downslope), <b>logging</b> or other clearing (blocky, beside roads or older cuts), or <b>unclear</b>. Keys <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>, arrows to move. Only "failure" becomes a label.</p>
-  <span class="sp"></span><span id="prog"></span><button id="export">Export review.json</button>
 </header>
 <div id="grid"></div>
 <script type="module">

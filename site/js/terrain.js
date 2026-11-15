@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { fetchBin } from './data.js';
+import { fetchBin } from './data.js?v=2';
 
 // Colour ramps: one source for both the shader and the legends (sRGB hex stops).
 export const RAMPS = {
@@ -43,10 +43,11 @@ void main() {
 }`;
 
 const FRAG = /* glsl */`
-uniform sampler2D tNormal, tUnitId, tA, tB, tC, tRamp, tImgA, tImgB, tRadar, tCoast;
+uniform sampler2D tNormal, tUnitId, tA, tB, tC, tD, tRamp, tImgA, tImgB, tRadar, tCoast;
 uniform vec2 uSize40, uHalf;
 uniform float uHalo;
 uniform int uMode, uTrack;
+uniform float uRain;
 uniform float uK, uExag, uTime, uOverlay, uImgMix, uImgOn, uRadarOn, uSel, uHover, uCounty, uMoveScale, uEdges, uRevealOn, uRevealP;
 uniform vec2 uScanO[3], uScanD[3], uRevealO, uRevealD;
 uniform float uScanP[3], uScanI[3];
@@ -91,6 +92,18 @@ vec4 unitColor(vec2 uv, out float glow) {
     c = vec4(ramp(1.0, v), smoothstep(0.06, 0.34, v) * 0.92);
   } else if (uMode == 5) {
     if (C.a < 0.0) c = vec4(0.0); else c = vec4(ramp(3.0, C.a), 0.88);
+  } else if (uMode == 8) {                                  // speed along the slope from the time-series inversion; faint inside the error bar
+    vec4 Dd = texelFetch(tD, q, 0);
+    if (Dd.g < -900.0) c = vec4(uLevelC[0], 0.35 * hatch());
+    else if (Dd.g > 900.0) c = vec4(0.0);
+    else { float v = clamp(Dd.g / 30.0, -1.0, 1.0); float sig = smoothstep(1.0, 4.0, abs(Dd.b)); c = vec4(ramp(2.0, v * 0.5 + 0.5), 0.08 + 0.86 * sig); glow = A.a > 0.5 ? 0.3 + 0.5 * (0.5 + 0.5 * sin(uTime * 2.2 + fract(id * 0.618034) * 6.2832)) : 0.0; }
+  } else if (uMode == 7) {                                  // forecast rain against the heaviest rain the slope has stood through
+    float rec = texelFetch(tD, q, 0).r; int l = int(A.r + 0.5);
+    if (rec > 0.0 && uRain > rec) {
+      if (l == 3) { float ph = fract(id * 0.618034); c = vec4(uLevelC[3], 0.95); glow = 0.3 + 0.5 * (0.5 + 0.5 * sin(uTime * 2.2 + ph * 6.2832)); }
+      else if (l == 2) c = vec4(uLevelC[2] * 0.85, 0.6);
+      else c = vec4(0.30, 0.52, 0.86, 0.2);
+    } else c = vec4(uLevelC[1], l >= 2 ? 0.16 : 0.05);
   }
   if (uCounty > 0.5 && abs(B.a - uCounty) > 0.5) { c.a *= 0.1; glow = 0.0; }
   return c;
@@ -226,15 +239,18 @@ export class Terrain {
     const TW = 1024, TH = Math.ceil((n + 1) / TW);
     this.TW = TW; this.TH = TH;
     const mk = () => { const a = new Float32Array(TW * TH * 4); const t = new THREE.DataTexture(a, TW, TH, THREE.RGBAFormat, THREE.FloatType); t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true; return [a, t]; };
-    const [a, tA] = mk(), [b, tB] = mk(), [c, tC] = mk();
+    const [a, tA] = mk(), [b, tB] = mk(), [c, tC] = mk(), [d, tD] = mk();
     const C = D.col;
     for (let u = 0; u < n; u++) {
       const k = (u + 1) * 4;
       a[k] = C.level[u]; a[k + 1] = C.pct[u]; a[k + 2] = Number.isFinite(C.dnbr[u]) ? C.dnbr[u] : 0; a[k + 3] = C.moving[u];
       b[k] = C.cum_125[u]; b[k + 1] = C.cum_032[u]; b[k + 2] = C.cum_024[u]; b[k + 3] = C.county[u];
-      c[k] = c[k + 1] = c[k + 2] = 999; c[k + 3] = -1;
+      c[k] = c[k + 1] = c[k + 2] = 999; c[k + 3] = -1; d[k] = C.rec48 ? C.rec48[u] : 0;
+      // solved speed along the slope (mm a month) and how many error bars it is from zero; -999 = seen from one side only, 999 = no radar here
+      const solved = C.vd && Number.isFinite(C.vd[u]) && C.vds[u] > 0;
+      d[k + 1] = solved ? C.vd[u] : (!C.vd || (D.korea && !(C.rcov[u] > 0))) ? 999 : -999; d[k + 2] = solved ? C.vd[u] / C.vds[u] : 0;
     }
-    tA.needsUpdate = tB.needsUpdate = true;
+    tA.needsUpdate = tB.needsUpdate = tD.needsUpdate = true;
     this.dyn = c; this.tC = tC;
     const tId = new THREE.DataTexture(D.unitid, D.W40, D.H40, THREE.RGBAFormat, THREE.UnsignedByteType);
     tId.minFilter = tId.magFilter = THREE.NearestFilter; tId.generateMipmaps = false; tId.needsUpdate = true;
@@ -247,7 +263,7 @@ export class Terrain {
     this.loadTex = tex;
     const lc = (h) => new THREE.Color().setStyle(h);
     this.uniforms = {
-      tNormal: { value: tex('data/normal.jpg', false) }, tUnitId: { value: tId }, tA: { value: tA }, tB: { value: tB }, tC: { value: tC },
+      tNormal: { value: tex('data/normal.jpg', false) }, tUnitId: { value: tId }, tA: { value: tA }, tB: { value: tB }, tC: { value: tC }, tD: { value: tD }, uRain: { value: 120 },
       tRamp: { value: rampTexture() }, tImgA: { value: blank }, tImgB: { value: blank }, tRadar: { value: blank },
       uSize40: { value: new THREE.Vector2(D.W40, D.H40) }, tCoast: { value: D.korea ? this.coastTexture() : blank }, uHalo: { value: D.korea ? 1 : 0 }, uHalf: { value: new THREE.Vector2(Wkm / 2, Hkm / 2) }, uMode: { value: 1 }, uTrack: { value: 0 }, uK: { value: D.k },
       uExag: { value: D.view.exag }, uTime: { value: 0 }, uOverlay: { value: 0.92 }, uImgMix: { value: 0 }, uImgOn: { value: 0 }, uRadarOn: { value: 0 },

@@ -62,6 +62,13 @@ R["label"] = (agg((C9["label"] > 0.5) & seen, "max") > 0.5)
 R["moving"] = agg(C9["moving"], "max") > 0.5
 R["det"] = agg(C9["det"], "max"); R["zmax"] = agg(C9["zmax"], "max")
 R["regional_pct_max"] = agg(C9["pct"], "max")
+# downslope rate from the regional time-series inversion: the child slope whose rate stands furthest above its error bar
+for k_ in ("vd", "vds", "vpre", "vstep"): R[k_] = np.full(N, np.nan, "float32")
+if "vd" in C9:
+    zc = np.abs(C9["vd"] / C9["vds"]); zc = np.where(np.isfinite(zc), zc, -1.0)[ok]
+    o = np.lexsort((zc, p)); last = np.r_[p[o][1:] != p[o][:-1], True]; pick = o[last][zc[o[last]] >= 0]
+    for k_ in ("vd", "vds", "vpre", "vstep"):
+        if k_ in C9: R[k_][p[pick]] = C9[k_][ok][pick]
 for t in TR:
     meas = C9[f"meas_{t}"] > 0.5
     R[f"meas_{t}"] = agg(meas.astype("float32"), "max") > 0.5

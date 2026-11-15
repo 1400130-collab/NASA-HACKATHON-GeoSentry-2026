@@ -4,14 +4,14 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { loadAll, DAYS, AREA } from './data.js';
-import { Terrain } from './terrain.js';
-import { Satellite, Rain, Clouds, Beacon, PastMarks, makeVectors } from './fx.js?v=3';
-import { UI } from './ui.js?v=7';
+import { loadAll, DAYS, AREA } from './data.js?v=2';
+import { Terrain } from './terrain.js?v=4';
+import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=11';
+import { UI } from './ui.js?v=15';
 
 const qs = new URLSearchParams(location.search);
 const quality = qs.get('q') || ((navigator.hardwareConcurrency || 8) <= 4 || /Mobi|Android/i.test(navigator.userAgent) ? 'mid' : 'high');
-const MODE_ID = { img: 0, level: 1, suscept: 2, move: 3, burn: 4, coh: 5, ifg: 6, past: 0 };      // past landslides: bare relief under the markers
+const MODE_ID = { img: 0, level: 1, suscept: 2, move: 3, burn: 4, coh: 5, ifg: 6, past: 0, rain: 7, speed: 8 };      // past landslides: bare relief under the markers
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -46,7 +46,7 @@ function resize() {
 }
 addEventListener('resize', resize); resize();
 
-const app = { state: { mode: 'level', track: 0, img: null, tc: true, day: DAYS - 1, playing: false, sel: -1, hover: -1, county: 0, prov: 0, clouds: false, story: null } };
+const app = { state: { mode: 'level', track: 0, img: null, tc: true, day: DAYS - 1, playing: false, sel: -1, hover: -1, county: 0, prov: 0, clouds: false, story: null, rain: 120 } };
 const bar = document.getElementById('introBar'), msg = document.getElementById('introMsg');
 const D = app.D = await loadAll((f, k) => { bar.style.width = `${f * 82}%`; msg.textContent = `Loaded ${k}`; });
 if (D.korea) {                                                  // city districts arrive as "Buk-gu" or "Suwonsijangangu": name them after their city
@@ -71,6 +71,8 @@ Object.values(vectors).forEach((v) => scene.add(v));
 const sats = D.tracks.map((t, i) => new Satellite(t.id, i, terrain)); sats.forEach((s) => scene.add(s.group));
 const rain = new Rain(D), clouds = new Clouds(D), beacon = new Beacon();
 scene.add(rain.mesh, clouds.mesh, beacon.group);
+const debris = app.debris = D.runout ? new Debris(D, U.uExag, terrain) : null;                    // simulated debris flows (regional map)
+if (debris) scene.add(debris.points);
 const past = D.past ? new PastMarks(D, D.past.events) : null;
 if (past) scene.add(past.group);
 
@@ -157,8 +159,10 @@ app.setImage = (k, manual) => {
   terrain.setImage(key, `${D.base}s2_${key}.jpg`); ui.image(k);
 };
 app.setTrueColour = (on) => { app.state.tc = on; app.setImage(app.state.img); ui.legend(); };
+app.setRain = (mm) => { app.state.rain = mm; U.uRain.value = mm; ui.rain(mm); };      // forecast, mm in 48 h (rain layer)
 app.setExag = (v) => { U.uExag.value = v; if (app.state.sel >= 0) placeBeacon(app.state.sel); };
-app.setToggle = (k, on) => { if (k === 'labels') labelsOn = on; else if (k === 'edges') U.uEdges.value = on ? 1 : 0; else { vectors[k].visible = on; if (k === 'borders' && vectors.provinces) vectors.provinces.visible = on; } };
+let dimmed = null;                                             // the slope colours fade while the flows play, so the flows are what you see
+app.setToggle = (k, on) => { if (k === 'debris') { if (!on) { debris.clear(); if (dimmed !== null) U.uOverlay.value = dimmed; dimmed = null; } else { if (dimmed === null) dimmed = U.uOverlay.value; U.uOverlay.value = 0.12; debris.fireAll(); if (D.korea) flyTo({ x: D.region.x, z: D.region.z + 1, dist: 24, polar: 0.82, az: -0.2, dur: 2.6 }); } } else if (k === 'labels') labelsOn = on; else if (k === 'edges') U.uEdges.value = on ? 1 : 0; else { vectors[k].visible = on; if (k === 'borders' && vectors.provinces) vectors.provinces.visible = on; } };
 app.setCounty = (id) => {
   app.state.county = id; U.uCounty.value = id; ui.list(); const c = D.meta.counties.find((c) => c.id === id);
   if (c && c.cx !== null) flyTo({ x: D.sx(c.cx), z: D.sz(c.cz), dist: D.view.countyDist, polar: 0.8, az: -0.2 });
@@ -174,6 +178,7 @@ function placeBeacon(u) { const x = D.sx(D.col.x[u]), z = D.sz(D.col.z[u]); beac
 app.select = (u, fly) => {
   app.state.sel = u; U.uSel.value = u >= 0 ? u + 1 : -1;
   if (u >= 0) { placeBeacon(u); ui.tab('detail'); if (fly) app.flyToUnit(u); } else beacon.hide();
+  if (debris && D.runout.local) debris.focus(u >= 0 ? (D.runout.flow.get(u) ?? -1) : -1);
   ui.detail(); document.querySelectorAll('.item').forEach((el) => el.classList.toggle('sel', +el.dataset.u === u));
 };
 // moving through time: step the data, fire a sweep for every NISAR pass that is crossed
@@ -201,6 +206,14 @@ app.story = async () => {
   const tok = app.state.story = { cancel: false }, st = app.state, L = D.meta.levels, A = D.meta.anomaly;
   const wait = async (s) => { const end = performance.now() + s * 1000; while (performance.now() < end) { if (tok.cancel) throw 0; await sleep(50); } };
   const run = async (from, to, secs) => { const t0 = performance.now(); st.day = from; for (;;) { const f = Math.min(1, (performance.now() - t0) / (secs * 1000)); app.setDay(from + (to - from) * f); if (f >= 1) break; if (tok.cancel) throw 0; await sleep(16); } };
+  // physics: let every flagged slope go, then follow one flow down to the houses it reaches
+  const flows = async () => {
+    const I = D.runout.info, f = D.runout.flow.get(I.show.unit), [x, z] = debris.centre(f), az = Math.PI - (I.show.dir + 35) * Math.PI / 180;
+    ui.caption('x', { n: I.n.toLocaleString(), b: I.reach.toLocaleString() });
+    U.uMode.value = 0; app.imgT = 0; debris.fireAll();              // bare relief under the flows
+    flyTo({ x, z, dist: 15 / D.k, polar: 1.0, az, dur: 5 }); await wait(8.5);
+    debris.focus(f); flyTo({ x, z, dist: 3.4 / D.k, polar: 1.12, az, dur: 4 }); await wait(8.5); debris.focus(-1);
+  };
   document.body.classList.add('story'); app.pause(); app.select(-1); app.setCounty0?.();
   const sel0 = { mode: st.mode, day: st.day };
   try {
@@ -213,6 +226,7 @@ app.story = async () => {
       ui.caption(3); app.setTrack(2); await terrain.setRadar('024'); app.setMode('ifg'); at(2, 0, 30, 0.7, 0.1, 5); await run(48.5, 50.4, 2.5); await wait(4.5);
       ui.caption(4, { n: (L.radar_measured || 0).toLocaleString(), m: L.moving_units, d: A.detect80_cm_well_oriented?.toFixed(0) ?? '8' });
       app.setTrack(0); app.setMode('move'); at(0, 1, 32, 0.8, -0.3, 7); await run(51, DAYS - 1, 7); await wait(1);
+      if (debris) await flows();
       ui.caption(5, { n: L.levels.check_first.toLocaleString() }); st.tc = D.trueColour; app.setMode('level'); reveal(); flyTo({ ...home(), dur: 5 }); await wait(7);
     } else {
     ui.caption(0); app.imgManual = true; app.setMode('img'); app.setImage('prefire_20250314'); st.day = 0; app.setDay(0);
@@ -222,12 +236,13 @@ app.story = async () => {
     ui.caption(3); app.setTrack(2); await terrain.setRadar('024'); app.setMode('ifg'); flyTo({ x: 16, z: 0, dist: 112, polar: 0.7, az: 0.1, dur: 5 }); await run(48.5, 50.4, 2.5); await wait(4.5);
     ui.caption(4, { n: (D.n - L.levels.not_measurable).toLocaleString(), m: L.moving_units, d: A.detect80_cm_well_oriented?.toFixed(0) ?? '8' });
     app.setTrack(0); app.setMode('move'); flyTo({ x: 0, z: 6, dist: 118, polar: 0.8, az: -0.3, dur: 7 }); await run(51, DAYS - 1, 7); await wait(1);
+    if (debris) await flows();
     ui.caption(5, { n: L.levels.check_first.toLocaleString() }); app.setMode('level'); reveal(); flyTo({ ...home(), dur: 4 }); await wait(6.5);
     }
   } catch (e) { if (e !== 0) throw e; }
   ui.caption(null); document.body.classList.remove('story'); app.state.story = null; app.imgManual = false; st.tc = D.trueColour;
   if (tok.cancel) { app.setMode(sel0.mode); app.setDay(sel0.day, true); } else app.setDay(DAYS - 1, true);
-  clouds.target = 0;
+  clouds.target = 0; if (debris && !document.querySelector('input[data-k="debris"]')?.checked) debris.clear();
 };
 document.getElementById('capSkip').onclick = () => app.stopStory();
 let revealing = false;
@@ -274,7 +289,7 @@ function tick(now) {
     ui.hoverTip(u, ptr[0], ptr[1]);
   }
   const settling = Math.abs(app.imgT - U.uImgOn.value) > 0.003 || Math.abs(app.radT - U.uRadarOn.value) > 0.003;
-  const hot = app.state.playing || tween || app.state.story || revealing || down || settling || beacon.group.visible || now < hotUntil;   // the selection beacon pulses, so it needs every frame
+  const hot = app.state.playing || tween || app.state.story || revealing || down || settling || beacon.group.visible || debris?.active || now < hotUntil;   // the selection beacon pulses, so it needs every frame
   const due = softAt && now >= softAt;
   const gap = hot ? HOT_GAP : due ? 0 : LIVE ? 48 : Infinity;
   if (now - lastFrame < gap) return;
@@ -292,7 +307,7 @@ function tick(now) {
   }
   controls.update();
   U.uImgOn.value += (app.imgT - U.uImgOn.value) * Math.min(1, dt * 4); U.uRadarOn.value += (app.radT - U.uRadarOn.value) * Math.min(1, dt * 4);
-  terrain.update(dt, time); sats.forEach((s) => s.update(dt, time)); rain.update(dt, time); clouds.update(dt, time);
+  terrain.update(dt, time); debris?.update(dt, camera, renderer); sats.forEach((s) => s.update(dt, time)); rain.update(dt, time); clouds.update(dt, time);
   if (revealing) { U.uRevealP.value = U.uScanP.value[0]; if (!sats[0].active) { revealing = false; U.uRevealOn.value = 0; } }
   if (beacon.group.visible) beacon.update(time, camera.position.distanceTo(beacon.group.position));
   if (past?.group.visible) past.update(camera, U.uExag.value);

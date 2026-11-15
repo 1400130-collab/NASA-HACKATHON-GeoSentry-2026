@@ -13,6 +13,16 @@ export async function fetchBin(url) {
 }
 const json = (u) => fetch(u).then((r) => r.json());
 
+// Simulated debris flows (pipeline p11, regional map only). Layout: u32 flows | u32 unit[flows] | u32 count[flows] |
+// u16 col[cells] | u16 row[cells] (10 m grid) | u8 arrival (0.5 s) | u8 deepest depth (2 cm) | u8 also covered in the best-fit case
+function parseRunout(b) {
+  const nf = new DataView(b.buffer, b.byteOffset, 4).getUint32(0, true), cut = (o, n, T) => new T(b.buffer.slice(b.byteOffset + o, b.byteOffset + o + n * T.BYTES_PER_ELEMENT));
+  const unit = cut(4, nf, Uint32Array), count = cut(4 + 4 * nf, nf, Uint32Array), off = new Uint32Array(nf + 1), flow = new Map();
+  for (let i = 0; i < nf; i++) { off[i + 1] = off[i] + count[i]; flow.set(unit[i], i); }
+  const m = off[nf], o = 4 + 8 * nf;
+  return { nf, m, unit, off, flow, col: cut(o, m, Uint16Array), row: cut(o + 2 * m, m, Uint16Array), t: b.subarray(o + 4 * m, o + 5 * m), d: b.subarray(o + 5 * m, o + 6 * m), k: b.subarray(o + 6 * m, o + 7 * m) };
+}
+
 export const AREA = new URLSearchParams(location.search).get('area') === 'region' ? 'region' : 'korea';
 export const BASE = AREA === 'region' ? 'data/' : 'data/korea/';
 export const DAY0 = Date.UTC(2026, 5, 1);
@@ -41,6 +51,10 @@ export async function loadAll(onProgress, base = BASE) {
   await Promise.all(Object.entries(jobs).map(async ([k, f]) => { out[k] = await f(); onProgress(++done / n, k); }));
 
   const m = out.meta, n_ = m.units.n, korea = m.scope === 'korea';
+  // Simulated debris flows live in the regional build. The nationwide map borrows them: the regional meta carries a
+  // lattice of its grid in this map's projection, so the cells can be placed without a projection library.
+  const rm = m.runout ? m : (korea && m.region ? await json('data/meta.json').catch(() => null) : null);
+  const runout = rm && rm.runout && rm.flows ? await fetchBin((m.runout ? base : 'data/') + 'runout.bin.gz').then(parseRunout).catch(() => null) : null;
   const f32 = new Float32Array(out.units.buffer, out.units.byteOffset, out.units.byteLength / 4);
   const col = {};
   m.units.cols.forEach((c, i) => { col[c] = f32.subarray(i * n_, (i + 1) * n_); });
@@ -51,7 +65,7 @@ export async function loadAll(onProgress, base = BASE) {
   const h = new Float32Array(h16.length);
   for (let i = 0; i < h.length; i++) h[i] = h16[i] / m.grid.height_scale / 1000 / k;      // scene units
   const D = {
-    meta: m, vectors: out.vectors, rain: out.rain, cands: out.cands, base, korea, k,
+    meta: m, vectors: out.vectors, rain: out.rain, cands: out.cands, base, korea, k, runout,
     n: n_, col, h, H80: m.grid.h80[0], W80: m.grid.h80[1], H40: m.grid.h40[0], W40: m.grid.h40[1],
     Wkm: m.grid.w_km, Hkm: m.grid.h_km, Ws: m.grid.w_km / k, Hs: m.grid.h_km / k, unitid: out.unitid,
     series: new Int16Array(out.series.buffer, out.series.byteOffset, out.series.byteLength / 2), coh: out.coh, nd: m.units.nd,
@@ -61,6 +75,16 @@ export async function loadAll(onProgress, base = BASE) {
       : { exag: 2.6, exagMax: 5, unitDist: 9, countyDist: 62, provDist: 62, minDist: 2.5, near: 0.5 },
   };
   D.sx = (kmx) => kmx / k - D.Ws / 2; D.sz = (kmz) => kmz / k - D.Hs / 2;
+  if (runout) {
+    const F = rm.flows, g = m.grid;
+    runout.local = !korea;                                    // unit numbers in the file are this map's own slopes
+    runout.info = { n: rm.runout.simulated_slopes, reach: rm.levels.runout.exposed_sim_far, show: F.show };
+    runout.at = korea ? (col, row) => {                       // 10 m cell -> scene x, z
+      const fx = Math.min(Math.max((col + 0.5) * 0.01 / F.w_km * (F.nx - 1), 0), F.nx - 1.0001), fz = Math.min(Math.max((row + 0.5) * 0.01 / F.h_km * (F.nz - 1), 0), F.nz - 1.0001);
+      const j = fx | 0, i = fz | 0, a = fx - j, b = fz - i, q = i * F.nx + j, mix = (v) => (v[q] * (1 - a) + v[q + 1] * a) * (1 - b) + (v[q + F.nx] * (1 - a) + v[q + F.nx + 1] * a) * b;
+      return [D.sx((mix(F.e) - g.x0) / 1000), D.sz((g.y1 - mix(F.n)) / 1000)];
+    } : (col, row) => [D.sx((col + 0.5) * 0.01), D.sz((row + 0.5) * 0.01)];
+  }
   D.hAt = (x, z) => {
     const fx = Math.min(Math.max((x / D.Ws + 0.5) * D.W80 - 0.5, 0), D.W80 - 1.001);
     const fz = Math.min(Math.max((z / D.Hs + 0.5) * D.H80 - 0.5, 0), D.H80 - 1.001);

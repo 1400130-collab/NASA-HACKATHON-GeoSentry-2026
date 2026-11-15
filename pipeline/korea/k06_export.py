@@ -73,7 +73,12 @@ for t in TR:
     cols[f"cum_{t}"] = Rg[f"cum_{t}"][sl]; cols[f"sig_{t}"] = Rg[f"sig_{t}"][sl]
     cols[f"meas_{t}"] = Rg[f"meas_{t}"][sl]; cols[f"sens_{t}"] = Rg[f"sens_{t}"][sl]
     cols[f"cohpre_{t}"] = Rg[f"cohpre_{t}"][sl]; cols[f"cohstorm_{t}"] = Rg[f"cohstorm_{t}"][sl]
+for k_ in ("vd", "vds", "vpre", "vstep"): cols[k_] = Rg[k_][sl]
 cols["prov"] = U["prov"][sl]; cols["rcov"] = Rg["inreg"][sl]; cols["rain_season"] = U["rain_season"][sl]
+# debris reach per slope (k04b): cautious friction, best-fit friction, and where it came from (1 ML model 3, 2 GPU simulation)
+REACH = json.load(open(WORK / "reach_stats.json")) if (WORK / "reach_stats.json").exists() else None
+if REACH:
+    Rc = np.load(WORK / "reach.npz"); cols["reach"] = Rc["reach"][sl]; cols["reach_fit"] = Rc["reach_fit"][sl]; cols["reach_src"] = Rc["src"][sl]
 cols["ndvi_latest"] = U["ndvi_latest"][sl] if "ndvi_latest" in U.files else nan
 gz("units.bin.gz", np.stack([np.asarray(v, "float32") for v in cols.values()], 0).astype("<f4"))
 
@@ -221,9 +226,10 @@ meta = {
     "provinces": [{k: p[k] for k in ("id", "en", "ko", "units", "cx", "cz", "lx", "lz")} for p in prv],
     "tracks": RM["tracks"], "radar": RM["radar"],
     "s2": [i["median_date"] for i in images], "images": images,
-    "storm": RM["storm"], "series": RM["series"], "labels": lab, "suscept": SS, "anomaly": RM["anomaly"], "levels": LS,
+    "storm": RM["storm"], "series": RM["series"], "labels": lab, "suscept": SS, "anomaly": RM["anomaly"], "velocity": RM.get("velocity"), "sign": RM.get("sign"), "levels": LS,
     "region": {"bbox_km": [float(v) for v in (*km(*tf.transform(128.30, 36.85)), *km(*tf.transform(129.50, 36.15)))],
                "regional_meta": {"units": RM["units"]["n"], "check_first": RM["levels"]["levels"]["check_first"]}},
+    "reach": REACH,
     "sources": {"s2": "Microsoft Planetary Computer, sentinel-2-l2a (first clear pixel, least cloudy scene first)",
                 "dem": "Copernicus DEM GLO-30/GLO-90", "landcover": "ESA WorldCover 2021", "forest": "Hansen GFC v1.13",
                 "rain": "ERA5 via Open-Meteo, 0.2 degree", "boundaries": "KOSTAT 2018 (southkorea-maps)", "osm": "OpenStreetMap (Geofabrik)",
