@@ -31,6 +31,8 @@ a { color: inherit; text-decoration: underline; text-decoration-color: var(--mut
 a:hover { color: var(--red); text-decoration-color: var(--red); }
 img { max-width: 100%; height: auto; display: block; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 clamp(32px, 5vw, 64px); }
+/* home page hero (first slide only): wider, tighter side margins */
+#hero .wrap, .masthead.on-hero .wrap { max-width: 1680px; padding: 0 clamp(24px, 3vw, 48px); }
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .small { font-size: 14px; color: var(--ink2); }
 .dim { color: var(--mute); }
@@ -438,7 +440,7 @@ html.js .bars.rv.in i { transform: none; }
 
 @media (max-width: 900px) {
   body { font-size: 16px; }
-  .wrap { padding: 0 20px; }
+  .wrap, #hero .wrap, .masthead.on-hero .wrap { padding: 0 20px; }
   .masthead .wrap { gap: 14px; height: 60px; }
   .masthead nav { gap: 16px; font-size: 13.5px; }
   .masthead nav a.go { display: none; }

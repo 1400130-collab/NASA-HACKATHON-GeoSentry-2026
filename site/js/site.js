@@ -548,7 +548,7 @@ if (slides.length) {
   tick.push(() => {
     const y = scrollY + 1, mid = y + innerHeight * 0.5, bar0 = y + barH / 2;
     let cur = 0, top = 0, cut = 0; tops.forEach((t, i) => { if (t <= mid) cur = i; if (t <= bar0) top = i; if (i && t > y && t < y + barH - 1) cut = i; });
-    if (top !== under) { under = top; document.body.dataset.slide = slides[top].dataset.slide; if (head) head.dataset.slide = slides[top].dataset.slide; }
+    if (top !== under) { under = top; document.body.dataset.slide = slides[top].dataset.slide; if (head) { head.dataset.slide = slides[top].dataset.slide; head.classList.toggle('on-hero', slides[top].id === 'hero'); } }
     const f = cut ? `linear-gradient(${inks[cut - 1]} ${(tops[cut] - scrollY).toFixed(1)}px, ${inks[cut]} 0)` : inks[top];
     if (head && f !== fill) { fill = f; head.style.setProperty('--fill', f); }
     if (cur !== shown) {
