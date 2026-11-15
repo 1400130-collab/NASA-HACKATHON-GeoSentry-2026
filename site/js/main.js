@@ -8,7 +8,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { loadAll, DAYS, AREA } from './data.js?v=3';
 import { Terrain } from './terrain.js?v=25';
 import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=32';
-import { UI } from './ui.js?v=24';
+import { UI } from './ui.js?v=26';
 import { World } from './world.js?v=17';
 import { makeGeo } from './world-geo.js';
 

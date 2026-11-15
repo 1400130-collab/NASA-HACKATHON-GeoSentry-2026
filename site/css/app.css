@@ -564,3 +564,62 @@ body.story #xp { display: none; }
 @media (max-width: 1180px) { .lfilt select { font-size: 12px; padding-left: 9px; } }
 /* short windows: the rail scrolls, so it fades out above the timeline instead of being cut */
 @media (max-height: 600px) { #left { padding-bottom: 30px; -webkit-mask-image: linear-gradient(#000 calc(100% - 30px), transparent); mask-image: linear-gradient(#000 calc(100% - 30px), transparent); } }
+
+/* ---- what to do now: one slope's coordinates to copy, three steps, and a printed form for every listed slope ---- */
+#tabs button.act::before { content: ""; display: inline-block; width: 5px; height: 5px; margin-right: 6px; border-radius: 50%; vertical-align: 2px; background: var(--red); }
+#tabs { gap: 13px; } #tabs button { font-size: 12.5px; }      /* four tabs in the panel's width */
+@media (max-width: 1260px) { #tabs { gap: 9px; } #tabs button { font-size: 12px; } #tabs button.act::before { margin-right: 5px; } }
+.wkick { margin: 2px 0 9px; font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+.wh { margin: 0 0 18px; font-size: clamp(26px, 2.5vw, 32px); font-weight: 800; letter-spacing: -.045em; line-height: 1; }
+.wtgt { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 0 0 14px; box-shadow: inset 0 -1px 0 var(--line); }
+.wtgt > div { min-width: 0; }
+.wtgt span { display: block; font: 500 10px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.wtgt b { display: block; margin-top: 6px; font-size: 19px; font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
+.wtgt em { font-style: normal; font-size: 44px; font-weight: 800; letter-spacing: -.06em; line-height: .8; font-variant-numeric: tabular-nums; color: var(--ink2); }
+.wtgt.l3 em { color: var(--red); } .wtgt.l2 em { color: var(--amber); } .wtgt.l1 em { color: #b9dbe5; }
+.wsteps { list-style: none; margin: 18px 0 6px; padding: 0; }
+.wsteps > li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding-bottom: 20px; }
+.wsteps > li::before { content: ""; position: absolute; left: 13.5px; top: 34px; bottom: 6px; width: 1px; background: var(--line); }
+.wsteps > li:last-child::before { content: none; }
+.wsteps > li > i { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 10px/1 var(--mono); font-style: normal; color: var(--red); box-shadow: inset 0 0 0 1px rgba(255, 77, 46, .55); }
+.wsteps > li > div > b { display: block; font-size: 15.5px; font-weight: 700; letter-spacing: -.02em; line-height: 28px; }
+.wsteps p { margin: 0; color: var(--ink2); font-size: 12.5px; line-height: 1.4; }
+.wsteps .links { margin-top: 10px; }
+/* the coordinates: the whole card is the copy button */
+.wcoord { position: relative; display: block; width: 100%; margin-top: 6px; padding: 14px 14px 12px; border-radius: 8px; overflow: hidden; color: var(--ink);
+  background: linear-gradient(120deg, rgba(255, 77, 46, .24), rgba(255, 77, 46, .05) 62%), var(--bg2); box-shadow: inset 0 0 0 1px rgba(255, 77, 46, .4); transition: box-shadow .15s, background-color .15s; }
+.wcoord:hover { box-shadow: inset 0 0 0 1px var(--red); }
+.wcoord .aim { position: absolute; right: -14px; top: 50%; width: 96px; height: 96px; margin-top: -48px; color: var(--red); opacity: .38; stroke-width: 1; animation: aim 5s var(--ease) infinite; }
+.wcoord .aim .dot { fill: var(--red); }
+.wcoord .ll { position: relative; display: grid; gap: 5px; font: 600 clamp(19px, 1.7vw, 23px)/1 var(--mono); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.wcoord .ll small { margin-left: 3px; font-size: .55em; font-weight: 500; letter-spacing: 0; color: var(--ink2); }
+.wcoord .hint { position: relative; display: flex; align-items: center; gap: 6px; margin-top: 12px; font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink2); }
+.wcoord .hint svg { width: 12px; height: 12px; }
+.wcoord.ok { box-shadow: inset 0 0 0 1px var(--ink); } .wcoord.ok .hint { color: var(--ink); }
+@keyframes aim { 50% { transform: scale(1.12); opacity: .2; } }
+/* shared by every copy control: the copy icon and label give way to a tick while "ok" is on */
+.i1, .c1, .ok > .i0, .ok > .c0, .ok .hint .i0, .ok .hint .c0 { display: none; }
+.ok > .i1, .ok > .c1, .ok .hint .i1, .ok .hint .c1 { display: inline-block; }
+/* the printed form, as a page */
+.wpaper { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; margin-top: 6px; padding: 12px 14px 12px 12px; border-radius: 8px; text-decoration: none; color: #0b0c0d; background: var(--red); transition: background .15s; }
+.wpaper:hover { background: var(--ink); }
+.wpaper .pg { position: relative; display: grid; align-content: start; gap: 4px; width: 38px; height: 50px; padding: 8px 6px 0; border-radius: 2px; background: #f3f1ec; box-shadow: 0 6px 14px rgba(11, 12, 13, .35); transform: rotate(-4deg); transition: transform .25s var(--ease); }
+.wpaper:hover .pg { transform: rotate(0) translateY(-2px); }
+.wpaper .pg s { display: block; height: 2px; background: rgba(11, 12, 13, .28); } .wpaper .pg s:first-child { height: 6px; width: 60%; background: #ff4d2e; } .wpaper .pg s:last-child { width: 70%; }
+.wpaper b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+.wpaper small { display: block; margin-top: 3px; font-size: 11.5px; line-height: 1.35; color: rgba(11, 12, 13, .72); }
+.wpaper .go { width: 16px; height: 16px; }
+/* every listed slope: copy its coordinates, open its form */
+#tab-todo h3.hd { margin: 8px 0 6px; }
+.wrow { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto auto; gap: 6px; align-items: center; margin: 0 -10px; padding: 7px 10px; border-radius: 4px; cursor: pointer; transition: background .12s; }
+.wrow:hover { background: rgba(255, 255, 255, .06); }
+.wrow.sel { background: rgba(255, 77, 46, .16); box-shadow: inset 2px 0 0 var(--red); }
+.wrow .rk { font: 10.5px/1 var(--mono); color: var(--mute); }
+.wrow > div { min-width: 0; }
+.wrow b { display: block; font-size: 14px; font-weight: 600; letter-spacing: -.015em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wrow small { display: block; margin-top: 4px; font: 11px/1 var(--mono); color: var(--mute); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.wic { width: 30px; height: 30px; border-radius: 6px; display: grid; place-items: center; color: var(--ink2); background: var(--bg2); transition: color .15s, background .15s; }
+.wic:hover { color: var(--ink); background: var(--bg3); }
+.wic.sheet { color: var(--red); } .wic.sheet:hover { color: #0b0c0d; background: var(--red); }
+.wic.ok, #tdAll.ok { color: #0b0c0d; background: var(--ink); }
+.wic.ok > .i1 { display: block; }

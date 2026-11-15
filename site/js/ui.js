@@ -1,4 +1,4 @@
-import { STR, reason, compass } from './i18n.js?v=18';
+import { STR, reason, compass } from './i18n.js?v=19';
 import { addScores, checkOrder } from './score.js';
 import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js?v=24';
 import { DAY0, DAYS, dayOf, AREA } from './data.js?v=3';
@@ -10,6 +10,22 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const S4 = '#c98500';
 const MODES = ['level', 'suscept', 'move', 'speed', 'burn', 'img'], ADV = ['coh', 'ifg'], AI_MODES = ['level', 'suscept'];
 const LV_ICON = ['?', '·', '!', '!!'];
+// icons of the "what to do now" tab
+const svg = (c, d) => `<svg class="${c}" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC = {
+  copy: svg('i0', '<rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 2.5h-6a2 2 0 0 0-2 2v6"/>'),
+  ok: svg('i1', '<path d="M3 8.5l3.2 3.2L13 4.8"/>'),
+  sheet: svg('', '<path d="M4 1.5h5.5L12.5 4.5v10h-8.5z"/><path d="M9.5 1.5v3h3M6.2 8h4M6.2 10.8h4"/>'),
+  go: svg('go', '<path d="M3 8h10M9 4l4 4-4 4"/>'),
+  aim: '<svg class="aim" viewBox="0 0 80 80" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="40" cy="40" r="30"/><circle cx="40" cy="40" r="17"/><path d="M40 2v20M40 58v20M2 40h20M58 40h20"/><circle class="dot" cx="40" cy="40" r="3.5" stroke="none"/></svg>',
+};
+// the clipboard API needs a secure page; the old command still works on a plain-http LAN address
+const copyText = async (s) => {
+  try { await navigator.clipboard.writeText(s); } catch {
+    const ta = Object.assign(document.createElement('textarea'), { value: s }); ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.append(ta); ta.select(); try { document.execCommand('copy'); } catch { /* no clipboard at all */ } ta.remove();
+  }
+};
 // what stands behind each layer: the index, a trained model, the solver, or a data source
 const TAG = { level: 'INDEX', suscept: 'ML 1', move: 'InSAR', speed: 'GLS', burn: 'dNBR', img: 'S2', past: 'LOG', rain: 'ERA5', coh: 'γ', ifg: 'φ' };
 
@@ -151,7 +167,7 @@ export class UI {
   tab(name) {
     this.curTab = name;
     document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
-    for (const k of ['list', 'detail', 'numbers']) $(`#tab-${k}`).hidden = k !== name;
+    for (const k of ['list', 'detail', 'numbers', 'todo']) $(`#tab-${k}`).hidden = k !== name;
   }
   mode(m) {
     document.querySelectorAll('.mode').forEach((b) => b.classList.toggle('on', b.dataset.m === m));
@@ -241,6 +257,7 @@ export class UI {
     }).join('');
     if (rows.length > this.shown) h += `<button class="more">${this.t('showMore')}</button>`;
     const el = $('#tab-list'); el.innerHTML = h; this.countUp($('.lhero b', el), rows.length);
+    this.rows = rows; this.tdShown = 12; this.todo();
     $('#county').onchange = (e) => { this.shown = 30; this.app.setCounty(+e.target.value); };
     if (K) $('#prov').onchange = (e) => { this.shown = 30; this.app.setProvince(+e.target.value); };
     el.onclick = (e) => { const it = e.target.closest('.item'); if (it) this.app.select(+it.dataset.u, true); if (e.target.closest('.more')) { this.shown += 40; this.list(); } };
@@ -252,6 +269,7 @@ export class UI {
   // ---- selected slope -----------------------------------------------------------
   detail() {
     const u = this.app.state.sel, el = $('#tab-detail'), D = this.D, C = D.col, t = (k, v) => this.t(k, v);
+    this.todo();
     if (u < 0) { el.innerHTML = `<div class="empty">${t('pick')}</div>`; return; }
     const lv = C.level[u], T = D.tracks;
     let best = -1, bz = -1;
@@ -351,6 +369,46 @@ export class UI {
       tracks.push({ id: tr.id, k: i, days, mm });
     });
     return { u, v, s: C.vds[u], z: v / C.vds[u], v_pre: vpre, step, storm_day: Ts, slope: C.slope[u], moving: !!C.moving[u], tracks };
+  }
+
+  // ---- what to do now: from the list to the hillside ------------------------------------
+  // One slope at the top (the selected one, else the first on the list): its coordinates to copy, a map link and its
+  // printed form. Below it every listed slope with the same two actions.
+  todo() {
+    const el = $('#tab-todo'), C = this.D.col, st = this.app.state, t = (k, v) => this.t(k, v), reg = AREA === 'region' ? '&area=region' : '';
+    const rows = this.rows || this.order, u = st.sel >= 0 ? st.sel : (rows[0] ?? -1);
+    if (u < 0) { el.innerHTML = `<p class="wkick">${t('td_k')}</p><h2 class="wh">${t('td_h')}</h2><div class="empty">${t('td_none')}</div>`; return; }
+    const ll = (x) => `${C.lat[x].toFixed(5)}, ${C.lon[x].toFixed(5)}`, form = (x) => `form.html?u=${x}&lang=${this.lang}${reg}`;
+    const lv = C.level[u], rk = this.rank.get(u), top = rows.slice(0, this.tdShown);
+    const copyBtn = (x) => `<button class="wic" data-copy="${x}" title="${esc(t('copy'))}" aria-label="${esc(t('copy'))}">${IC.copy}${IC.ok}</button>`;
+    el.innerHTML = `<p class="wkick">${t('td_k')}</p><h2 class="wh">${t('td_h')}</h2>
+      <div class="wtgt l${lv}"><div><span>${t(st.sel >= 0 ? 'td_sel' : 'td_first')}${rk ? ' · ' + t('td_rank', { r: rk.toLocaleString(), n: this.order.length.toLocaleString() }) : ''}</span>
+        <b>${esc(this.county(C.county[u], this.D.korea))} #${u}</b></div><em title="${esc(t('sc_dz'))}">${this.dz(u)}</em></div>
+      <ol class="wsteps">
+        <li><i>01</i><div><b>${t('td_s1')}</b>
+          <button class="wcoord" data-copy="${u}">${IC.aim}<span class="ll"><span>${C.lat[u].toFixed(5)}<small>°N</small></span><span>${C.lon[u].toFixed(5)}<small>°E</small></span></span>
+            <span class="hint">${IC.copy}${IC.ok}<span class="c0">${t('td_tap')}</span><span class="c1">${t('copied')}</span></span></button></div></li>
+        <li><i>02</i><div><b>${t('td_s2')}</b><p>${t('td_s2p')}</p>
+          <div class="links"><a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/link/map/GeoSentry,${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}">${t('kakao')}</a><button id="tdFly">${t('fly')}</button></div></div></li>
+        <li><i>03</i><div><b>${t('td_s3')}</b>
+          <a class="wpaper" target="_blank" href="${form(u)}"><i class="pg" aria-hidden="true"><s></s><s></s><s></s><s></s></i><span><b>${t('td_form')} #${u}</b><small>${t('td_s3p')}</small></span>${IC.go}</a></div></li>
+      </ol>
+      <h3 class="hd"><span>${t('td_list')}</span><em>${String(top.length).padStart(2, '0')}</em></h3>
+      ${top.map((x, i) => `<div class="wrow ${x === st.sel ? 'sel' : ''}" data-u="${x}"><span class="rk">${String(i + 1).padStart(3, '0')}</span><div><b>${esc(this.county(C.county[x]))}</b><small>${ll(x)}</small></div>
+        ${copyBtn(x)}<a class="wic sheet" target="_blank" href="${form(x)}" title="${esc(t('form'))}" aria-label="${esc(t('form'))}">${IC.sheet}</a></div>`).join('')}
+      ${rows.length > top.length ? `<button class="more" id="tdMore">${t('showMore')}</button>` : ''}
+      <div class="links"><button id="tdAll">${IC.copy}${IC.ok}<span class="c0">${t('td_all', { n: top.length })}</span><span class="c1">${t('copied')}</span></button><a class="btn" target="_blank" href="${$('#btnSheet').getAttribute('href')}">${t('sheet')}</a></div>`;
+    const flash = (b) => { b.classList.add('ok'); clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove('ok'), 1400); };
+    el.onclick = (e) => {
+      const cp = e.target.closest('[data-copy]'), row = e.target.closest('.wrow');
+      if (cp) { copyText(ll(+cp.dataset.copy)); flash(cp); }
+      else if (e.target.closest('#tdAll')) { copyText(top.map((x, i) => `${i + 1}\t${this.county(C.county[x], this.D.korea)} #${x}\t${ll(x)}`).join('\n')); flash(e.target.closest('#tdAll')); }
+      else if (e.target.closest('#tdFly')) this.app.flyToUnit(u);
+      else if (e.target.closest('#tdMore')) { this.tdShown += 20; this.todo(); }
+      else if (row && !e.target.closest('a')) { this.app.select(+row.dataset.u, true); this.tab('todo'); el.scrollTo({ top: 0, behavior: 'smooth' }); }      // stays on this tab: the slope moves to the top
+    };
+    el.onmouseover = (e) => { const r = e.target.closest('.wrow'); this.app.setHover(r ? +r.dataset.u : -1); };
+    el.onmouseleave = () => this.app.setHover(-1);
   }
 
   // ---- the three numbers -----------------------------------------------------------

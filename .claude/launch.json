@@ -48,6 +48,18 @@
         "site"
       ],
       "port": 5176
+    },
+    {
+      "name": "geosentry-drone-tmp",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5181",
+        "--directory",
+        "site"
+      ],
+      "port": 5181
     }
   ]
 }

@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <meta name="theme-color" content="#0b0c0d">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
-<link rel="stylesheet" href="css/app.css?v=32">
+<link rel="stylesheet" href="css/app.css?v=33">
 <link rel="stylesheet" href="css/inversion.css?v=2">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
@@ -139,10 +139,12 @@
     <button data-tab="list" class="on" data-i18n="tabList">Check first</button>
     <button data-tab="detail" data-i18n="tabDetail">Selected slope</button>
     <button data-tab="numbers" data-i18n="tabNumbers">Numbers</button>
+    <button data-tab="todo" class="act" data-i18n="tabTodo">Do now</button>
   </div>
   <section id="tab-list"></section>
   <section id="tab-detail" hidden></section>
   <section id="tab-numbers" hidden></section>
+  <section id="tab-todo" hidden></section>
 </aside>
 
 <footer id="time">
@@ -166,7 +168,7 @@
   </div>
 </div>
 
-<script type="module" src="js/main.js?v=74"></script>
+<script type="module" src="js/main.js?v=76"></script>
 <script src="js/nav.js?v=7" defer></script>
 </body>
 </html>
