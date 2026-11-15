@@ -1,4 +1,4 @@
-# SLOPEWATCH build plan
+# GeoSentry build plan
 
 Written 13 November 2026, the night before the hackathon (14–15 November, Seoul). This replaces the build order in [concept.md](concept.md). Nothing below is built yet. Every result marked **TBD** is a number we have to measure, not one we already know.
 

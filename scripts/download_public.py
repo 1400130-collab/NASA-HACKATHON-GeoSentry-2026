@@ -1,4 +1,4 @@
-"""Download the public (no-login) supporting layers for SLOPEWATCH, cropped to the study area.
+"""Download the public (no-login) supporting layers for GeoSentry, cropped to the study area.
 
 Everything is resampled onto one grid: EPSG:32652 (UTM 52N), 20 m pixels, snapped to
 80 m so it nests with the NISAR GUNW 80 m grid.
@@ -41,7 +41,7 @@ S2_DATES = {
 }
 S2_BANDS = ["red", "nir", "swir16", "swir22", "scl"]
 
-UA = {"User-Agent": "slopewatch-hackathon/0.1"}
+UA = {"User-Agent": "geosentry-hackathon/0.1"}
 
 
 def grid():

@@ -243,7 +243,7 @@ export class UI {
       <div class="sec" ${D.korea && !C.rcov[u] ? 'hidden' : ''}><h4>${t('history')} <span style="text-transform:none;letter-spacing:0">(${t('cm')})</span></h4><div id="dchart" class="chart"></div>
         <div class="cleg">${T.map((tr, i) => C['meas_' + tr.id][u] ? `<span><i style="background:${TRACK_COLORS[i]}"></i>${tr.id} ${tr.dir === 'ascending' ? '↑' : '↓'}</span>` : '').join('')}<span><i style="background:#555;height:8px;opacity:.5"></i>${t('noise')}</span></div>
         ${meas ? `<div class="caveat" style="border:0;padding:0;margin-top:6px">${esc(t('w_meas', { t: meas }))}. ${esc(t('sign'))}</div>` : ''}</div>
-      <div class="links"><button id="dFly">${t('fly')}</button><a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/link/map/SLOPEWATCH,${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}">${t('kakao')}</a><button id="dCopy">${t('copy')}</button><a class="btn" target="_blank" href="form.html?u=${u}&lang=${this.lang}${AREA === 'region' ? '&area=region' : ''}">${t('form')}</a></div>
+      <div class="links"><button id="dFly">${t('fly')}</button><a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/link/map/GeoSentry,${C.lat[u].toFixed(6)},${C.lon[u].toFixed(6)}">${t('kakao')}</a><button id="dCopy">${t('copy')}</button><a class="btn" target="_blank" href="form.html?u=${u}&lang=${this.lang}${AREA === 'region' ? '&area=region' : ''}">${t('form')}</a></div>
       <div class="caveat">${t('caveat')}</div>`;
     $('#dFly').onclick = () => this.app.flyToUnit(u);
     if ($('#dFlow')) $('#dFlow').onclick = () => { this.app.debris.focus(this.D.runout.flow.get(u) ?? -1); this.app.flyToUnit(u); };

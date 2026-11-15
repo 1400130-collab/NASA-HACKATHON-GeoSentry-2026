@@ -1,4 +1,4 @@
-"""Shared grid, paths and helpers for the nationwide (South Korea) SLOPEWATCH build.
+"""Shared grid, paths and helpers for the nationwide (South Korea) GeoSentry build.
 
 The North Gyeongsang pipeline (pipeline/pNN_*.py) runs on a 20 m UTM grid of one 108 x 78 km box.
 This one covers all of South Korea (North Korea and Japan masked out) on a coarser grid so the whole

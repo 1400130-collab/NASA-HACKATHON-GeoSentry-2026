@@ -1,10 +1,10 @@
-# SLOPEWATCH: check these slopes first
+# GeoSentry: check these slopes first
 
 **Team GeoSentry** · NASA Space Apps Challenge 2026, Seoul · Challenge: *Dancing with the Stars: SARs* (NISAR surface change)
 
-> Landslide warnings tell people when to run. SLOPEWATCH tells local governments which slopes to fix before the rain comes.
+> Landslide warnings tell people when to run. GeoSentry tells local governments which slopes to fix before the rain comes.
 
-SLOPEWATCH turns NISAR L-band radar, Sentinel-2 imagery and terrain data into a ranked list of hillsides for every city and county in South Korea. It lists the slopes an officer should inspect first, gives the reasons for each, and prints a one-page inspection sheet per county.
+GeoSentry turns NISAR L-band radar, Sentinel-2 imagery and terrain data into a ranked list of hillsides for every city and county in South Korea. It lists the slopes an officer should inspect first, gives the reasons for each, and prints a one-page inspection sheet per county.
 
 It is a prevention tool. It does not predict when a slope will fail, and it is not a warning system.
 
@@ -54,7 +54,7 @@ All figures are read from pipeline output files. None are typed in by hand.
 | Random | 5% | | |
 | Steepness only | 2 / 20 | 2–28% | 0.26 |
 | Steep + burned rule | 3 / 20 | 4–34% | 0.08 |
-| **SLOPEWATCH** | **5 / 20** | **10–46%** | **0.003** |
+| **GeoSentry** | **5 / 20** | **10–46%** | **0.003** |
 
 The model beats chance clearly. With 20 failures it cannot yet prove it beats the simple rule; the intervals overlap. ([analysis/headline_stats.py](analysis/headline_stats.py))
 
@@ -134,6 +134,6 @@ python3 -m http.server 5173 --directory site     # then open http://localhost:51
 - `site/`: the static website. Every number is read from `site/data/**/meta.json`, `stats.json` or `radar_check.json`.
 - `docs/`: [build plan](docs/build-plan.md), [concept](docs/concept.md), [expert consultation](docs/expert-consultation.md), [past winners research](docs/research.md), [label review list](docs/label-review.md), [demo video script](docs/demo-video.md).
 - `interview/`: anonymised interview transcript (Korean and English).
-- `demo/`: an earlier, unrelated idea (SPHEREx sky changes). Not part of SLOPEWATCH.
+- `demo/`: an earlier, unrelated idea (SPHEREx sky changes). Not part of GeoSentry.
 
-*SLOPEWATCH is a student prototype. It is not endorsed by NASA, ISRO, ESA, the Korea Forest Service or any research institute.*
+*GeoSentry is a student prototype. It is not endorsed by NASA, ISRO, ESA, the Korea Forest Service or any research institute.*

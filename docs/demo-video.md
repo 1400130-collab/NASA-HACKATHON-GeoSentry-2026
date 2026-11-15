@@ -6,7 +6,7 @@ Every shot is a screen recording of the real site (`map.html` and `index.html`),
 
 | Time | On screen | Voice-over / subtitle |
 |---|---|---|
-| 0:00–0:03 | Black. White text: **SLOPEWATCH**, then *Team GeoSentry · NASA Space Apps Seoul 2026 · Dancing with the Stars: SARs* | "We're Team GeoSentry." |
+| 0:00–0:03 | Black. White text: **GeoSentry**, then *Team GeoSentry · NASA Space Apps Seoul 2026 · Dancing with the Stars: SARs* | "We're Team GeoSentry." |
 | 0:03–0:08 | Map, North Gyeongsang. Storm replay playing: the rain bar hits 18–19 July and the timeline shows clouds. | "In July 2026, a storm hit hills that burned the year before. Optical satellites saw nothing for 18 days." |
 | 0:08–0:14 | Switch to *Ground movement*, then *Radar clarity*. Camera dips toward one scar. | "NISAR's radar sees through cloud. It measures each slope moving, to a few centimetres, every 12 days." |
 | 0:14–0:20 | Zoom out to all of Korea. *Where to check first* layer. The 3,291 counter and the sidebar list scroll. | "Two models turn that into a short list: 3,291 slopes to check first, with a house or road below." |
