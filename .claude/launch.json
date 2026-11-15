@@ -48,18 +48,6 @@
         "site"
       ],
       "port": 5176
-    },
-    {
-      "name": "slopewatch-site-5",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "5177",
-        "--directory",
-        "site"
-      ],
-      "port": 5177
     }
   ]
 }
