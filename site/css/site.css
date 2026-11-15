@@ -503,7 +503,7 @@ html.js .bars.rv.in i { transform: none; }
 /* ---- uncertainty, radar check, workload, operations ---- */
 .xstats { font: 500 14px/1.6 var(--mono); color: var(--ink2); margin-top: 18px; }
 .xstats b { color: var(--ink); font-weight: 600; }
-.vs[data-xblock="radarbars"] > div { grid-template-columns: 230px 1fr 64px; }
+.vs[data-xblock="radarbars"] > div { grid-template-columns: 8.4em minmax(0, 1fr) 3.6em; gap: 16px; }
 .sec .vs { max-width: 760px; margin: 28px 0 14px; }
 .xnote { color: var(--ink2); max-width: 64ch; font-size: 15.5px; margin: 0; }
 
@@ -650,9 +650,25 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-o
   .topo { transition: none; }
 }
 
-/* home page, section 04: two models and the physics simulation side by side */
-.models.tri { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-@media (max-width: 1100px) { .models.tri { grid-template-columns: minmax(0, 1fr); } }
+/* home page, section 04: three equal cards. Subgrid lines up kind, title, text and figures across all three,
+   so no card reads as more important than the others. */
+.models.tri { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, auto); column-gap: clamp(12px, 1.4vw, 18px); row-gap: 0; }
+.models.tri .model { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; padding: clamp(18px, 3vh, 28px) clamp(18px, 2vw, 28px); }
+.models.tri .model .kind { white-space: nowrap; }
+.models.tri .model h3 { font-size: clamp(26px, min(2.6vw, 5.2vh), 40px); }
+.models.tri .model > p { font-size: 15px; max-width: none; }
+.models.tri .model .base { margin-top: 0; display: flex; flex-direction: column; }
+.models.tri .figs { gap: 12px; }
+.models.tri .figs b { font-size: clamp(24px, min(2.3vw, 4.6vh), 34px); white-space: nowrap; }
+.models.tri .figs li > span { font-size: 13px; }
+.models.tri .vs.sm > div { grid-template-columns: minmax(0, 7.6em) minmax(0, 1fr) 2.8em; gap: 10px; font-size: 13.5px; }
+.models.tri .vs.sm > div > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#machine-learning h2.big { margin-bottom: clamp(20px, 3.6vh, 34px); }
+@media (max-width: 900px) {
+  .models.tri { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 14px; }
+  .models.tri .model { grid-row: auto; grid-template-rows: none; }
+  .models.tri .vs.sm > div { grid-template-columns: minmax(0, 1fr) 46px; }
+}
 
 /* home hero, fourth engine: the debris-flow simulation. A flow runs down a slope and reaches a house. */
 .g-flow .s { fill: none; stroke: var(--ink); stroke-opacity: .4; stroke-width: 1.4; stroke-linecap: round; }
@@ -661,3 +677,21 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-o
 @keyframes eng-flow { 0%, 12% { stroke-dashoffset: 1; opacity: 1; } 58%, 86% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
 @keyframes eng-house { 0%, 56% { fill: var(--ink); opacity: .55; } 63%, 88% { fill: var(--red); opacity: 1; } 100% { fill: var(--ink); opacity: .55; } }
 @media (prefers-reduced-motion: reduce) { .g-flow .f, .g-flow .h { animation: none; stroke-dashoffset: 0; } .g-flow .h { fill: var(--red); opacity: 1; } }
+
+/* short screens (laptops at 720–800 px tall): every slide still fits in one screen */
+.band .eyebrow { margin-bottom: clamp(20px, 4.2vh, 40px); }
+.band { padding-top: clamp(80px, 12vh, 108px); padding-bottom: clamp(28px, 5vh, 64px); }
+.tiers { gap: clamp(14px, 2.8vh, 24px); }
+.tiers b { font-size: clamp(34px, min(4.4vw, 8.4vh), 64px); }
+.tiers em { margin-top: clamp(4px, 1vh, 8px); }
+@media (min-width: 901px) and (max-height: 820px) {
+  .models.tri .model { padding-top: 18px; padding-bottom: 18px; }
+  .models.tri .model > p { margin-bottom: 14px; }
+  .models.tri .model .base { padding-top: 12px; }
+  .models.tri .model .lab { margin-bottom: 10px; }
+  #machine-learning h2.big { margin-bottom: 18px; }
+}
+
+/* hide the browser scrollbar (page still scrolls) */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }

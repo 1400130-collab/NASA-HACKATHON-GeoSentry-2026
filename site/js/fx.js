@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { TRACK_COLORS } from './terrain.js?v=5';
+import { TRACK_COLORS } from './terrain.js?v=24';
 
 const az2dir = (deg) => new THREE.Vector2(Math.sin(deg * Math.PI / 180), -Math.cos(deg * Math.PI / 180));   // (x east, z south)
 // Flight headings measured from the look vectors in the NISAR files (left-looking radar).
@@ -225,60 +225,157 @@ export function makeVectors(D, uExag) {
   return out;
 }
 
-// ---- debris flows: the cells each simulated slide covers, lit in the order the flow reaches them ---------------
-// Times are simulated seconds. The front glows, what it leaves behind stays as mud. Cells that only the far-reaching
-// friction case covers are drawn darker than the ones the best-fit case reaches too.
+// ---- debris flows: the cells each simulated slide covers, filled in the order the flow reaches them ---------------
+// Times are simulated seconds. The flows are painted into the ground by the terrain shader (terrain.js debCell/debShade):
+// this bakes them into three textures once. Close up every 10 m cell is read and blended, far away a filtered texture
+// of 80 m blocks takes over, so nothing flickers and the cost is a few texture reads per ground pixel, not 845k sprites.
+// Cells only the far-reaching friction case covers are drawn pale and hatched.
 export class Debris {
   constructor(D, uExag, terrain) {
-    // Height of the drawn terrain mesh (coarser than the height grid), so the flow lies on the surface the viewer sees.
-    const { W80, H80, h } = D, mp = terrain.mesh.geometry.attributes.position.array, st = Math.max(1, Math.round((mp[3] - mp[0]) / (D.Ws / W80)));      // mesh spacing in 80 m cells
-    const nx = Math.floor((W80 - 1) / st) + 1, nz = Math.floor((H80 - 1) / st) + 1, vh = (i, j) => h[Math.min(i * st, H80 - 1) * W80 + Math.min(j * st, W80 - 1)];
-    const meshH = (x, z) => {
-      const gj = Math.min(Math.max(((x / D.Ws + 0.5) * W80 - 0.5) / st, 0), nx - 1.001), gi = Math.min(Math.max(((z / D.Hs + 0.5) * H80 - 0.5) / st, 0), nz - 1.001);
-      const j = gj | 0, i = gi | 0, a = gj - j, b = gi - i, ha = vh(i, j), hb = vh(i, j + 1), hc = vh(i + 1, j), hd = vh(i + 1, j + 1);
-      return a + b <= 1 ? ha + (hb - ha) * a + (hc - ha) * b : hd + (hc - hd) * (1 - a) + (hb - hd) * (1 - b);
-    };
-    const R = D.runout, m = R.m, pos = new Float32Array(m * 3), aT = new Float32Array(m), aD = new Float32Array(m), aF = new Float32Array(m), aK = new Float32Array(m), aS = new Float32Array(m);
-    this.R = R; this.pos = pos; this.len = new Float32Array(R.nf);
-    for (let f = 0; f < R.nf; f++) {
-      const s0 = (f * 0.618034) % 1;                                  // each slope lets go at its own moment
+    const R = D.runout, U = terrain.uniforms, B = 8, SPREAD = 70, m = R.m, nf = R.nf;
+    this.R = R; this.U = U; this.len = new Float32Array(nf); this.cen = new Float32Array(nf * 2);
+    let cmax = 0, rmax = 0;
+    for (let i = 0; i < m; i++) { if (R.col[i] > cmax) cmax = R.col[i]; if (R.row[i] > rmax) rmax = R.row[i]; }
+    // blocks that hold a flow cell or touch one (the blurred outline and the across coordinate reach a cell past the flow)
+    const TW = ((cmax + 1) >> 3) + 1, TH = ((rmax + 1) >> 3) + 1, NT = TW * TH, tile = new Int32Array(NT).fill(-1), tq = [];
+    for (let i = 0; i < m; i++) for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const c = R.col[i] + dc, r = R.row[i] + dr; if (c < 0 || r < 0) continue;
+      const q = (r >> 3) * TW + (c >> 3); if (tile[q] < 0) { tile[q] = tq.length; tq.push(q); }
+    }
+    // two pages of cells, then the block index, then (after a gap that keeps the filtered levels apart) the far-view blocks
+    const nt = tq.length, AW = Math.max(Math.ceil(Math.sqrt(nt)), Math.ceil(TW / B)), AH = Math.ceil(nt / AW), PW = AW * B, PB = AH * B, IY = 2 * PB;
+    const CY = IY + TH + 64, HT = CY + TH, atlas = new Uint8Array(PW * HT * 4), NC = PW * PB, first = new Float32Array(NC).fill(1e9), own = new Int32Array(NC).fill(-1);
+    const cell = (c, r) => { if (c < 0 || r < 0 || c >= TW * B || r >= TH * B) return -1; const ti = tile[(r >> 3) * TW + (c >> 3)]; return ti < 0 ? -1 : ((ti / AW | 0) * B + (r & 7)) * PW + (ti % AW) * B + (c & 7); };
+    for (let f = 0; f < nf; f++) {
+      const s0 = (f * 0.618034) % 1; let cx = 0, cz = 0;
       for (let i = R.off[f]; i < R.off[f + 1]; i++) {
-        const [x, z] = R.at(R.col[i], R.row[i]);
-        pos[i * 3] = x; pos[i * 3 + 1] = meshH(x, z); pos[i * 3 + 2] = z;
-        aT[i] = R.t[i] * 0.5; aD[i] = R.d[i] / 50; aF[i] = f; aK[i] = R.k[i]; aS[i] = s0;
-        if (aT[i] > this.len[f]) this.len[f] = aT[i];
+        const c = R.col[i], r = R.row[i], t = R.t[i] * 0.5, at = s0 * SPREAD + t, a = cell(c, r);
+        if (at < first[a]) {                                           // two flows on one cell: the one that gets there first
+          first[a] = at; own[a] = f; const id = f + 1;
+          atlas[a * 4] = R.t[i]; atlas[a * 4 + 1] = Math.max(atlas[a * 4 + 1], R.d[i]); atlas[a * 4 + 2] = id & 255; atlas[a * 4 + 3] = ((id >> 8) << 1) | (R.k[i] ? 1 : 0);
+        } else atlas[a * 4 + 1] = Math.max(atlas[a * 4 + 1], R.d[i]);
+        if (t > this.len[f]) this.len[f] = t;
+        cx += c; cz += r;
+      }
+      const n = R.off[f + 1] - R.off[f], [x, z] = R.at(cx / n, cz / n); this.cen[f * 2] = x; this.cen[f * 2 + 1] = z;
+    }
+    // arrival times smoothed over each flow's own neighbouring cells (twice), so the mesh's cross lines run as clean curves
+    for (let pass = 0; pass < 2; pass++) {
+      const tNew = new Float32Array(NC);
+      for (let a = 0; a < NC; a++) {
+        if (own[a] < 0) continue;
+        const c = (a % PW), r = (a / PW | 0), ti = (r >> 3) * AW + (c >> 3), q = tq[ti], cc = (q % TW) * B + (c & 7), rr = (q / TW | 0) * B + (r & 7);
+        let sw = 0, st = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const e = cell(cc + dx, rr + dy); if (e < 0 || own[e] !== own[a]) continue;
+          const k = (dx ? 1 : 2) * (dy ? 1 : 2); sw += k; st += k * atlas[e * 4];
+        }
+        tNew[a] = st / sw;
+      }
+      for (let a = 0; a < NC; a++) if (own[a] >= 0) atlas[a * 4] = Math.round(tNew[a]);
+    }
+    // across coordinate: signed distance (cells) from each flow's centre line, which runs through the middles of its
+    // cells taken in the order the flow reached them, so the mesh's long lines bend with the flow
+    const vAt = new Float32Array(NC).fill(NaN);
+    for (let f = 0; f < nf; f++) {
+      const o = R.off[f], n = R.off[f + 1] - o, ord = Array.from({ length: n }, (_, k) => o + k).sort((p, q) => R.t[p] - R.t[q]);
+      const G = Math.max(1, Math.min(16, Math.round(n / 16))), pts = [];
+      for (let g = 0; g < G; g++) {
+        let x = 0, y = 0; const a = Math.floor(g * n / G), b = Math.floor((g + 1) * n / G);
+        for (let k = a; k < b; k++) { x += R.col[ord[k]]; y += R.row[ord[k]]; }
+        pts.push([x / (b - a), y / (b - a)]);
+      }
+      let sm = pts;
+      for (let it = 0; it < 3; it++) sm = sm.map((p, k) => (k === 0 || k === G - 1) ? p : [(sm[k - 1][0] + 2 * p[0] + sm[k + 1][0]) / 4, (sm[k - 1][1] + 2 * p[1] + sm[k + 1][1]) / 4]);
+      const line = []; for (const p of sm) { const l = line[line.length - 1]; if (!l || Math.hypot(p[0] - l[0], p[1] - l[1]) > 0.5) line.push(p); }
+      for (let i = o; i < o + n; i++) {
+        const a = cell(R.col[i], R.row[i]); if (own[a] !== f) continue;
+        if (line.length < 2) { vAt[a] = 0; continue; }
+        let best = 1e9, v = 0;
+        for (let k = 0; k < line.length - 1; k++) {
+          const [x0, y0] = line[k], [x1, y1] = line[k + 1], dx = x1 - x0, dy = y1 - y0, L2 = dx * dx + dy * dy;
+          let u = ((R.col[i] - x0) * dx + (R.row[i] - y0) * dy) / L2;
+          if (k > 0) u = Math.max(u, 0); if (k < line.length - 2) u = Math.min(u, 1);
+          const px = R.col[i] - (x0 + u * dx), py = R.row[i] - (y0 + u * dy), d = Math.hypot(px, py);
+          if (d < best) { best = d; v = Math.sign(dx * py - dy * px) * d; }
+        }
+        vAt[a] = v;
       }
     }
-    const g = new THREE.BufferGeometry();
-    for (const [k, a, n] of [['position', pos, 3], ['aT', aT, 1], ['aD', aD, 1], ['aF', aF, 1], ['aK', aK, 1], ['aS', aS, 1]]) g.setAttribute(k, new THREE.BufferAttribute(a, n));
-    this.u = { uExag, uT: { value: 0 }, uSpread: { value: 70 }, uSel: { value: -1 }, uSelT: { value: 0 }, uOn: { value: 0 }, uScale: { value: 1000 } };
-    this.points = new THREE.Points(g, new THREE.ShaderMaterial({
-      uniforms: this.u, transparent: true, depthWrite: false,
-      vertexShader: `uniform float uExag, uT, uSpread, uSel, uSelT, uOn, uScale; attribute float aT, aD, aF, aK, aS; varying float vF, vD, vK, vDim, vFar;
-        void main(){ bool sel = abs(aF - uSel) < 0.5; float t = sel ? uSelT - aT : uT - aS * uSpread - aT;
-          if (t < 0.0 || (!sel && uOn < 0.5)) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); gl_PointSize = 0.0; return; }
-          vF = exp(-t / 5.0); vD = clamp(aD / 0.8, 0.3, 1.0); vK = aK; vDim = (uSel > -0.5 && !sel) ? 0.3 : 1.0;
-          vec3 p = position; p.y = p.y * uExag + ${(0.008 / D.k).toFixed(5)}; vec4 mv = viewMatrix * vec4(p, 1.0);
-          float px = ${(0.015 / D.k).toFixed(5)} * uScale / -mv.z; vFar = clamp(2.8 / max(px, 0.01), 1.0, 3.2);       // seen from far away a flow is a spark: bigger and brighter than its true size
-          gl_PointSize = clamp(px, 2.8, 48.0); gl_Position = projectionMatrix * mv; }`,
-      fragmentShader: `varying float vF, vD, vK, vDim, vFar; void main(){ float r = length(gl_PointCoord - 0.5) * 2.0; float a = smoothstep(1.0, 0.5, r); if (a < 0.03) discard;
-          vec3 mud = mix(vec3(0.6, 0.26, 0.1), vec3(1.0, 0.52, 0.14), vK), hot = vec3(1.0, 0.85, 0.5) * 2.6;
-          gl_FragColor = vec4(mix(mud, hot, vF) * (0.6 + 0.4 * vD) * (0.55 + 0.45 * vFar), min(1.0, a * mix(0.5 + 0.35 * vK, 1.0, vF) * (0.7 + 0.3 * vFar)) * vDim); }`,
-    }));
-    this.points.frustumCulled = false; this.points.renderOrder = 3;
+    // page B: blurred cover (all flows, and the best-fit case alone) and the across coordinate, which cells just
+    // outside a flow borrow from their neighbours so the blend at the edge stays sane
+    const K = [1, 2, 1];
+    for (let ti = 0; ti < nt; ti++) {
+      const q = tq[ti], c0 = (q % TW) * B, r0 = (q / TW | 0) * B;
+      for (let y = 0; y < B; y++) for (let x = 0; x < B; x++) {
+        const c = c0 + x, r = r0 + y, a = cell(c, r); let sa = 0, sb = 0, vs = 0, vn = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const e = cell(c + dx, r + dy); if (e < 0 || own[e] < 0) continue;
+          const k = K[dx + 1] * K[dy + 1]; sa += k; sb += k * (atlas[e * 4 + 3] & 1);
+          if (!Number.isNaN(vAt[e])) { vs += vAt[e]; vn++; }
+        }
+        const v = own[a] >= 0 && !Number.isNaN(vAt[a]) ? vAt[a] : (vn ? vs / vn : 0), enc = Math.max(0, Math.min(65535, Math.round((v + 128) * 256)));
+        const pb = (a + NC) * 4; atlas[pb] = Math.round(sa / 16 * 255); atlas[pb + 1] = Math.round(sb / 16 * 255); atlas[pb + 2] = enc & 255; atlas[pb + 3] = enc >> 8;
+      }
+    }
+    // per 80 m block: share covered, earliest start, best-fit share, mean depth. Empty blocks take their nearest
+    // covered neighbour's values (all but the share), so filtering never pulls a start time or depth towards zero.
+    const cov = new Float32Array(NT), t0 = new Float32Array(NT).fill(255), bst = new Float32Array(NT), dep = new Float32Array(NT);
+    for (let ti = 0; ti < nt; ti++) {
+      const ax = (ti % AW) * B, ay = (ti / AW | 0) * B, q = tq[ti]; let n = 0, nb = 0, sd = 0;
+      for (let y = 0; y < B; y++) for (let x = 0; x < B; x++) {
+        const a = (ay + y) * PW + ax + x; if (own[a] < 0) continue;
+        n++; nb += atlas[a * 4 + 3] & 1; sd += atlas[a * 4 + 1]; if (first[a] < t0[q]) t0[q] = first[a];
+      }
+      if (!n) continue; cov[q] = n / 64; bst[q] = nb / n; dep[q] = sd / n / 75;
+    }
+    const seen = new Uint8Array(NT), queue = new Int32Array(NT); let qh = 0, qt = 0;
+    for (const q of tq) if (cov[q] > 0) { seen[q] = 1; queue[qt++] = q; }
+    while (qh < qt) {
+      const q = queue[qh++], x = q % TW, y = (q / TW) | 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= TW || Y >= TH) continue;
+        const p = Y * TW + X; if (seen[p]) continue;
+        seen[p] = 1; t0[p] = t0[q]; bst[p] = bst[q]; dep[p] = dep[q]; queue[qt++] = p;
+      }
+    }
+    for (let q = 0; q < NT; q++) {
+      const id = tile[q] + 1, a = ((IY + (q / TW | 0)) * PW + q % TW) * 4; atlas[a] = id & 255; atlas[a + 1] = id >> 8;
+      const c = ((CY + (q / TW | 0)) * PW + q % TW) * 4;
+      atlas[c] = Math.round(cov[q] * 255); atlas[c + 1] = Math.min(255, Math.round(t0[q])); atlas[c + 2] = Math.round(bst[q] * 255); atlas[c + 3] = Math.round(Math.min(dep[q], 1) * 255);
+    }
+    const tex = (data, w, h, filtered) => {
+      const t = new THREE.DataTexture(data, w, h, THREE.RGBAFormat, THREE.UnsignedByteType);
+      t.minFilter = filtered ? THREE.LinearMipmapLinearFilter : THREE.NearestFilter; t.magFilter = filtered ? THREE.LinearFilter : THREE.NearestFilter;
+      t.generateMipmaps = filtered; t.anisotropy = filtered ? 4 : 1; t.needsUpdate = true; return t;
+    };
+    // scene x, z -> cell column, row (cell centres at whole numbers). Exact for the regional map; on the nationwide map the
+    // cells sit on a gently curved lattice, so fit the plane through it.
+    const S = [];
+    for (let a = 0; a <= 8; a++) for (let b = 0; b <= 8; b++) { const c = cmax * a / 8, r = rmax * b / 8, [x, z] = R.at(c, r); S.push([x, z, c, r]); }
+    const fit = (k) => {
+      const M = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], v = [0, 0, 0];
+      for (const s of S) { const row = [s[0], s[1], 1]; for (let i = 0; i < 3; i++) { v[i] += row[i] * s[k]; for (let j = 0; j < 3; j++) M[i][j] += row[i] * row[j]; } }
+      for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) { const g = M[j][i] / M[i][i]; for (let l = 0; l < 3; l++) M[j][l] -= g * M[i][l]; v[j] -= g * v[i]; }
+      const o = [0, 0, 0]; for (let i = 2; i >= 0; i--) { let s = v[i]; for (let j = i + 1; j < 3; j++) s -= M[i][j] * o[j]; o[i] = s / M[i][i]; }
+      return new THREE.Vector3(...o);
+    };
+    U.uDebX.value = fit(2); U.uDebZ.value = fit(3);
+    U.tDebA.value = tex(atlas, PW, HT, true); U.uDebIY.value = IY; U.uDebPB.value = PB; U.uDebCR.value.set(1 / (B * PW), CY / HT, 1 / (B * HT), 0);
+    U.uDebAW.value = AW; U.uDebN.value.set(TW * B, TH * B); U.uDebSpread.value = SPREAD;
+    this.points = new THREE.Group();                                   // nothing to add to the scene: the ground draws them
     this.playing = false; this.sel = -1;
   }
-  get active() { return this.playing || this.sel >= 0; }
-  centre(f) { let x = 0, z = 0; const a = this.R.off[f], b = this.R.off[f + 1]; for (let i = a; i < b; i++) { x += this.pos[i * 3]; z += this.pos[i * 3 + 2]; } return [x / (b - a), z / (b - a)]; }
-  fireAll() { this.u.uOn.value = 1; this.u.uT.value = -4; this.playing = true; }
-  showAll() { this.u.uOn.value = 1; this.u.uT.value = 1e4; this.playing = false; }        // every flow at its end state
-  clear() { this.u.uOn.value = 0; this.playing = false; }
-  focus(f) { this.sel = f; this.u.uSel.value = f; this.u.uSelT.value = -6; }                // replay one slope's flow in a loop
-  update(dt, camera, renderer) {
-    const RATE = 9;                                                    // simulated seconds per second on screen
-    this.u.uScale.value = renderer.domElement.height / (2 * Math.tan(camera.fov * Math.PI / 360));
-    if (this.playing) { this.u.uT.value += dt * RATE; if (this.u.uT.value > this.u.uSpread.value + 140) this.playing = false; }
-    if (this.sel >= 0) { this.u.uSelT.value += dt * RATE; if (this.u.uSelT.value > this.len[this.sel] + 45) this.u.uSelT.value = -6; }
+  get active() { return this.playing || this.sel >= 0 || this.U.uDebOn.value > 0; }      // the mesh streams, so it needs every frame
+  centre(f) { return [this.cen[f * 2], this.cen[f * 2 + 1]]; }
+  fireAll() { this.U.uDebOn.value = 1; this.U.uDebT.value = -4; this.playing = true; }
+  showAll() { this.U.uDebOn.value = 1; this.U.uDebT.value = 1e4; this.playing = false; }        // every flow at its end state
+  clear() { this.U.uDebOn.value = 0; this.playing = false; }
+  focus(f) { this.sel = f; this.U.uDebSel.value = f; this.U.uDebSelT.value = -6; }                // replay one slope's flow in a loop
+  update(dt) {
+    const RATE = 9, U = this.U;                                        // simulated seconds per second on screen
+    if (this.playing) { U.uDebT.value += dt * RATE; if (U.uDebT.value > U.uDebSpread.value + 140) this.playing = false; }
+    if (this.sel >= 0) { U.uDebSelT.value += dt * RATE; if (U.uDebSelT.value > this.len[this.sel] + 45) U.uDebSelT.value = -6; }
   }
 }
 

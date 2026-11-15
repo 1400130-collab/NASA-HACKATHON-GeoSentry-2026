@@ -1,6 +1,6 @@
-import { STR, reason, compass, featName } from './i18n.js?v=12';
+import { STR, reason, compass } from './i18n.js?v=15';
 import { addScores, checkOrder } from './score.js';
-import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js?v=5';
+import { RAMPS, LEVEL_COLORS, TRACK_COLORS } from './terrain.js?v=24';
 import { DAY0, DAYS, dayOf, AREA } from './data.js?v=3';
 import { playSolver } from './inversion.js';
 const stored = () => { try { return localStorage.getItem('sw_lang'); } catch { return null; } };
@@ -374,25 +374,38 @@ export class UI {
 
   // ---- "How the AI works": the two models in plain language ----------------------------
   ai() {
-    const { m, a } = this.nums(), t = (k, v) => this.t(k, v), s = m.suscept;
-    const top = Object.keys(s.importance).slice(0, 3).map((k) => featName(k, this.lang)).join(', ');
-    $('#modalBody').innerHTML = `<h2>${t('ai_title')}</h2><p class="lead">${t('ai_lead')}</p>
-      <div class="flow">
-        <div class="fbox"><h3>${t('ai_in')}</h3><p>${t('ai_in_p', { n: this.D.n.toLocaleString() })}</p><ul>${[1, 2, 3, 4].map((i) => `<li>${t('ai_in_' + i)}</li>`).join('')}</ul></div>
-        <div class="farrow">→</div>
-        <div class="fcol">
-          <div class="fbox ai"><h3>${t('ai_m1')}</h3><p>${t('ai_m1_p')}</p><small>${t('ai_m1_top', { a: esc(top) })}<br>${t('ai_m1_t', { f: s.features.length, n: s.n_units.toLocaleString() })}${s.joint?.shipped ? '<br>' + t('ai_m1_j', { n: s.joint.teacher_slopes.toLocaleString() }) : ''}</small></div>
-          <div class="fbox ai"><h3>${t('ai_m2')}</h3><p>${t('ai_m2_p')}</p><small>${t('ai_m2_t', { n: a.units.toLocaleString() })}</small></div>
-          ${m.reach ? `<div class="fbox ai"><h3>${t('ai_m3')}</h3><p>${t('ai_m3_p', { n: m.reach.simulated_slopes.toLocaleString() })}</p><small>${t('ai_m3_t', { r: m.reach.far.r2_heldout.toFixed(2), x: m.reach.far.err_factor_heldout.toFixed(2) })}</small></div>` : ''}
-        </div>
-        <div class="farrow">→</div>
-        <div class="fbox out"><h3>${t('ai_out')}</h3><div class="big">${m.levels.levels.check_first.toLocaleString()}</div><p><b>${t('ai_out_v')}</b><br>${t('ai_out_p')}</p></div>
-      </div>
-      <h3 class="hh">${t('ai_rule')}</h3><ol class="limits">${[1, 2, 3].map((i) => `<li>${t(i === 2 && m.reach ? 'ai_r2_ml' : 'ai_r' + i, { n: m.levels.check_first_moving })}</li>`).join('')}</ol><p class="rulenote">${t('ai_rule_n')}</p>
-      <h3 class="hh">${t('ai_work')}</h3><div class="g2 tight">${this.aiTiles()}</div>
-      <h3 class="hh">${t('ai_honest')}</h3><ul class="limits">${[1, 2, 3].map((i) => `<li>${t('ai_h' + i, { n: s.n_failed })}</li>`).join('')}</ul>
-      <button id="aiProof" class="more">${t('ai_more')}</button>`;
+    const { m, ship, a } = this.nums(), t = (k, v) => this.t(k, v), s = m.suscept;
+    const x = (v) => (Math.abs(v - Math.round(v)) < 0.15 ? Math.round(v) : v.toFixed(1));
+    const det = a.results.detector.well_oriented[3], mf = a.results.matched.well_oriented[3];
+    // the same small live drawings as the home page's engines
+    const G = {
+      tree: '<svg class="eng-glyph g-tree" viewBox="0 0 112 40" aria-hidden="true"><path class="e" style="--i:0" pathLength="1" d="M56 5L28 20"/><path class="e" style="--i:0" pathLength="1" d="M56 5L84 20"/><path class="e" style="--i:1" pathLength="1" d="M28 20L14 35"/><path class="e" style="--i:1" pathLength="1" d="M28 20L42 35"/><path class="e" style="--i:1" pathLength="1" d="M84 20L70 35"/><path class="e" style="--i:1" pathLength="1" d="M84 20L98 35"/><circle class="n" style="--i:0" cx="56" cy="5" r="3.2"/><circle class="n" style="--i:1" cx="28" cy="20" r="3.2"/><circle class="n" style="--i:1" cx="84" cy="20" r="3.2"/><circle class="n" style="--i:2" cx="14" cy="35" r="3.2"/><circle class="n hit" style="--i:2" cx="70" cy="35" r="3.2"/><circle class="n" style="--i:2" cx="42" cy="35" r="3.2"/><circle class="n" style="--i:2" cx="98" cy="35" r="3.2"/></svg>',
+      gru: `<svg class="eng-glyph g-gru" viewBox="0 0 112 40" aria-hidden="true">${[10, 16, 8, 14, 11, 18, 9, 13, 22, 28, 33, 37].map((h, i) => `<rect class="b${i > 7 ? ' hit' : ''}" x="${4 + i * 9}" y="${38 - h}" width="5" height="${h}" rx="1.5"/>`).join('')}<rect class="scan" x="0" y="0" width="14" height="40" rx="3"/></svg>`,
+      flow: '<svg class="eng-glyph g-flow" viewBox="0 0 112 40" aria-hidden="true"><path class="s" d="M4 5C30 7 44 21 62 29S96 35 109 35"/><path class="f" pathLength="1" d="M9 6C31 9 44 21 62 29S82 34 90 35"/><path class="h" d="M91 35v-8l6-5 6 5v8z"/></svg>',
+    };
+    const models = [
+      ['tree', t('ai_x', { x: x(ship.capture_top5 / 0.05) }), t('ai_s1'), t('ai_t1', { f: s.features.length })],
+      ['gru', t('ai_x', { x: x(det / mf) }), t('ai_s2'), t('ai_t2')],
+      m.reach && ['flow', 'R² ' + m.reach.far.r2_heldout.toFixed(2), t('ai_s3'), t('ai_t3')],
+    ].filter(Boolean);
+    const rule = (i) => t(i === 2 && m.reach ? 'ai_r2_ml' : 'ai_r' + i, { n: m.levels.check_first_moving }).match(/<b>(.*?)<\/b>\s*(.*)/s);
+    $('#modalBody').innerHTML = `<div class="aisheet"><p class="kick">${t('ai_title')}</p><h2>${t('ai_hl' + models.length).replace('<br>', ' ')}</h2><p class="lead">${t('ai_ls')}</p>
+      <div class="pin"><div class="big">${this.D.n.toLocaleString()}</div><div class="lbl">${t('ai_iu')}</div><ul>${[1, 2, 3, 4].map((i) => `<li>${t('ai_c' + i)}</li>`).join('')}</ul></div>
+      <div class="pai" style="--n:${models.length}">${models.map(([g, v, l, tag], i) => `<div>
+        <span class="pk">AI ${i + 1} · ${tag}</span>${G[g]}<h3>${t('ai_n' + (i + 1))}</h3><p>${t('ai_d' + (i + 1), { n: m.reach?.simulated_slopes.toLocaleString() })}</p>
+        <div class="st"><b>${v}</b><span>${l}</span></div></div>`).join('')}</div>
+      <div class="pout"><div class="big" data-count="${m.levels.levels.check_first}">${m.levels.levels.check_first.toLocaleString()}</div><div><b>${t('ai_out_v')}</b><p>${t('ai_os')}</p></div></div>
+      <h3 class="hh">${t(models.length === 3 ? 'ai_rs' : 'ai_rs2')}</h3>
+      <ol class="steps">${[1, 2, 3].map((i) => { const [, q, ans] = rule(i); return `<li><b>${q}</b><p>${ans}</p></li>`; }).join('')}</ol>
+      <p class="rulenote">${t('ai_rule_n')}</p>
+      <h3 class="hh">${t('ai_honest')}</h3><ul class="honest">${[1, 2, 3].map((i) => `<li>${t('ai_h' + i, { n: s.n_failed })}</li>`).join('')}</ul>
+      <button id="aiProof" class="more">${t('ai_more')} →</button></div>`;
     $('#modal').hidden = false;
+    const big = $('#modalBody .pout .big'), N = +big.dataset.count, t0 = performance.now();
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const tick = (now) => { const p = Math.min(1, (now - t0) / 1100); big.textContent = Math.round(N * (1 - (1 - p) ** 3)).toLocaleString(); if (p < 1 && !$('#modal').hidden) requestAnimationFrame(tick); else big.textContent = N.toLocaleString(); };
+      requestAnimationFrame(tick);
+    }
     $('#aiProof').onclick = () => this.proof();
   }
 

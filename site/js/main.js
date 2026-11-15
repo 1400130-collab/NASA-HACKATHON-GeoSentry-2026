@@ -6,10 +6,10 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { loadAll, DAYS, AREA } from './data.js?v=3';
-import { Terrain } from './terrain.js?v=5';
-import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=12';
-import { UI } from './ui.js?v=16';
-import { World } from './world.js?v=8';
+import { Terrain } from './terrain.js?v=24';
+import { Satellite, Rain, Clouds, Beacon, PastMarks, Debris, makeVectors } from './fx.js?v=31';
+import { UI } from './ui.js?v=20';
+import { World } from './world.js?v=17';
 import { makeGeo } from './world-geo.js';
 
 const qs = new URLSearchParams(location.search);
@@ -20,7 +20,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const canvas = document.getElementById('gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, quality === 'ultra' ? 2 : 1.25));     // map.html?q=ultra for full retina
+// Resolution. A still picture is always drawn at the screen's own sharpness (up to 2x on a retina screen): the loop draws
+// only while something changes, so a sharp still frame costs nothing. The old fixed 1.25x was stretched up by the browser
+// on a 2x screen, which is what looked pixelated. While the camera moves the ratio steps down only if this GPU cannot
+// keep up (measured in tick), and the first still frame after the move is sharp again.
+const MAX_PR = Math.min(devicePixelRatio || 1, quality === 'low' ? 1 : quality === 'mid' ? 1.5 : 2);
+let movePR = MAX_PR;
+renderer.setPixelRatio(MAX_PR);
 renderer.toneMapping = THREE.NoToneMapping;
 const scene = new THREE.Scene(); scene.background = new THREE.Color('#05090d');
 const camera = new THREE.PerspectiveCamera(36, 1, 0.5, 2500);
@@ -31,11 +37,13 @@ controls.target.set(0, 0, 0);
 
 const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: quality === 'ultra' || quality === 'high' ? 4 : 0 });      // multisampling: about 1.5 ms a frame on a laptop GPU, and what stops building edges crawling; off on weaker devices
 const composer = new EffectComposer(renderer, rt);
+composer.renderTarget2.samples = 0;            // only the scene is multisampled; the second buffer just takes the full-screen passes
+const MSAA = rt.samples > 0;
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.55, 1.0);
 composer.addPass(bloom); composer.addPass(new OutputPass());
-// Edge smoothing (FXAA, after Timothy Lottes). The scene is drawn without multisampling, which is what makes the edges
-// of buildings, trees and thin lines crawl while the camera moves; one cheap pass over the finished picture calms them.
+// Edge smoothing (FXAA, after Timothy Lottes). At retina resolution the scene is drawn without multisampling (see
+// resize); one cheap pass over the finished picture keeps the edges of buildings, trees and thin lines from crawling.
 const fxaa = new ShaderPass({
   uniforms: { tDiffuse: { value: null }, uInv: { value: new THREE.Vector2(1, 1) } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
@@ -55,12 +63,20 @@ const fxaa = new ShaderPass({
     }`,
 });
 composer.addPass(fxaa);
-const inset = { l: 0, r: 0, t: 0, b: 0 };
+const inset = { l: 0, r: 0, t: 0, b: 0 }, lineW = [];
 function resize() {
   const w = innerWidth, h = innerHeight;
+  if (!w || !h) return;                        // a hidden window: a zero size would make the camera NaN for good
   renderer.setSize(w, h, false); composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(w, h);
+  // multisampling only below 1.5x: at retina sharpness FXAA alone keeps edges clean, and 4x samples of a 2x picture
+  // cost about 6 ms a frame (half of it). FXAA stays on always: with it the composer swaps its buffers twice a frame,
+  // so the scene always lands in renderTarget1, the multisampled one.
+  const ms = MSAA && renderer.getPixelRatio() < 1.5 ? 4 : 0;
+  if (rt.samples !== ms) { rt.samples = ms; rt.dispose(); }
+  // the draped lines are as wide on screen whatever the resolution (their widths were set at 1.25x)
+  for (const u of lineW) { u.base ??= u.value; u.value = u.base * renderer.getPixelRatio() / 1.25; }
   fxaa.uniforms.uInv.value.set(1 / (w * renderer.getPixelRatio()), 1 / (h * renderer.getPixelRatio()));
-  bloom.setSize(w * renderer.getPixelRatio() / 2, h * renderer.getPixelRatio() / 2);      // the glow is blurry anyway, so it gets a quarter of the pixels
+  bloom.setSize(w * 0.625, h * 0.625);         // the glow is blurry anyway: the same few pixels at any resolution (half of 1.25x)
   camera.aspect = w / h;
   // the controls cover the left and right edges, so the map is centred in the part between them
   const L = document.getElementById('left'), R = document.getElementById('right'), wide = w > 820;
@@ -95,6 +111,8 @@ const world = app.world = new World(D, terrain, { quality, poke: (ms) => app.pok
 scene.add(world.group);
 D.surfAt = makeGeo({ korea: D.korea, k: D.k, Ws: D.Ws, Hs: D.Hs, W80: D.W80, H80: D.H80, step: terrain.step, h: D.h }).surface;   // height of the mesh as drawn
 const vectors = makeVectors(D, U.uExag);
+for (const v of Object.values(vectors)) if (v.material?.uniforms?.uW) lineW.push(v.material.uniforms.uW);
+resize();
 vectors.scars.visible = false;
 Object.values(vectors).forEach((v) => scene.add(v));
 const sats = D.tracks.map((t, i) => new Satellite(t.id, i, terrain)); sats.forEach((s) => scene.add(s.group));
@@ -281,7 +299,21 @@ function reveal() { U.uRevealOn.value = 1; U.uRevealD.value.copy(sats[0].dir); r
 // ---- pointer: hover + click picking ---------------------------------------------------------
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let down = null, ptr = null;
 const pickAt = (x, y) => { ndc.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); return terrain.pick(ray.ray.origin, ray.ray.direction); };
-canvas.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; idle = 0; app.ui.hintOff(); });
+// The orbit point on the ground straight ahead. Moving it along the line of sight changes nothing on screen, but the
+// controls then pan at the speed of the ground under the centre and turn around a point on it, not one buried under
+// a mountain or hanging in the air.
+const seatV = new THREE.Vector3();
+function seat() {
+  const dir = seatV.copy(controls.target).sub(camera.position).normalize(), p = terrain.pick(camera.position, dir);
+  if (!p) return;
+  const d = Math.min(controls.maxDistance, Math.max(controls.minDistance, Math.hypot(p.x - camera.position.x, p.y - camera.position.y, p.z - camera.position.z)));
+  controls.target.copy(camera.position).addScaledVector(dir, d);
+}
+canvas.addEventListener('pointerdown', (e) => {
+  down = [e.clientX, e.clientY]; idle = 0; app.ui.hintOff();
+  if (app.state.story) return;
+  tween = null; zoom = null; seat();                            // grabbing the map stops a fly-to: the person is steering now
+});
 canvas.addEventListener('pointermove', (e) => { ptr = [e.clientX, e.clientY]; });
 canvas.addEventListener('pointerleave', () => { ptr = null; app.setHover(-1); ui.hoverTip(-1); });
 canvas.addEventListener('pointerup', (e) => {
@@ -289,17 +321,24 @@ canvas.addEventListener('pointerup', (e) => {
   const p = pickAt(e.clientX, e.clientY); app.select(p && p.unit >= 0 ? p.unit : -1, false);
 });
 // Zoom. The controls would jump one step per wheel notch; instead every notch moves a goal distance and the camera
-// glides to it, towards (or away from) the ground under the pointer. Touch pinch is still the controls' own.
+// glides to it. Camera and orbit point both scale about the 3D point under the pointer, so that point stays exactly
+// under the pointer, on a mountaintop as much as in a valley. Touch pinch is still the controls' own.
 let zoom = null;
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault(); e.stopImmediatePropagation();            // keep the wheel from the controls
   idle = 0; app.ui.hintOff();
-  if (tween || app.state.story) return;
+  if (app.state.story) return;
+  if (tween) tween = null;                                       // the wheel takes over from a fly-to instead of being ignored
+  if (!zoom) seat();
   const dy = Math.max(-260, Math.min(260, e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? innerHeight : 1)));
   const dist = camera.position.distanceTo(controls.target);
-  const goal = Math.min(controls.maxDistance, Math.max(controls.minDistance, (zoom ? zoom.goal : dist) * Math.exp(dy * (e.ctrlKey ? 0.011 : 0.0017))));
-  const p = pickAt(e.clientX, e.clientY);
-  zoom = { goal, ax: p ? p.x : controls.target.x, az: p ? p.z : controls.target.z };
+  const goal = Math.min(controls.maxDistance, Math.max(controls.minDistance, (zoom ? zoom.goal : dist) * Math.exp(dy * (e.ctrlKey ? 0.011 : 0.0024))));
+  let p = pickAt(e.clientX, e.clientY);
+  if (!p) {                                                      // over the sky or off the map: the level of the orbit point under the pointer, else the orbit point
+    const d = ray.ray.direction, t = (controls.target.y - ray.ray.origin.y) / d.y;
+    p = d.y < -1e-4 && t > 0 ? ray.ray.at(t, new THREE.Vector3()) : controls.target.clone();
+  }
+  zoom = { goal, p: new THREE.Vector3(p.x, p.y, p.z) };
   poke(500);
 }, { capture: true, passive: false });
 
@@ -311,7 +350,9 @@ app.imgT = 0; app.radT = 0;
 // data is moving, one frame for the hover highlight when the pointer pauses, and not at all otherwise (the pulsing slopes
 // hold still). map.html?live=1 keeps it animating all the time (for an unattended screen).
 const LIVE = qs.has('live'), HOT_GAP = 1000 / Math.min(Math.max(+qs.get('fps') || 60, 10), 120) - 2;      // map.html?fps=30 halves the load while dragging
-let lastFrame = 0, lastPick = 0, hotUntil = 0, softAt = 0, ptrMoved = false;
+let lastFrame = 0, lastPick = 0, hotUntil = 0, softAt = 0, ptrMoved = false, wasHot = false;
+const ft = [];
+function setPR(pr) { if (Math.abs(renderer.getPixelRatio() - pr) > 0.01) { renderer.setPixelRatio(pr); resize(); } }
 app.soft = () => { softAt = performance.now() + 120; };          // the hover highlight: one redraw once the pointer pauses, none while it sweeps across
 const poke = app.poke = (ms = 600) => { hotUntil = Math.max(hotUntil, performance.now() + ms); };
 for (const k of Object.keys(app)) {                              // anything that changes the map's state asks for a redraw
@@ -334,8 +375,16 @@ function tick(now) {
   const settling = Math.abs(app.imgT - U.uImgOn.value) > 0.003 || Math.abs(app.radT - U.uRadarOn.value) > 0.003;
   const hot = app.state.playing || tween || app.state.story || revealing || down || settling || beacon.group.visible || debris?.active || world.busy || zoom || now < hotUntil;   // the selection beacon pulses, so it needs every frame
   const due = softAt && now >= softAt;
-  const gap = hot ? HOT_GAP : due ? 0 : LIVE ? 48 : Infinity;
+  const sharpen = !hot && renderer.getPixelRatio() < MAX_PR - 0.01 && now - lastFrame > 120;      // the move is over: one sharp frame
+  const gap = hot ? HOT_GAP : due || sharpen ? 0 : LIVE ? 48 : Infinity;
   if (now - lastFrame < gap) return;
+  // frame-time governor: if the frames of a move keep coming slower than ~40 fps, moves are drawn at a lower resolution
+  if (hot && wasHot && movePR > 1) {
+    ft.push(now - lastFrame);
+    if (ft.length >= 24) { ft.sort((a, b) => a - b); if (ft[12] > 25) movePR = Math.max(1, movePR - 0.25); ft.length = 0; }
+  } else if (!hot) ft.length = 0;
+  wasHot = hot;
+  setPR(hot ? movePR : MAX_PR);
   if (due) softAt = 0;
   lastFrame = now;
   const dt = Math.min(clock.getDelta(), 0.1); time += dt; frame++;
@@ -350,30 +399,33 @@ function tick(now) {
   }
   if (zoom && (tween || app.state.story)) zoom = null;
   if (zoom) {                                                  // glide towards the goal distance, keeping the ground under the pointer where it is
-    const off = camera.position.clone().sub(controls.target), r = zoom.goal / off.length();
-    if (Math.abs(Math.log(r)) < 0.0015) zoom = null;
+    const r = zoom.goal / camera.position.distanceTo(controls.target);
+    if (Math.abs(Math.log(r)) < 0.0015) { zoom = null; seat(); }
     else {
-      const f = Math.pow(r, 1 - Math.exp(-Math.min(dt, 0.034) * 9));      // the first frame after a pause reports a long dt: no lurch
-      controls.target.x = zoom.ax + (controls.target.x - zoom.ax) * f; controls.target.z = zoom.az + (controls.target.z - zoom.az) * f;
-      camera.position.copy(controls.target).addScaledVector(off, f);
+      const f = Math.pow(r, 1 - Math.exp(-Math.min(dt, 0.034) * 9)), P = zoom.p;      // the first frame after a pause reports a long dt: no lurch
+      controls.target.sub(P).multiplyScalar(f).add(P); camera.position.sub(P).multiplyScalar(f).add(P);
     }
   }
   controls.update();
   // never under the ground: close up and tilted, the camera would otherwise sink into the hillside behind it
   if (Math.abs(camera.position.x) < D.Ws / 2 && Math.abs(camera.position.z) < D.Hs / 2) {
     const floor = D.surfAt(camera.position.x, camera.position.z) * U.uExag.value + 0.03 / D.k;      // 30 m above the surface
-    if (camera.position.y < floor) { camera.position.y = floor; camera.lookAt(controls.target); }
+    if (camera.position.y < floor) {
+      camera.position.y = floor; camera.lookAt(controls.target);
+      if (zoom && zoom.goal < camera.position.distanceTo(controls.target)) { zoom = null; seat(); }      // as close as the hillside allows: stop, rather than push against it every frame
+    }
   }
   // close to the ground the near and far planes come in with the camera, so buildings a few metres away are not cut off
   const cd = camera.position.distanceTo(controls.target), near = Math.min(D.view.near, Math.max(D.view.near * 0.008, cd * 0.04)), far = Math.min(2500, Math.max(400, cd * 3000));
   if (Math.abs(near - camera.near) > camera.near * 0.04 || far !== camera.far) { camera.near = near; camera.far = far; camera.updateProjectionMatrix(); }
-  world.update(camera, controls.target, dt, renderer.domElement.height); vectors.roads.material.uniforms.uCut.value = world.roadCut;
+  world.update(camera, controls.target, dt, innerHeight * 1.25);      // its detail levels were tuned at 1.25x: kept, so nothing pops when the resolution changes vectors.roads.material.uniforms.uCut.value = world.roadCut;
   U.uImgOn.value += (app.imgT - U.uImgOn.value) * Math.min(1, dt * 4); U.uRadarOn.value += (app.radT - U.uRadarOn.value) * Math.min(1, dt * 4);
   terrain.update(dt, time); debris?.update(dt, camera, renderer); sats.forEach((s) => s.update(dt, time)); rain.update(dt, time); clouds.update(dt, time);
   if (revealing) { U.uRevealP.value = U.uScanP.value[0]; if (!sats[0].active) { revealing = false; U.uRevealOn.value = 0; } }
   if (beacon.group.visible) beacon.update(time, camera.position.distanceTo(beacon.group.position));
   if (past?.group.visible) past.update(camera, U.uExag.value);
   placeLabels();
+  terrain.bakeLayer(renderer);                                 // re-filters the far-view slope layer if it changed
   composer.render();
 }
 canvas.addEventListener('pointerup', () => { down = null; });

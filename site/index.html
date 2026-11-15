@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap">
-<link rel="stylesheet" href="css/site.css?v=47">
+<link rel="stylesheet" href="css/site.css?v=48">
 <link rel="stylesheet" href="css/inversion.css?v=12">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }
@@ -127,47 +127,49 @@
 
   <section id="machine-learning" class="band" data-slide="navy"><div class="wrap">
     <p class="eyebrow rv"><b>04</b><span lang="en">The machine learning</span><span lang="ko">머신러닝</span></p>
-    <h2 class="big wide rv" lang="en">Three models and a physics engine. <span class="dim">One watches the ground move. One learned which slopes fail. One learned how far the debris runs.</span></h2>
-    <h2 class="big wide rv" lang="ko">모델 셋과 물리 엔진 하나. <span class="dim">하나는 지표의 움직임을 봅니다. 하나는 어떤 사면이 무너지는지 배웠습니다. 하나는 토석류가 얼마나 멀리 가는지 배웠습니다.</span></h2>
+    <h2 class="big wide rv" lang="en">Three models, one job each. <span class="dim">Spot the movement. Rank the slopes. Predict how far the debris runs.</span></h2>
+    <h2 class="big wide rv" lang="ko">모델 셋, 각자 할 일 하나. <span class="dim">움직임을 찾고, 사면 순위를 매기고, 토석류가 얼마나 멀리 가는지 예측합니다.</span></h2>
     <div class="models tri">
       <article class="model rv">
-        <p class="kind"><b>01</b><span lang="en">Neural network · GRU</span><span lang="ko">신경망 · GRU</span></p>
+        <p class="kind"><b>01</b><span lang="en">Neural network</span><span lang="ko">신경망</span></p>
         <h3 lang="en">The detector</h3><h3 lang="ko">탐지 모델</h3>
-        <p lang="en">Reads each slope's full radar history on three orbits and answers one question: real movement, or noise? It needed no labelled landslides. We hid artificial slips in real noise until it could find them.</p>
-        <p lang="ko">세 궤도에서 얻은 사면별 레이더 이력 전체를 읽고 한 가지를 판단합니다. 실제 이동인가, 잡음인가. 산사태 정답 자료가 필요 없습니다. 실제 잡음 속에 가상의 이동을 숨기고, 찾아낼 때까지 학습시켰습니다.</p>
+        <p lang="en">A GRU reads each slope's radar history on three orbits and decides: real movement, or noise? It learned by finding fake slips hidden in real noise.</p>
+        <p lang="ko">GRU가 세 궤도의 사면별 레이더 이력을 읽고 판단합니다. 실제 이동인가, 잡음인가? 실제 잡음 속에 숨긴 가상의 이동을 찾으며 학습했습니다.</p>
         <div class="base">
-          <p class="lab"><span lang="en">3 cm slips caught, at <span data-n="far">…</span>% false alarms</span><span lang="ko">3 cm 이동 탐지율, 오탐률 <span data-n="far">…</span>%</span></p>
+          <p class="lab"><span lang="en">3 cm slips · <span data-n="far">…</span>% false alarms</span><span lang="ko">3 cm 이동 · 오탐률 <span data-n="far">…</span>%</span></p>
           <div class="vs sm rv" data-block="detbars"></div>
         </div>
       </article>
       <article class="model rv" style="--d:.1s">
-        <p class="kind"><b>02</b><span lang="en">Gradient-boosted trees</span><span lang="ko">그래디언트 부스팅 트리</span></p>
+        <p class="kind"><b>02</b><span lang="en">Boosted trees</span><span lang="ko">부스팅 트리</span></p>
         <h3 lang="en">The ranker</h3><h3 lang="ko">순위 모델</h3>
-        <p lang="en">Learns what the slopes that failed in July 2026 had in common: terrain, burn severity, vegetation, land cover. A finer 20 m model of <span data-n="teacher">…</span> slopes teaches it, then it ranks the whole country.</p>
-        <p lang="ko">2026년 7월에 무너진 사면들의 공통점을 배웁니다. 지형, 산불 피해 정도, 식생, 토지 피복. 사면 <span data-n="teacher">…</span>곳을 다룬 더 세밀한 20 m 모델이 이 모델을 가르치고, 그다음 전국에 순위를 매깁니다.</p>
+        <p lang="en">Learns what the slopes that failed in July 2026 had in common: terrain, burn, vegetation, land cover. Then it ranks every hillside in the country.</p>
+        <p lang="ko">2026년 7월에 무너진 사면들의 공통점을 배웁니다. 지형, 산불 피해, 식생, 토지 피복. 그다음 전국 모든 사면에 순위를 매깁니다.</p>
         <div class="base">
+          <p class="lab"><span lang="en">Scored on counties it never saw</span><span lang="ko">처음 보는 시·군에서 채점</span></p>
           <ul class="figs">
-            <li><b data-n="nfeat">…</b><span lang="en">inputs per slope</span><span lang="ko">개 입력 (사면당)</span></li>
-            <li><b data-n="nfolds">…</b><span lang="en">groups of counties, each held out in turn</span><span lang="ko">개 시·군 묶음을 번갈아 빼고 검증</span></li>
-            <li><b data-n="auc">…</b><span lang="en">AUC on counties it never saw, up from <span data-n="aucBase">…</span> without the teacher</span><span lang="ko">처음 보는 시·군에서의 AUC. 교사 모델 없이는 <span data-n="aucBase">…</span></span></li>
+            <li><b data-n="auc">…</b><span lang="en">AUC</span><span lang="ko">AUC</span></li>
+            <li><b data-n="aucBase">…</b><span lang="en">without its 20 m teacher</span><span lang="ko">20 m 교사 모델 없이</span></li>
+            <li><b data-n="nfeat">…</b><span lang="en">inputs per slope</span><span lang="ko">사면당 입력</span></li>
           </ul>
         </div>
       </article>
       <article class="model rv" style="--d:.2s">
-        <p class="kind"><b>03</b><span lang="en">Boosted trees · trained on GPU physics</span><span lang="ko">부스팅 트리 · GPU 물리 계산으로 학습</span></p>
+        <p class="kind"><b>03</b><span lang="en">Physics emulator</span><span lang="ko">물리 에뮬레이터</span></p>
         <h3 lang="en">The reach model</h3><h3 lang="ko">도달 거리 모델</h3>
-        <p lang="en">A GPU solver (2-D shallow-water equations, Voellmy friction, finite volumes in PyTorch) let <span data-n="roSim">…</span> flagged slopes go and followed the debris. This model learned from those runs how far debris travels and predicts it for every slope in Korea, <span data-n="emLo">…</span> to <span data-n="emHi">…</span> m. The list looks that far downhill instead of the same 360 m everywhere. It copies the simulator, whose friction real scars only loosely pin down.</p>
-        <p lang="ko">GPU 해석기(2차원 천수 방정식, Voellmy 마찰, PyTorch 유한체적법)로 표시된 사면 <span data-n="roSim">…</span>곳을 무너뜨려 토석류를 따라갔습니다. 이 모델은 그 결과에서 토석류가 가는 거리를 배워 전국 모든 사면에 대해 예측합니다(<span data-n="emLo">…</span>–<span data-n="emHi">…</span> m). 목록은 어디서나 같은 360 m 대신 그 거리만큼 아래를 확인합니다. 이 모델은 모의 결과를 따라 하는 것이며, 모의의 마찰 계수는 실제 붕괴지로 느슨하게만 정해집니다.</p>
+        <p lang="en">A GPU simulator let <span data-n="roSim">…</span> slopes fail and tracked the debris. This model learned from those runs to predict every slope's runout: <span data-n="emLo">…</span>–<span data-n="emHi">…</span> m.</p>
+        <p lang="ko">GPU 모의로 사면 <span data-n="roSim">…</span>곳을 무너뜨려 토석류를 추적했습니다. 이 모델은 그 결과로 모든 사면의 도달 거리를 예측합니다: <span data-n="emLo">…</span>–<span data-n="emHi">…</span> m.</p>
         <div class="base">
+          <p class="lab"><span lang="en">Scored on counties it never saw</span><span lang="ko">처음 보는 시·군에서 채점</span></p>
           <ul class="figs">
-            <li><b data-n="emR2">…</b><span lang="en">R² against the simulator, on counties it never saw. Typical error ×<span data-n="emX">…</span>, a constant gets ×<span data-n="emX0">…</span></span><span lang="ko">처음 보는 시·군에서 모의 결과 대비 R². 일반적인 오차 ×<span data-n="emX">…</span>, 상수 예측은 ×<span data-n="emX0">…</span></span></li>
-            <li><b data-n="emMoved">…</b><span lang="en">slopes moved on or off the list by it</span><span lang="ko">곳이 이 모델로 목록에 들어오거나 빠짐</span></li>
-            <li><b>▸</b><span><a href="map.html" data-lang-href="map.html"><span lang="en">Watch the flows on the map</span><span lang="ko">지도에서 토석류 보기</span></a></span></li>
+            <li><b data-n="emR2">…</b><span lang="en">R² against the simulator</span><span lang="ko">모의 결과 대비 R²</span></li>
+            <li><b>×<span data-n="emX">…</span></b><span lang="en">typical error (a constant: ×<span data-n="emX0">…</span>)</span><span lang="ko">일반적인 오차 (상수: ×<span data-n="emX0">…</span>)</span></li>
+            <li><b data-n="emMoved">…</b><span lang="en">slopes it moved on or off the list</span><span lang="ko">곳이 목록에 들어오거나 빠짐</span></li>
           </ul>
         </div>
       </article>
     </div>
-    <p class="dropped rv"><span lang="en">Tried and thrown out: an autoencoder (caught <span data-n="ae3">…</span>%, a plain z-score catches <span data-n="z3">…</span>%) and radar inputs in the ranker (the gain was inside the noise). <a href="results.html">What didn't work</a></span><span lang="ko">써 보고 버린 것: 오토인코더(탐지율 <span data-n="ae3">…</span>%, 단순 z값은 <span data-n="z3">…</span>%)와 순위 모델의 레이더 입력(개선 폭이 잡음 이내). <a href="results.html">안 된 것들</a></span></p>
+    <p class="dropped rv"><span lang="en">Thrown out: an autoencoder (caught <span data-n="ae3">…</span>%, a plain z-score catches <span data-n="z3">…</span>%) and radar inputs in the ranker (gain inside the noise). The reach model copies a simulator whose friction real scars only loosely pin down. <a href="results.html">What didn't work</a> · <a href="map.html" data-lang-href="map.html">Watch the flows on the map</a></span><span lang="ko">버린 것: 오토인코더(탐지율 <span data-n="ae3">…</span>%, 단순 z값은 <span data-n="z3">…</span>%)와 순위 모델의 레이더 입력(개선 폭이 잡음 이내). 도달 거리 모델은 모의를 따라 하며, 모의의 마찰 계수는 실제 붕괴지로 느슨하게만 정해집니다. <a href="results.html">안 된 것들</a> · <a href="map.html" data-lang-href="map.html">지도에서 토석류 보기</a></span></p>
   </div></section>
 
   <section id="inversion" class="band" data-slide="ice"><div class="wrap">
@@ -249,18 +251,18 @@
     <p class="eyebrow rv"><b>09</b><span lang="en">A second witness</span><span lang="ko">두 번째 증인</span></p>
     <div class="witness">
       <div>
-        <h2 class="big rv" lang="en">The radar found the same scars. <span class="dim">Nobody told it where they were.</span></h2>
+        <h2 class="big rv" lang="en">The radar found the same scars. <span class="dim">Nobody told it where.</span></h2>
         <h2 class="big rv" lang="ko">레이더도 같은 흔적을 찾았습니다. <span class="dim">위치는 알려 주지 않았습니다.</span></h2>
-        <p class="after rv" lang="en">Our failure labels come only from optical photos. So we asked NISAR separately: did the ground at those exact spots change during the storm? Coherence measures how alike two radar echoes are. Fresh bare soil and moved ground make it drop.</p>
-        <p class="after rv" lang="ko">붕괴 정답 자료는 광학 사진에서만 얻었습니다. 그래서 NISAR에 따로 물었습니다. 바로 그 지점의 지표가 폭우 동안 변했는가? 긴밀도는 두 레이더 반사파가 얼마나 닮았는지를 나타냅니다. 새로 드러난 맨땅과 움직인 지표에서는 긴밀도가 떨어집니다.</p>
+        <p class="after rv" lang="en">Our failure labels come from photos. The radar checked them on its own: where the storm tore up the ground, the echo changed.</p>
+        <p class="after rv" lang="ko">붕괴 정답 자료는 사진에서 얻었습니다. 레이더가 따로 확인했습니다. 폭우가 땅을 헤집은 곳에서는 반사파가 달라졌습니다.</p>
       </div>
       <figure class="rv" style="--d:.12s">
-        <p class="lab"><span lang="en">Spots where the radar echo changed across the storm</span><span lang="ko">폭우 전후로 레이더 반사파가 변한 지점</span></p>
+        <p class="lab"><span lang="en">Echo changed during the storm</span><span lang="ko">폭우 동안 반사파가 변한 비율</span></p>
         <div class="vs rv" data-xblock="radarbars"></div>
-        <figcaption><span lang="en">Share of spots where coherence across the storm pair (descending orbit, <span data-x="dPair">…</span>) dropped by more than 0.1 compared with the ground 240 m around it. <span data-x="dN">…</span> scars, <span data-x="dNc">…</span> clearings. Scars against old clearings: p = <span data-x="dP">…</span> (permutation test).</span><span lang="ko">폭우 전후 영상쌍(하강 궤도, <span data-x="dPair">…</span>)의 긴밀도가 주변 240 m 지표보다 0.1 넘게 떨어진 지점의 비율. 붕괴 흔적 <span data-x="dN">…</span>곳, 벌채지 <span data-x="dNc">…</span>곳. 붕괴 흔적 대 기존 벌채지: p = <span data-x="dP">…</span> (순열 검정).</span></figcaption>
+        <figcaption><span lang="en"><span data-x="dN">…</span> scars vs <span data-x="dNc">…</span> old clearings · p = <span data-x="dP">…</span> · <span data-x="dPair">…</span></span><span lang="ko">붕괴 흔적 <span data-x="dN">…</span>곳 대 벌채지 <span data-x="dNc">…</span>곳 · p = <span data-x="dP">…</span> · <span data-x="dPair">…</span></span></figcaption>
       </figure>
     </div>
-    <p class="dropped rv"><span lang="en">The pair ending <b>21 July</b>, two days after the storm, already shows a weak signal: <span data-x="eScar">…</span>% of scars against <span data-x="eRand">…</span>% of random places (p = <span data-x="eP">…</span>). That was 16 days before the first clear optical image. We tested three orbits, so read these p-values as suggestive, not as proof. <a href="results.html#radar-check">Full radar check</a></span><span lang="ko">폭우 이틀 뒤인 <b>7월 21일</b>에 끝나는 영상쌍에서도 약한 신호가 보입니다: 붕괴 흔적의 <span data-x="eScar">…</span>%, 무작위 지점의 <span data-x="eRand">…</span>% (p = <span data-x="eP">…</span>). 첫 맑은 광학 영상보다 16일 빠릅니다. 궤도 세 개를 시험했으므로 이 p값은 증거가 아니라 참고 수준으로 읽어 주세요. <a href="results.html#radar-check">레이더 검증 전체</a></span></p>
+    <p class="dropped rv"><span lang="en">Already visible on <b>21 July</b>, 16 days before the first clear photo. Suggestive, not proof. <a href="results.html#radar-check">Full radar check</a></span><span lang="ko"><b>7월 21일</b>에 이미 보였습니다. 첫 맑은 사진보다 16일 빠릅니다. 증거가 아니라 참고 수준입니다. <a href="results.html#radar-check">레이더 검증 전체</a></span></p>
   </div></section>
 
   <section id="officer" class="band" data-slide="lime"><div class="wrap">
@@ -346,7 +348,7 @@
   </nav>
 </div></footer>
 <script type="module" src="js/site.js?v=48"></script>
-<script type="module" src="js/extra.js?v=2"></script>
+<script type="module" src="js/extra.js?v=3"></script>
 <script type="module" src="js/home.js?v=4"></script>
 <script type="module" src="js/inversion.js?v=4"></script>
 <script src="js/nav.js?v=4" defer></script>

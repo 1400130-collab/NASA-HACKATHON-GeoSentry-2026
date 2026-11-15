@@ -282,13 +282,20 @@ function occupancy(T) {
 
 const hash = (i, j, k) => { let h = Math.imul(i, 374761393) ^ Math.imul(j, 668265263) ^ Math.imul(k, 2246822519); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
-// Trees are thinned by level: level 0 is one tree per 12 m cell, and every level up keeps one tree of each block of
+// Trees are thinned by level: level 0 is at most one tree per 26 m cell (about half stay empty, in clearings), and every level up keeps one tree of each block of
 // four, chosen by a hash, at the very place it already stood. So a coarser level is a subset of the finer one and no
 // tree moves when the camera rises or sinks. `rank` is the highest level a tree survives to; the shader shrinks the
 // trees that are about to drop out and widens the rest, continuously (js/world.js).
 // Two rings: level `level` out to `radius`, and beyond it, out to `outer`, level + 2.
 // Per tree: x, ground, z, height, a random seed, rank.
 const pick = (ci, cj, l) => Math.min(3, hash(ci, cj, 100 + l) * 4 | 0);
+const TREE_M = 26;
+// groves and clearings: a smooth noise on a ~110 m grid decides how many cells of a patch keep a tree
+const grove = (x, z) => {
+  const i = Math.floor(x), j = Math.floor(z), fx = x - i, fz = z - j, sx = fx * fx * (3 - 2 * fx), sz = fz * fz * (3 - 2 * fz);
+  const a = hash(i, j, 31), b = hash(i + 1, j, 31), c = hash(i, j + 1, 31), d = hash(i + 1, j + 1, 31);
+  return a + (b - a) * sx + (c - a) * sz + (a - b - c + d) * sx * sz;
+};
 async function scatterTrees({ cx, cz, radius, outer, level }) {
   if (typeof OffscreenCanvas === 'undefined') return new Float32Array(0);
   const g0 = G.toGrid(cx, cz).slice(), far = Math.max(radius, outer || 0) * G.mPerUnit, N = C.cells, cell = C.tile / N;
@@ -298,16 +305,17 @@ async function scatterTrees({ cx, cz, radius, outer, level }) {
   const got = new Map((await Promise.all(want.map(loadTile))).filter(Boolean).map((T) => [T.key, T]));
   const out = [];
   const ring = (lvl, r0, r1, clear) => {
-    const step = 12 * 2 ** lvl, R0 = r0 * G.mPerUnit, R1 = r1 * G.mPerUnit;
+    const step = TREE_M * 2 ** lvl, R0 = r0 * G.mPerUnit, R1 = r1 * G.mPerUnit;
     const i0 = Math.max(0, Math.floor((g0[0] - R1) / step)), i1 = Math.ceil((g0[0] + R1) / step), j0 = Math.max(0, Math.floor((g0[1] - R1) / step)), j1 = Math.ceil((g0[1] + R1) / step);
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
       let ci = i, cj = j;                                       // down to the 12 m cell this block keeps
       for (let l = lvl; l >= 1; l--) { const q = pick(ci, cj, l); ci = ci * 2 + (q & 1); cj = cj * 2 + (q >> 1); }
-      const mx = (ci + 0.08 + 0.84 * hash(ci, cj, 1)) * 12, mz = (cj + 0.08 + 0.84 * hash(ci, cj, 2)) * 12;
+      if (hash(ci, cj, 7) < 0.25 + 0.6 * grove(ci * TREE_M / 110, cj * TREE_M / 110)) continue;   // sparse, in clumps: not an even carpet
+      const mx = (ci + 0.08 + 0.84 * hash(ci, cj, 1)) * TREE_M, mz = (cj + 0.08 + 0.84 * hash(ci, cj, 2)) * TREE_M;
       const dx = mx - g0[0], dz = mz - g0[1], d2 = dx * dx + dz * dz; if (d2 > R1 * R1 || d2 < R0 * R0) continue;
       const tx = Math.floor(mx / C.tile), tz = Math.floor(mz / C.tile), T = got.get(tz * C.ntx + tx); if (!T) continue;
       const lx = mx - T.ox, lz = mz - T.oz, g = T.ground[Math.min(N - 1, lz / cell | 0) * N + Math.min(N - 1, lx / cell | 0)];
-      if (g >> 4 !== 1 || !(g & 15)) continue;                  // not forest, or no canopy measured
+      if (g >> 4 !== 1 || (g & 15) < 2) continue;               // not forest, or hardly any canopy measured
       if (clear && occupancy(T)[Math.min(OCC - 1, lz / C.tile * OCC | 0) * OCC + Math.min(OCC - 1, lx / C.tile * OCC | 0)]) continue;
       const s = G.toScene(mx, mz); if (!G.inside(s[0], s[1])) continue;
       let rank = lvl, pi = i, pj = j;                           // how many levels further up this tree is still the one kept

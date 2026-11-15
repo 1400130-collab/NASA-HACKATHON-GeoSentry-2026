@@ -23,7 +23,7 @@ function numbers(S, R) {
 }
 
 function bars(el, N) {
-  const rows = [['Random places', '무작위 지점', N.dRand, ''], ['Old clearings (already bare)', '기존 벌채지 (원래 맨땅)', N.dClear, ''], ['Storm scars', '폭우 붕괴 흔적', N.dScar, 'me']];
+  const rows = [['Random places', '무작위 지점', N.dRand, ''], ['Old clearings', '기존 벌채지', N.dClear, ''], ['Storm scars', '폭우 붕괴 흔적', N.dScar, 'me']];
   const max = Math.max(...rows.map((r) => r[2]), 1);
   el.innerHTML = rows.map(([en, ko, v, c], i) => `<div class="${c}" style="--k:${i}"><span><span lang="en">${en}</span><span lang="ko">${ko}</span></span><i style="width:${(v / max * 100).toFixed(1)}%"></i><b>${v}%</b></div>`).join('');
 }

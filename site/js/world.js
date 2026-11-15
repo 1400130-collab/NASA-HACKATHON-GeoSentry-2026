@@ -19,50 +19,61 @@ import { makeGeo } from './world-geo.js';
 //     colour, instead of flickering between pixels; buildings leaving a ring sink too, they are not switched off
 //   - trees thin out with height as one nested set, each surviving tree where it stood, widening as its neighbours go
 //   - from far away a mapped building is drawn as a small lit block, never smaller than a couple of pixels
-const B_MAX_KM = 36, D_MAX_KM = 34, T_MAX_KM = 26, UPLOAD_BYTES = 2e6;
+const B_MAX_KM = 36, D_MAX_KM = 34, T_MAX_KM = 1.8, UPLOAD_BYTES = 2e6;
+const FLAT = '#a29a8c';                                          // building footprints painted on the ground: the tone of the 3D buildings seen from afar
 
+// Buildings read as a clean architectural model: pale walls, roofs in a few muted tones, soft shade at the foot.
+// A new chunk fades in (an ordered dither, so it stays opaque and needs no sorting) instead of rising out of the ground.
 const BLD_VERT = /* glsl */`
 uniform float uExag, uHs, uGrow, uR, uShow, uMPU, uPx;
 uniform vec2 uCenter;
 attribute float aH; attribute vec2 aTop; attribute vec4 aN;
-varying vec3 vN; varying float vHm, vRoof, vCls, vTint, vTop, vSmall;
+varying vec3 vN; varying float vHm, vRoof, vCls, vTint, vTop, vSmall, vFade;
 void main() {
   vTop = aTop.x;
   vec3 p = position; p.y *= uExag;
-  // how many pixels the building covers: below about four it sinks into its footprint on the ground picture rather than flicker
+  // how many pixels the building covers: one too small to hold still squats into its footprint on the ground picture
   float px = max(aTop.y, aTop.x * 0.6) / uMPU / (distance(cameraPosition, p) * uPx);
-  float seen = smoothstep(2.4, 4.8, px);
-  vSmall = 1.0 - smoothstep(4.0, 22.0, px);
-  float grow = (1.0 - smoothstep(uR * 0.8, uR, length(position.xz - uCenter))) * uShow * uGrow * seen;
-  p.y += aH * uHs * grow;
+  float seen = smoothstep(1.6, 3.2, px);
+  vSmall = 1.0 - smoothstep(3.0, 10.0, px);
+  float h = (1.0 - smoothstep(uR * 0.8, uR, length(position.xz - uCenter))) * uShow * seen;
+  p.y += aH * uHs * h;
+  vFade = uGrow;
   float flag = aN.z * 127.0;
   vRoof = step(63.5, flag); vCls = flag - vRoof * 64.0; vTint = aN.w;
   vN = vRoof > 0.5 ? vec3(0.0, 1.0, 0.0) : normalize(vec3(aN.x, 0.0, aN.y));
   vHm = aH * uMPU;
-  gl_Position = grow < 0.03 ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * viewMatrix * vec4(p, 1.0);
+  gl_Position = h < 0.002 || uGrow < 0.01 ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * viewMatrix * vec4(p, 1.0);
 }`;
 const BLD_FRAG = /* glsl */`
-uniform vec3 uRoof, uWall, uFlat;
-varying vec3 vN; varying float vHm, vRoof, vCls, vTint, vTop, vSmall;
+uniform vec3 uFlat;
+varying vec3 vN; varying float vHm, vRoof, vCls, vTint, vTop, vSmall, vFade;
+float bayer2(vec2 a) { a = floor(a); return fract(a.x * 0.5 + a.y * a.y * 0.75); }
+float bayer4(vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
 void main() {
+  if (vFade < 0.999 && vFade <= bayer4(gl_FragCoord.xy) * 0.96 + 0.02) discard;
   vec3 N = vRoof > 0.5 ? vec3(0.0, 1.0, 0.0) : normalize(vN);
   float diff = max(dot(N, normalize(vec3(-0.52, 0.66, -0.54))), 0.0), fill = max(dot(N, normalize(vec3(0.6, 0.5, 0.6))), 0.0);   // the terrain's two lights
-  float light = 0.3 + 0.82 * diff + 0.18 * fill;
-  vec3 c = vRoof > 0.5 ? uRoof : uWall;
-  if (abs(vCls - 3.0) < 0.5) c = mix(c, vRoof > 0.5 ? vec3(0.2, 0.25, 0.32) : vec3(0.1, 0.12, 0.15), 0.6);      // industry: blue-grey sheds
-  if (abs(vCls - 5.0) < 0.5) c = mix(c, vec3(0.42, 0.5, 0.47), 0.65);                                             // greenhouses: pale film
-  if (abs(vCls - 2.0) < 0.5) c *= 1.12;
-  c *= 1.0 + vTint * 0.16;
-  c = mix(c, c.bgr * vec3(1.0, 1.02, 1.12), smoothstep(0.35, 1.0, vTint) * 0.5);                          // some roofs are cooler in tone
-  c = mix(c, vec3(0.2, 0.24, 0.3) * (vRoof > 0.5 ? 1.25 : 0.8), smoothstep(35.0, 110.0, vTop) * 0.55);       // towers: glass and steel
+  float light = 0.36 + 0.72 * diff + 0.14 * fill;
+  float t = vTint * 0.5 + 0.5;
+  vec3 roof = t < 0.46 ? vec3(0.46, 0.44, 0.4)                   // pale concrete
+            : t < 0.62 ? vec3(0.2, 0.26, 0.32)                   // slate blue
+            : t < 0.76 ? vec3(0.21, 0.29, 0.24)                  // grey-green
+            : t < 0.88 ? vec3(0.36, 0.19, 0.14)                  // muted terracotta
+            :            vec3(0.43, 0.39, 0.34);                 // warm grey
+  vec3 wall = vec3(0.42, 0.4, 0.36) * (0.9 + 0.18 * fract(t * 7.3));
+  if (vTop > 22.0) roof = vec3(0.42, 0.42, 0.41);               // apartment blocks: flat concrete roofs
+  if (abs(vCls - 3.0) < 0.5) { roof = vec3(0.24, 0.29, 0.34); wall = vec3(0.46, 0.47, 0.48); }    // industry: blue-grey sheds
+  if (abs(vCls - 5.0) < 0.5) { roof = vec3(0.7, 0.74, 0.72); wall = roof * 0.92; }               // greenhouses: pale film
+  vec3 c = vRoof > 0.5 ? roof : wall;
   if (vRoof < 0.5) {
-    float fl = vHm / 3.1, w = fwidth(fl);
-    c *= mix(1.0, 0.8 + 0.2 * step(0.38, fract(fl)), 1.0 - smoothstep(0.2, 0.55, w));    // storeys, once they are wide enough to see
-    c *= 0.66 + 0.34 * smoothstep(0.0, 3.5, vHm);                                         // darker where the wall meets the ground
+    float fl = vHm / 3.0, w = fwidth(fl);
+    float band = mix(1.0, 0.86 + 0.14 * smoothstep(0.3, 0.42, fract(fl)), 1.0 - smoothstep(0.25, 0.6, w));
+    c *= mix(1.0, band, smoothstep(8.0, 16.0, vTop));                                    // window bands on blocks of flats, once wide enough to see
+    c *= 0.58 + 0.42 * smoothstep(0.0, 4.0, vHm);                                        // shade where the wall meets the ground
   }
-  // small on screen: roof and walls merge into the tone of the footprint painted on the ground under it, so rows of
-  // houses cannot twinkle and a building sinking away leaves no trace of the change
-  gl_FragColor = vec4(mix(c * light, uFlat * (0.86 + 0.2 * light), vSmall * 0.92), 1.0);
+  // small on screen: roof and walls merge toward the footprint painted on the ground, so rows of houses do not twinkle
+  gl_FragColor = vec4(mix(c * light, uFlat * (0.86 + 0.2 * light), vSmall * 0.7), 1.0);
 }`;
 
 // Mapped buildings seen from far away (the points of data/**/vectors.json): a small lit block where each one stands.
@@ -70,11 +81,12 @@ void main() {
 const MARK_VERT = /* glsl */`
 uniform float uExag, uMPU, uPx, uShow, uNear, uSize;
 attribute vec3 iPos; attribute float iSeed;
-varying vec3 vN; varying float vY, vSeed;
+varying vec3 vN; varying float vY, vSeed, vTiny;
 void main() {
   vec3 base = vec3(iPos.x, iPos.y * uExag, iPos.z);
-  float dist = distance(cameraPosition, base);
-  float s = max(uSize * (0.75 + 0.5 * iSeed) / uMPU, 2.3 * dist * uPx) * uShow * (uNear > 0.0 ? smoothstep(uNear * 0.6, uNear, dist) : 1.0);
+  float dist = distance(cameraPosition, base), real = uSize * (0.75 + 0.5 * iSeed) / uMPU;
+  vTiny = 1.0 - smoothstep(0.8, 2.3, real / (dist * uPx));       // drawn bigger than it is: toned down, so towns are a texture, not glitter
+  float s = max(real, 2.3 * dist * uPx) * uShow * (uNear > 0.0 ? smoothstep(uNear * 0.6, uNear, dist) : 1.0);
   float a = iSeed * 6.2832, cs = cos(a), sn = sin(a);
   vec3 q = vec3(position.x * cs - position.z * sn, position.y * (0.55 + 0.5 * fract(iSeed * 5.3)), position.x * sn + position.z * cs);
   vN = vec3(normal.x * cs - normal.z * sn, normal.y, normal.x * sn + normal.z * cs); vY = position.y; vSeed = iSeed;
@@ -82,49 +94,57 @@ void main() {
 }`;
 const MARK_FRAG = /* glsl */`
 uniform vec3 uRoof, uWall;
-varying vec3 vN; varying float vY, vSeed;
+varying vec3 vN; varying float vY, vSeed, vTiny;
 void main() {
   vec3 N = normalize(vN);
   float light = 0.42 + 0.6 * max(dot(N, normalize(vec3(-0.52, 0.66, -0.54))), 0.0) + 0.16 * max(dot(N, normalize(vec3(0.6, 0.5, 0.6))), 0.0);
   vec3 c = N.y > 0.5 ? uRoof : uWall * 1.25;
-  gl_FragColor = vec4(c * light * (0.92 + 0.16 * vSeed), 1.0);
+  gl_FragColor = vec4(c * light * (0.92 + 0.16 * vSeed) * (1.0 - 0.45 * vTiny), 1.0);
 }`;
 
+// Trees: a sparse scatter close to the camera only (the forest colour of the ground does the rest). Low, rounded crowns
+// in soft greens near the forest floor's own tone, so they add texture without speckling the slope colours.
 const TREE_VERT = /* glsl */`
-uniform float uExag, uHs, uR, uRin, uOuter, uLam, uShow, uMPU, uPx;
+uniform float uExag, uHt, uR, uLam, uShow, uMPU, uPx;
 uniform vec2 uCenter;
 uniform vec3 uForest;
 attribute vec3 iPos, iHSL; attribute float aRing;
+#include <debris>
 varying vec3 vC;
 void main() {
   float d = length(iPos.xz - uCenter);
-  // the detail level here: it rises with the camera, and by two more beyond the inner ring. A tree whose rank is
-  // below it is gone, one exactly at it is shrinking away, the others stand and widen to fill the gaps
-  float lam = uLam + 2.0 * uOuter * smoothstep(uRin * 0.8, uRin, d), fl = floor(lam), rank = iHSL.z;
+  // the detail level here rises with the camera. A tree whose rank is below it is gone, one exactly at it is
+  // shrinking away, the others stand
+  float lam = uLam, fl = floor(lam), rank = iHSL.z;
   float keep = rank > fl + 0.5 ? 1.0 : (rank > fl - 0.5 ? 1.0 - smoothstep(0.5, 1.0, lam - fl) : 0.0);
-  float seed = iHSL.y, broad = step(0.42, fract(seed * 7.31));
-  float rad = (2.6 + 2.4 * fract(seed * 3.7) + broad * 1.6) / uMPU * pow(1.78, lam);
+  float seed = iHSL.y, broad = step(0.45, fract(seed * 7.31));
+  float rad = (2.4 + 1.6 * fract(seed * 3.7) + broad * 1.2) / uMPU * pow(1.2, lam);
   vec3 base = vec3(iPos.x, iPos.y * uExag, iPos.z);
-  float px = rad * 2.0 / (distance(cameraPosition, base) * uPx);
-  float f = (1.0 - smoothstep(uR * 0.78, uR, d)) * uShow * keep * smoothstep(0.9, 2.0, px);
-  float h = iHSL.x * uHs * (1.0 + 0.2 * lam) * f; rad *= f;
+  float f = (1.0 - smoothstep(uR * 0.6, uR, d)) * uShow * keep;
+  float px = rad * f * 2.0 / (distance(cameraPosition, base) * uPx);
+  f *= smoothstep(7.0, 12.0, px);                                 // a tree shrunk or far enough to be a speck is gone, not a dot
+  if (uDebOn > 0.5 || uDebSel > -0.5) {                        // a simulated debris flow (fx.js) reaching the tree buries it
+    float dm, dt; vec3 ds; vec4 dc = debCell(ivec2(floor(vec2(dot(uDebX, vec3(iPos.xz, 1.0)), dot(uDebZ, vec3(iPos.xz, 1.0))) + 0.5)), dm, dt, ds);
+    f *= 1.0 - dc.x * smoothstep(-0.4, 1.6, dc.y);
+  }
+  float h = min(iHSL.x * uHt, rad * mix(3.0, 2.0, broad)) * f; rad *= f;          // never a spike: height capped by the crown's width
   vec3 q = position;
-  if (aRing > 1.5) { q.y = mix(0.5, 0.74, broad); q.xz *= mix(0.52, 0.8, broad); }      // upper ring
-  else if (aRing > 0.5) { q.y = mix(0.14, 0.34, broad); q.xz *= mix(1.0, 0.9, broad); }  // lower ring
+  if (aRing > 1.5) { q.y = mix(0.58, 0.8, broad); q.xz *= mix(0.5, 0.78, broad); }      // upper ring
+  else if (aRing > 0.5) { q.y = mix(0.2, 0.36, broad); q.xz *= mix(1.0, 0.98, broad); } // lower ring
   float a = seed * 6.2832, cs = cos(a), sn = sin(a);
   vec3 p = base + vec3((q.x * cs - q.z * sn) * rad, q.y * h, (q.x * sn + q.z * cs) * rad);
-  vec3 N = normalize(vec3(q.x * cs - q.z * sn, 0.35 + q.y * 0.9, q.x * sn + q.z * cs));
+  vec3 N = normalize(vec3(q.x * cs - q.z * sn, 0.6 + q.y * 0.8, q.x * sn + q.z * cs));
   float diff = max(dot(N, normalize(vec3(-0.52, 0.66, -0.54))), 0.0);
-  vec3 col = mix(vec3(0.016, 0.07, 0.036), vec3(0.04, 0.105, 0.03), broad);
-  col *= 0.75 + 0.5 * fract(seed * 13.1);
+  vec3 col = mix(vec3(0.03, 0.075, 0.045), vec3(0.06, 0.1, 0.04), broad);
+  col *= 0.85 + 0.3 * fract(seed * 13.1);
   // small on screen: the light and dark sides merge into the colour of the forest floor, so the canopy does not glitter
-  vC = mix(uForest, col * (0.34 + 0.95 * diff) * (0.5 + 0.7 * q.y), smoothstep(3.0, 16.0, px) * 0.88 + 0.12);
+  vC = mix(uForest, col * (0.62 + 0.62 * diff) * (0.78 + 0.32 * q.y), smoothstep(3.0, 14.0, px) * 0.85 + 0.15);
   gl_Position = f < 0.02 ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * viewMatrix * vec4(p, 1.0);
 }`;
 const TREE_FRAG = /* glsl */`varying vec3 vC; void main() { gl_FragColor = vec4(vC, 1.0); }`;
 
-function treeGeometry() {                                        // a five-sided crown of two rings: the shader shapes it into a pine or a round broadleaf
-  const S = 5, pos = [0, 1, 0, 0, 0.03, 0], ring = [0, 0], idx = [];
+function treeGeometry() {                                        // a seven-sided crown of two rings: the shader shapes it into a pine or a round broadleaf
+  const S = 7, pos = [0, 1, 0, 0, 0.03, 0], ring = [0, 0], idx = [];
   for (let r = 1; r <= 2; r++) for (let i = 0; i < S; i++) { const a = (i + r * 0.5) / S * Math.PI * 2; pos.push(Math.cos(a), 0.3 * r, Math.sin(a)); ring.push(r); }
   for (let i = 0; i < S; i++) { const a = 2 + i, b = 2 + (i + 1) % S, c = 2 + S + i, d = 2 + S + (i + 1) % S; idx.push(1, a, b, a, c, b, b, c, d, 0, d, c); }
   const g = new THREE.InstancedBufferGeometry();
@@ -166,7 +186,7 @@ export class World {
     const g = blockGeometry(), ib = new THREE.InstancedInterleavedBuffer(data, 4);
     g.setAttribute('iPos', new THREE.InterleavedBufferAttribute(ib, 3, 0)); g.setAttribute('iSeed', new THREE.InterleavedBufferAttribute(ib, 1, 3)); g.instanceCount = list.length;
     this.uM = { uExag: this.U.uExag, uMPU: { value: 1000 * D.k }, uPx: this.px, uShow: { value: 0 }, uNear: { value: 0 }, uSize: { value: D.korea ? 60 : 16 },
-      uRoof: { value: lin('#b9aa8e').multiplyScalar(0.82) }, uWall: { value: lin('#6f665a').multiplyScalar(0.74) } };
+      uRoof: { value: lin('#c9c2b5').multiplyScalar(0.86) }, uWall: { value: lin('#b2aa9c').multiplyScalar(0.8) } };
     this.markers = new THREE.Mesh(g, new THREE.ShaderMaterial({ uniforms: this.uM, vertexShader: MARK_VERT, fragmentShader: MARK_FRAG }));
     this.markers.frustumCulled = false; this.markers.visible = list.length > 0; this.group.add(this.markers);
   }
@@ -179,16 +199,18 @@ export class World {
     this.geo = makeGeo(geo); this.unitKm = this.geo.mPerUnit / 1000;
     const lin = (h) => new THREE.Color().setStyle(h);
     const U = this.U, shared = { uExag: U.uExag, uHs: { value: 1 }, uMPU: { value: this.geo.mPerUnit }, uPx: this.px };
-    this.uB = { ...shared, uR: { value: 1 }, uShow: { value: 0 }, uCenter: { value: new THREE.Vector2() }, uRoof: { value: lin(idx.palette.building_roof).multiplyScalar(0.82) }, uWall: { value: lin(idx.palette.building_wall).multiplyScalar(0.74) }, uFlat: { value: lin(idx.palette.building_flat || '#857b68').multiplyScalar(0.8) } };
-    this.uT = { ...shared, uR: { value: 1 }, uRin: { value: 1 }, uOuter: { value: 0 }, uLam: { value: 0 }, uShow: { value: 0 }, uCenter: { value: new THREE.Vector2() }, uForest: { value: lin(idx.palette.tree_tall).multiplyScalar(0.95) } };
-    this.treeMat = new THREE.ShaderMaterial({ uniforms: this.uT, vertexShader: TREE_VERT, fragmentShader: TREE_FRAG });
+    idx.palette = { ...idx.palette, building_flat: FLAT };
+    this.uB = { ...shared, uR: { value: 1 }, uShow: { value: 0 }, uCenter: { value: new THREE.Vector2() }, uFlat: { value: lin(FLAT).multiplyScalar(0.8) } };
+    this.uT = { ...shared, uHt: { value: 1 }, uR: { value: 1 }, uLam: { value: 0 }, uShow: { value: 0 }, uCenter: { value: new THREE.Vector2() }, uForest: { value: lin(idx.palette.tree_tall).multiplyScalar(0.95) } };
+    for (const k of ['tDebA', 'uDebAW', 'uDebIY', 'uDebPB', 'uDebN', 'uDebX', 'uDebZ', 'uDebOn', 'uDebT', 'uDebSpread', 'uDebSel', 'uDebSelT', 'uDebCR']) this.uT[k] = U[k];   // the debris flows knock trees down
+    this.treeMat = new THREE.ShaderMaterial({ uniforms: this.uT, vertexShader: TREE_VERT.replace('#include <debris>', this.terrain.debGLSL), fragmentShader: TREE_FRAG });
     this.treeBase = treeGeometry();
     this.Udet = [{ t: U.tDetail, c: U.uDetailC, h: U.uDetailH, on: U.uDetailOn }, { t: U.tDetail2, c: U.uDetail2C, h: U.uDetail2H, on: U.uDetail2On }];
     // the whole map's land cover, as the ground colour far from the camera
     const land = new THREE.TextureLoader().load(`data/world/land_${D.korea ? 'korea' : 'region'}.png`, () => this.poke(600));
     land.flipY = false; land.colorSpace = THREE.SRGBColorSpace; land.anisotropy = 8; land.wrapS = land.wrapT = THREE.ClampToEdgeWrapping;
     U.tLand.value = land;
-    this.worker = new Worker(new URL('./world-worker.js?v=6', import.meta.url), { type: 'module' });
+    this.worker = new Worker(new URL('./world-worker.js?v=8', import.meta.url), { type: 'module' });
     this.worker.onmessage = (e) => this.message(e.data);
     this.worker.onerror = (e) => console.warn('world worker:', e.message);
     this.worker.postMessage({ t: 'init', cfg: { base: new URL('data/world/', location.href).href, tile: idx.tile_m, q: idx.q_m, cells: idx.cells, ntx: idx.ntx, ntz: idx.ntz, tiles: idx.tiles, palette: idx.palette,
@@ -226,7 +248,7 @@ export class World {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.BufferAttribute(m.pos, 3)); g.setAttribute('aH', new THREE.BufferAttribute(m.hgt, 1));
       g.setAttribute('aN', new THREE.BufferAttribute(m.att, 4, true)); g.setAttribute('aTop', new THREE.BufferAttribute(m.top, 2, false)); g.setIndex(new THREE.BufferAttribute(m.idx, 1));
-      const grow = { value: 0 };                                 // new buildings rise out of the ground
+      const grow = { value: 0 };                                 // new buildings fade in
       const mesh = new THREE.Mesh(g, new THREE.ShaderMaterial({ uniforms: { ...this.uB, uGrow: grow }, vertexShader: BLD_VERT, fragmentShader: BLD_FRAG }));
       mesh.frustumCulled = false; this.group.add(mesh);
       t.chunks.push({ b0: m.b0, b1: m.b1, n: m.n, mesh, grow }); t.built = m.b1;
@@ -252,7 +274,7 @@ export class World {
         t.tier = tier;
         if (t.counts) {
           const target = t.counts[tier];
-          // a chunk the new ring does not need sinks into the ground (update() frees it at zero); one that is needed again rises back
+          // a chunk the new ring does not need fades out (update() frees it at zero); one that is needed again fades back
           while (t.chunks.length && t.chunks.at(-1).b0 >= target) { t.dying.push(t.chunks.pop()); t.built = t.chunks.length ? t.chunks.at(-1).b1 : 0; }
           for (let i; t.built < target && (i = t.dying.findIndex((c) => c.b0 === t.built)) >= 0;) { const c = t.dying.splice(i, 1)[0]; t.chunks.push(c); t.built = c.b1; }
           if (t.built >= target) continue;
@@ -289,7 +311,7 @@ export class World {
     g.setAttribute('iPos', new THREE.InterleavedBufferAttribute(ib, 3, 0)); g.setAttribute('iHSL', new THREE.InterleavedBufferAttribute(ib, 3, 3));
     g.instanceCount = n;
     this.trees = new THREE.Mesh(g, this.treeMat); this.trees.frustumCulled = false; this.group.add(this.trees);
-    this.uT.uCenter.value.set(m.cx, m.cz); this.uT.uR.value = Math.max(m.radius, m.outer || 0); this.uT.uRin.value = m.radius; this.uT.uOuter.value = m.outer > m.radius ? 1 : 0;
+    this.uT.uCenter.value.set(m.cx, m.cz); this.uT.uR.value = m.radius;
   }
 
   // Called for every drawn frame. Decides what should be on screen for this camera and asks the worker for what is missing.
@@ -304,7 +326,8 @@ export class World {
     ease(U.uLandOn, this.ready && this.on.env && U.tLand.value.image ? 1 : 0);
     if (!this.ready) { this.busy = busy; return; }
     const dU = camera.position.distanceTo(target), dKm = dU * this.unitKm, km = 1 / this.unitKm;
-    this.uB.uHs.value = Math.min(3, 1 + 0.3 * (U.uExag.value - 1));          // buildings and trees gain a share of the terrain's exaggeration, not all of it
+    this.uB.uHs.value = Math.min(2.2, 1 + 0.15 * (U.uExag.value - 1));       // buildings and trees gain a small share of the terrain's exaggeration, not all of it
+    this.uT.uHt.value = Math.min(1.5, 1 + 0.06 * (U.uExag.value - 1));
     const g = this.geo.toGrid(target.x, target.z), gx = g[0], gz = g[1];
 
     // buildings
@@ -318,8 +341,8 @@ export class World {
     this.upload();
     let nb = 0, nc = 0;
     for (const t of this.tiles.values()) {
-      for (const c of t.chunks) { nc++; nb += c.n; if (c.grow.value < 1) { c.grow.value = Math.min(1, c.grow.value + dt * 2.2); busy = true; } }
-      for (let i = t.dying.length - 1; i >= 0; i--) { const c = t.dying[i]; c.grow.value -= dt * 2.2; busy = true; if (c.grow.value <= 0) { this.dropChunk(c); t.dying.splice(i, 1); } }
+      for (const c of t.chunks) { nc++; nb += c.n; if (c.grow.value < 1) { c.grow.value = Math.min(1, c.grow.value + dt * 3); busy = true; } }
+      for (let i = t.dying.length - 1; i >= 0; i--) { const c = t.dying[i]; c.grow.value -= dt * 3; busy = true; if (c.grow.value <= 0) { this.dropChunk(c); t.dying.splice(i, 1); } }
     }
     this.stats.buildings = nb; this.stats.tiles = this.tiles.size; this.stats.chunks = nc;
     if (this.inflight || this.incoming.length) busy = true;
@@ -339,15 +362,14 @@ export class World {
     const d0 = this.det[0].cur;
     this.roadCut = this.Udet[0].on.value > 0.5 && d0 ? dU + d0.half * 0.55 : 0;       // the main-road lines give way where the ground shows every road
 
-    // trees: single trees near the camera, wider crowns on a coarser grid beyond them
+    // trees: a sparse scatter around the camera, only when it is low; they fade out well before the overview zooms
     const showT = this.on.trees && this.canvasOK && dKm < T_MAX_KM;
-    this.uT.uLam.value = clamp(Math.log2(dKm / 1.3), 0, 4.999);
-    ease(this.uT.uShow, showT && this.trees ? 1 : 0);
+    this.uT.uLam.value = clamp(Math.log2(dKm / 1.2), 0, 1.999);
+    ease(this.uT.uShow, showT && this.trees ? 1 - THREE.MathUtils.smoothstep(dKm, T_MAX_KM * 0.5, T_MAX_KM) : 0);
     if (showT && !this.treesBusy) {
-      const level = clamp(Math.floor(Math.log2(dKm / 1.3)), 0, 4), radius = clamp(dKm, 0.9, 1.5 * 2 ** level) * this.q * km, s = this.treeSet;
-      const outer = level <= 3 ? Math.min(radius * 3.2, 18 * this.q * km) : 0;
+      const level = clamp(Math.floor(Math.log2(dKm / 1.2)), 0, 1), radius = clamp(dKm * 0.9, 0.8, 3.2) * this.q * km, s = this.treeSet;
       if (!s || s.level !== level || Math.hypot(target.x - s.cx, target.z - s.cz) > s.radius * 0.3 || radius > s.radius * 1.3 || radius < s.radius * 0.72) {
-        this.treesBusy = true; this.worker.postMessage({ t: 'trees', cx: target.x, cz: target.z, radius, outer, level });
+        this.treesBusy = true; this.worker.postMessage({ t: 'trees', cx: target.x, cz: target.z, radius, outer: 0, level });
       }
     } else if (!showT && this.uT.uShow.value === 0 && this.trees) { this.group.remove(this.trees); this.trees.geometry.dispose(); this.trees = null; this.treeSet = null; }
     this.busy = busy;
