@@ -359,8 +359,8 @@ let frameNow = () => {};                                 // set further down: ru
 // ---- scrolling ------------------------------------------------------------------------------------------
 // The wheel always scrolls freely and the page glides after it, eased in time (not frames) so it feels the same at
 // 60 Hz and 120 Hz. On the home page, when you stop close to where a slide starts, the page keeps drifting softly
-// onto it, carrying on the motion it already had. It never locks: any new scroll takes over at once, from where the
-// page is and not from where the drift was heading. It only pulls back if you are right at a slide's edge. Arrow keys, space, page up/down and the dots glide to the next slide.
+// onto it, carrying on the motion it already had (within ~half a screen ahead). It never locks: any new scroll takes over at once, from where the
+// page is and not from where the drift was heading. It pulls back if you are within a quarter screen of a slide's edge. Arrow keys, space, page up/down and the dots glide to the next slide.
 // Touch screens and reduced-motion users keep the browser's own scrolling; a scroll made some other way (scrollbar,
 // a link) stops the glide and we carry on from there.
 (() => {
@@ -393,10 +393,11 @@ let frameNow = () => {};                                 // set further down: ru
   };
   const settle = () => {
     const y = target, h = innerHeight, M = marks();
-    const fwd = dir > 0 ? M.find((v) => v > y + 1 && v - y < h * 0.3) : [...M].reverse().find((v) => v < y - 1 && y - v < h * 0.3);
-    const back = M.find((v) => Math.abs(v - y) > 1 && Math.abs(v - y) < h * 0.07);   // only when right at an edge
+    const fwd = dir > 0 ? M.find((v) => v > y + 1 && v - y < h * 0.55) : [...M].reverse().find((v) => v < y - 1 && y - v < h * 0.55);
+    const near = M.reduce((a, v) => (Math.abs(v - y) < Math.abs(a - y) ? v : a), M[0]);
+    const back = Math.abs(near - y) > 1 && Math.abs(near - y) < h * 0.25 ? near : null;   // pull back to a close edge
     const to = fwd ?? back;
-    if (to != null) glide(to, 3.2, true);                  // slow and soft: it just keeps the drift going
+    if (to != null) glide(to, 2.6, true);                  // slow and soft, but still a glide: it keeps the drift going
   };
 
   addEventListener('wheel', (e) => {
@@ -411,7 +412,7 @@ let frameNow = () => {};                                 // set further down: ru
     // moving on its own or the wheel has turned round, so the page never keeps going against the hand
     const from = !raf ? scrollY : auto || Math.sign(target - cur) !== dir ? cur : target;
     glide(from + px, pad ? 11 : 5.5);
-    if (deck) { clearTimeout(idle); idle = setTimeout(settle, pad ? 120 : 160); }
+    if (deck) { clearTimeout(idle); idle = setTimeout(settle, pad ? 90 : 120); }
   }, { passive: false });
 
   const next = (d) => {
